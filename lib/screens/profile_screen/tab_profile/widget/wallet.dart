@@ -211,7 +211,19 @@ class _walletState extends State<wallet> {
                             child: Text("Volume",style: TextStyle(color: white),),
                           ),
 
-                          Text("100.05",style: TextStyle(color: white,fontWeight: FontWeight.w900,fontSize: 18),),
+                          Row(
+                            children: [
+                              Text("100.05",style: TextStyle(color: white,fontWeight: FontWeight.w900,fontSize: 18),),
+                              SizedBox(width: 3,),
+
+                              SvgPicture.asset(
+                                "assets/svg/arrowbackdown.svg",
+                                height: 9,
+                              ),
+                            ],
+
+
+                          ),
 
                         ],
                       ),
@@ -225,7 +237,19 @@ class _walletState extends State<wallet> {
                             child: Text("High",style: TextStyle(color: white),),
                           ),
 
-                          Text("1000.3",style: TextStyle(color: white,fontWeight: FontWeight.w900,fontSize: 18),),
+                          Row(
+                            children: [
+                              Text("1000.3",style: TextStyle(color: white,fontWeight: FontWeight.w900,fontSize: 18),),
+
+                              SizedBox(width: 3,),
+
+                              SvgPicture.asset(
+                                "assets/svg/arrowbackdown.svg",
+                                height: 9,
+                              ),
+
+                            ],
+                          ),
 
                         ],
                       ),
@@ -237,7 +261,19 @@ class _walletState extends State<wallet> {
                             child: Text("Low",style: TextStyle(color: white),),
                           ),
 
-                          Text("88.05",style: TextStyle(color: white,fontWeight: FontWeight.w900,fontSize: 18),),
+                          Row(
+                            children: [
+                              Text("88.05",style: TextStyle(color: white,fontWeight: FontWeight.w900,fontSize: 18),),
+
+                              SizedBox(width: 3,),
+
+                              SvgPicture.asset(
+                                "assets/svg/arrowbackdown.svg",
+                                height: 9,
+                              ),
+
+                            ],
+                          ),
 
                         ],
                       ),
@@ -254,7 +290,7 @@ class _walletState extends State<wallet> {
                       alignment:Alignment.topLeft,
                       child: Padding(
                         padding:  EdgeInsets.symmetric(horizontal: 20,vertical: 10),
-                        child: Text("Price Change 24 hours",style: TextStyle(color: white),),
+                        child: Text("Price Change 24 hours",style: TextStyle(color: white,fontSize: 10),),
                       ),
                     ),
                   ),
@@ -285,7 +321,21 @@ class _walletState extends State<wallet> {
                                         end: Alignment.bottomCenter,
                                       ),
                                       borderRadius: BorderRadius.all(Radius.circular(5))),
-                                  child: Center(child: Text("11.64",style: TextStyle(fontSize: 10,color: white),)),
+                                  child: Center(
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Text("11.64",style: TextStyle(fontSize: 10,color: white),),
+
+                                          SizedBox(width: 5,),
+
+                                          SvgPicture.asset(
+                                            "assets/svg/arrowtop.svg",
+                                            height: 6,
+                                          ),
+
+                                        ],
+                                      )),
                                  ),
                               ],
                             ),
@@ -299,13 +349,8 @@ class _walletState extends State<wallet> {
                   SizedBox(height: 20,),
 
 
-
                 ],
               ),
-
-
-
-
 
 
             ),
