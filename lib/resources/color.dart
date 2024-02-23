@@ -31,6 +31,9 @@ const grad1 = Color.fromRGBO(230, 240, 239, 1);
 const grad2 = Color.fromRGBO(203, 218, 224, 1);
 const conainer220 = Color.fromRGBO(220, 230, 255, 1);
 const white1 = Color.fromRGBO(255, 255, 255, 0.4);
+const blueshade = Color.fromRGBO(49, 82, 128, 1);
+const gradnew = Color.fromRGBO(60, 76, 106, 1);
+const gradnew1 = Color.fromRGBO(30, 60, 110, 1);
 
 
 
