@@ -1,6 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../resources/color.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import '../../../../services/wallet_service.dart';
+import '../../../../support/logger.dart';
 
 class wallet extends StatefulWidget {
   const wallet({super.key});
@@ -10,6 +16,74 @@ class wallet extends StatefulWidget {
 }
 
 class _walletState extends State<wallet> {
+
+  var userid;
+  var walletmarketvalue;
+  var walletbalance;
+  bool _isLoading = true;
+  String balance = '';
+
+
+
+  Future _marketvalueapi() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    userid = prefs.getString('userid');
+    var response = await WalletService.marketvalue();
+    log.i('wallet data Show.. $response');
+    setState(() {
+      walletmarketvalue = response;
+
+    });
+  }
+
+
+
+
+  Future<void> fetchBalance() async {
+    final url = 'https://pwyfklahtrh.rubideum.net/basic/getBalance';
+
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        "payId": "RBD968793034",
+        "uniqueId": "64eaf0a9cec8b5bb72f56d01",
+        "currency": "RBD",
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> data = jsonDecode(response.body);
+      setState(() {
+        balance = data['balance'].toString();
+      });
+    } else {
+      print('Failed to load balance');
+    }
+  }
+
+  Future _initLoad() async {
+    await Future.wait(
+      [
+        _marketvalueapi(),
+        fetchBalance()
+      ],
+    );
+    _isLoading = false;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    setState(() {
+      _initLoad();
+    });
+  }
+
+
+
+
+
   @override
   Widget build(BuildContext context) {
     return  Scaffold(
@@ -19,7 +93,11 @@ class _walletState extends State<wallet> {
         title: Text("Wallet",style: TextStyle(fontSize: 15,color: white),),
         automaticallyImplyLeading: false,
       ),
-      body: Column(
+      body:  _isLoading
+          ? Center(
+        child: CircularProgressIndicator(),
+      )
+      :Column(
         children: [
 
           Padding(
@@ -79,12 +157,12 @@ class _walletState extends State<wallet> {
                     children: [
                       SvgPicture.asset(
                         "assets/svg/verify.svg",
-                        height: 40,
+                        height: 30,
                       ),
 
                       SizedBox(width: 10,),
 
-                      Text("21.3",style: TextStyle(fontWeight: FontWeight.w900,fontSize: 36,color: white),)
+                      Text(balance,style: TextStyle(fontWeight: FontWeight.w900,fontSize: 18,color: white),)
                     ],
                   ),
 
@@ -160,25 +238,16 @@ class _walletState extends State<wallet> {
                       Column(
                         children: [
                           Padding(
-                            padding:  EdgeInsets.symmetric(horizontal: 20,vertical: 20),
-                            child: Text("RBD",style: TextStyle(color: white),),
+                            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                            child: (walletmarketvalue != null &&
+                                walletmarketvalue['data'] != null &&
+                                walletmarketvalue['data'].isNotEmpty)
+                                ? Text(walletmarketvalue['data']['trading_pairs'], style: TextStyle(color: white))
+                                : Text("Data not available", style: TextStyle(color: white)),
                           ),
 
-                          Text("5.3",style: TextStyle(color: white,fontWeight: FontWeight.w900,fontSize: 25),),
 
-                        ],
-                      ),
-
-                      SizedBox(width: 50,),
-
-                      Column(
-                        children: [
-                          Padding(
-                            padding:  EdgeInsets.symmetric(horizontal: 20,vertical: 20),
-                            child: Text("IND",style: TextStyle(color: white),),
-                          ),
-
-                          Text("1000.3",style: TextStyle(color: white,fontWeight: FontWeight.w900,fontSize: 25),),
+                          Text(walletmarketvalue['data']['last_price'],style: TextStyle(color: white,fontWeight: FontWeight.w900,fontSize: 25),),
 
                         ],
                       ),
@@ -213,7 +282,7 @@ class _walletState extends State<wallet> {
 
                           Row(
                             children: [
-                              Text("100.05",style: TextStyle(color: white,fontWeight: FontWeight.w900,fontSize: 18),),
+                              Text(walletmarketvalue['data']['quote_volume'].toString(),style: TextStyle(color: white,fontWeight: FontWeight.w900,fontSize: 16),),
                               SizedBox(width: 3,),
 
                               SvgPicture.asset(
@@ -239,7 +308,7 @@ class _walletState extends State<wallet> {
 
                           Row(
                             children: [
-                              Text("1000.3",style: TextStyle(color: white,fontWeight: FontWeight.w900,fontSize: 18),),
+                              Text(walletmarketvalue['data']['highest_price_24h'].toString(),style: TextStyle(color: white,fontWeight: FontWeight.w900,fontSize: 18),),
 
                               SizedBox(width: 3,),
 
@@ -263,7 +332,7 @@ class _walletState extends State<wallet> {
 
                           Row(
                             children: [
-                              Text("88.05",style: TextStyle(color: white,fontWeight: FontWeight.w900,fontSize: 18),),
+                              Text(walletmarketvalue['data']['lowest_price_24h'].toString(),style: TextStyle(color: white,fontWeight: FontWeight.w900,fontSize: 18),),
 
                               SizedBox(width: 3,),
 
@@ -271,15 +340,11 @@ class _walletState extends State<wallet> {
                                 "assets/svg/arrowbackdown.svg",
                                 height: 9,
                               ),
-
                             ],
                           ),
 
                         ],
                       ),
-
-
-
 
                     ],
                   ),
@@ -294,6 +359,7 @@ class _walletState extends State<wallet> {
                       ),
                     ),
                   ),
+
                   Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
@@ -325,7 +391,7 @@ class _walletState extends State<wallet> {
                                       child: Row(
                                         mainAxisAlignment: MainAxisAlignment.center,
                                         children: [
-                                          Text("11.64",style: TextStyle(fontSize: 10,color: white),),
+                                          Text(walletmarketvalue['data']['price_change_percent_24h'].toString(),style: TextStyle(fontSize: 10,color: white),),
 
                                           SizedBox(width: 5,),
 
@@ -347,17 +413,10 @@ class _walletState extends State<wallet> {
                   ),
 
                   SizedBox(height: 20,),
-
-
                 ],
               ),
-
-
             ),
           )
-
-
-
         ],
       ),
 

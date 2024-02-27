@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rubidya/screens/profile_screen/tab_profile/photo_tab.dart';
 import 'package:rubidya/screens/profile_screen/tab_profile/vedio_tab.dart';
+import 'package:rubidya/screens/profile_screen/tab_profile/widget/verification_page.dart';
 import 'package:rubidya/screens/profile_screen/tab_profile/widget/wallet.dart';
 
 import '../../resources/color.dart';
@@ -135,13 +136,18 @@ class _profilepageState extends State<profilepage> with TickerProviderStateMixin
 
                           Row(
                             children: [
-                              Container(
-                                height: 40,
-                                width: 120,
-                                decoration: BoxDecoration(
-                                  color: buttoncolor,
-                                    borderRadius: BorderRadius.all(Radius.circular(20))),
-                                child: Center(child: Text("Verification",style: TextStyle(color: white,fontSize: 12),)),
+                              GestureDetector(
+                                onTap:(){
+                                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => Verification()));
+                                },
+                                child: Container(
+                                  height: 40,
+                                  width: 130,
+                                  decoration: BoxDecoration(
+                                    color: buttoncolor,
+                                      borderRadius: BorderRadius.all(Radius.circular(20))),
+                                  child: Center(child: Text("Verify Account",style: TextStyle(color: white,fontSize: 12),)),
+                                ),
                               ),
 
                               SizedBox(width: 20,),
@@ -152,7 +158,7 @@ class _profilepageState extends State<profilepage> with TickerProviderStateMixin
                                 },
                                 child: Container(
                                   height: 40,
-                                  width: 120,
+                                  width: 130,
                                   decoration: BoxDecoration(
                                       color: blueshade,
                                       borderRadius: BorderRadius.all(Radius.circular(20))),
