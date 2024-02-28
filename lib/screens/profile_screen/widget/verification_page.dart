@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../../navigation/bottom_navigation.dart';
 import '../../../../resources/color.dart';
 import '../../../../services/profile_service.dart';
 import '../../../../support/logger.dart';
@@ -15,127 +16,26 @@ class Verification extends StatefulWidget {
 }
 
 class _VerificationState extends State<Verification> {
-  var payid;
+  TextEditingController payid=TextEditingController();
   var uniqueid;
   bool isLoading = false;
   var userid;
-  String? payId;
+
   late http.Response response; // Initialize as http.Response
   String uid = '';
   String pid = '';
 
-  // Future addData() async {
-  //   setState(() {});
-  //   SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   userid = prefs.getString('userid');
-  //   var reqData = {
-  //     'payId': pid,
-  //     'uniqueId': uid,
-  //   };
-  //
-  //   try {
-  //     var response = await ProfileService.checkpayid(reqData);
-  //     log.i('add member create . $response');
-  //
-  //     // Check for success in the response and show a success SnackBar
-  //     if (response.statusCode == 200) {
-  //       final Map<String, dynamic> responseData = jsonDecode(response.data);
-  //
-  //       if (responseData['sts'] == '01') {
-  //         ScaffoldMessenger.of(context).showSnackBar(
-  //           SnackBar(
-  //             content: Text(responseData['msg']),
-  //             duration: Duration(seconds: 3),
-  //           ),
-  //         );
-  //       } else {
-  //         // Handle other cases if needed
-  //       }
-  //     } else {
-  //       // Handle non-200 status codes
-  //       log.e('Request failed with status: ${response.statusCode}');
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(
-  //           content: Text('Failed to add member. Please try again.'),
-  //           duration: Duration(seconds: 3),
-  //         ),
-  //       );
-  //     }
-  //   } catch (error) {
-  //     // Handle other errors
-  //     log.e('Error adding member: $error');
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       SnackBar(
-  //         content: Text('Error adding member. Please try again.'),
-  //         duration: Duration(seconds: 3),
-  //       ),
-  //     );
-  //   }
-  // }
 
-
-
-  Future addmember() async {
-    try {
-      setState(() {});
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      userid = prefs.getString('userid');
-      var reqData = {
-        'payId': pid,
-        'uniqueId': uid,
-
-      };
-
-      var response = await ProfileService.checkpayid(reqData);
-      log.i('add member create . $response');
-
-      // Check for success in the response and show a success SnackBar
-      if (response['msg'] == 'User Add Successfully') {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('User added successfully!'),
-            duration: Duration(seconds: 3),
-          ),
-        );
-      }
-
-      // Navigator.push(
-      //   context,
-      //   MaterialPageRoute(builder: (context) => Bottomnav()),
-      // );
-    } catch (error) {
-      // Handle specific error cases
-      if (error.toString().contains("User Already Exist")) {
-        // Show a SnackBar to inform the user
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('User already exists!'),
-            duration: Duration(seconds: 3),
-          ),
-        );
-      } else {
-        // Handle other errors
-        print('Error: $error');
-        // You may choose to show a generic error message to the user
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('User already exists!'),
-            duration: Duration(seconds: 3),
-          ),
-        );
-      }
-    }
-  }
 
 
   Future<void> fetchBalance() async {
     final url = 'https://pwyfklahtrh.rubideum.net/basic/checkPayIdExist';
-
+print("payid---------${payid.text}");
     response = await http.post(
       Uri.parse(url),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
-        "payId": payid,
+        "payId": payid.text.trim(),
       }),
     );
 
@@ -145,19 +45,87 @@ class _VerificationState extends State<Verification> {
         uid = data['uniqueId'].toString();
         pid = data['payId'].toString();
       });
+      addData();
+
     } else {
       print('Failed to load balance: ${response.statusCode}');
       print('Response body: ${response.body}');
     }
   }
 
+
+
+
+  Future addData() async {
+    setState(() {});
+    try {
+      setState(() {});
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      userid = prefs.getString('userid');
+      var reqData = {
+        'payId': pid,
+        'uniqueId': uid,
+      };
+
+      var response = await ProfileService.checkpayid(reqData);
+      log.i('add member create . $response');
+
+      // Check for success in the response and show a success SnackBar
+      if (response['msg'] == 'PayId added successfully') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Pay Id Added Successfully'),
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+
+
+    }catch (error) {
+      // Handle specific error cases
+      if (error.toString().contains("User Already Exist")) {
+        // Show a SnackBar to inform the user
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('User already exists!'),
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+    }
+  }
+
+
+  void updateButtonState() {
+    setState(() {
+      payid == null;
+    });
+  }
+
+  bool validateForm() {
+    if (payid == null || payid!.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Please enter a valid Pay id'),
+          duration: Duration(seconds: 3),
+        ),
+      );
+      return false;
+    }
+
+    return true;
+  }
+
+
+
+
+
   Future<void> _initLoad() async {
     try {
       await fetchBalance();
-      // Do additional tasks if needed
     } catch (error) {
       print('Error: $error');
-      // Handle errors appropriately, e.g., show an error message to the user
+
     }
   }
 
@@ -188,6 +156,7 @@ class _VerificationState extends State<Verification> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               child: TextField(
+                controller: payid,
                 decoration: InputDecoration(
                   hintText: 'Pay ID',
                   hintStyle: TextStyle(color: textblack, fontSize: 12),
@@ -206,43 +175,51 @@ class _VerificationState extends State<Verification> {
                     color: bordercolor,
                   ),
                 ),
-                onChanged: (text) {
-                  setState(() {
-                    payid = text;
-                  });
-                },
+
                 style: TextStyle(color: textblack, fontSize: 14),
               ),
             ),
 
             SizedBox(height: 40,),
 
-            Text(
-              'Unique ID: $uid',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-
-            Text(
-              'P ID: $pid',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            // Text(
+            //   'Unique ID: $uid',
+            //   style: TextStyle(
+            //     fontSize: 16,
+            //     fontWeight: FontWeight.bold,
+            //   ),
+            // ),
+            //
+            // Text(
+            //   'P ID: $pid',
+            //   style: TextStyle(
+            //     fontSize: 16,
+            //     fontWeight: FontWeight.bold,
+            //   ),
+            // ),
 
             InkWell(
               onTap: () async {
-                setState(() {
-                  addmember();
-                  isLoading = true;
-                });
-                await _initLoad();
-                setState(() {
-                  isLoading = false;
-                });
+                if (validateForm()) {
+                  setState(() {
+                    isLoading = true;
+                  });
+
+                  // Perform your asynchronous operation, for example, _initLoad()
+                  _initLoad().then((result) {
+                    setState(() {
+                      isLoading = false;
+                    });
+
+                    Future.delayed(Duration(seconds:0), () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => Bottomnav()),
+                      );
+
+                    });
+                  });
+                }
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -257,6 +234,8 @@ class _VerificationState extends State<Verification> {
                 ),
               ),
             ),
+
+
           ],
         ),
       ),

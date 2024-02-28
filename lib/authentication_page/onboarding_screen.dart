@@ -46,9 +46,7 @@ class _onboardingscreenState extends State<onboardingscreen> {
               textAlign: TextAlign.center, // Set the text alignment to center
             ),
 
-            SizedBox(height: 20,),
-
-
+            SizedBox(height: 40,),
 
             InkWell(
               onTap: (){

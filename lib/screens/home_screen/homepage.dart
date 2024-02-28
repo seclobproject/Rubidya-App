@@ -232,6 +232,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../services/profile_service.dart';
+import '../../support/logger.dart';
+
 
 class homepage extends StatefulWidget {
   const homepage({Key? key}) : super(key: key);
@@ -242,6 +248,38 @@ class homepage extends StatefulWidget {
 
 class _homepageState extends State<homepage> {
   bool isFavorite = false;
+  var userid;
+  var profiledetails;
+  bool isLoading = false;
+
+
+  Future _profiledetailsapi() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    userid = prefs.getString('userid');
+    print(userid);
+    var response = await ProfileService.getProfile();
+    log.i('profile details show.. $response');
+    setState(() {
+      profiledetails = response;
+    });
+  }
+
+
+  Future _initLoad() async {
+    await Future.wait(
+      [
+        _profiledetailsapi()
+      ],
+    );
+    isLoading = false;
+  }
+
+  @override
+  void initState() {
+    _initLoad();
+    super.initState();
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -252,20 +290,37 @@ class _homepageState extends State<homepage> {
         child: Column(
           children: [
             SizedBox(height: 50,),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Image.asset(
-                  'assets/logo/logo2.png',
-                  fit: BoxFit.cover,
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: SvgPicture.asset(
+            Padding(
+              padding: const EdgeInsets.only(right:20 ),
+              child: Row(
+
+                children: [
+                  Image.asset(
+                    'assets/logo/logo2.png',
+                    fit: BoxFit.cover,
+                  ),
+                Expanded(child: SizedBox()),
+
+                  InkWell(
+                    onTap: (){
+                      Share.share("https://rubidya.com/register/$userid");
+                    },
+                    child: SvgPicture.asset(
+                      "assets/svg/reffer.svg",
+                    ),
+                  ),
+                  SizedBox(width: 20,),
+
+                  SvgPicture.asset(
+                    "assets/svg/massage.svg",
+                  ),
+                  SizedBox(width: 20,),
+
+                  SvgPicture.asset(
                     "assets/svg/notification.svg",
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
             SizedBox(height: 15,),
             Padding(

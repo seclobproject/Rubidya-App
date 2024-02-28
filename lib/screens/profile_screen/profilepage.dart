@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:rubidya/screens/profile_screen/tab_profile/photo_tab.dart';
 import 'package:rubidya/screens/profile_screen/tab_profile/vedio_tab.dart';
-import 'package:rubidya/screens/profile_screen/tab_profile/widget/verification_page.dart';
-import 'package:rubidya/screens/profile_screen/tab_profile/widget/wallet.dart';
+import 'package:rubidya/screens/profile_screen/widget/rubidya_premium.dart';
+import 'package:rubidya/screens/profile_screen/widget/verification_page.dart';
+import 'package:rubidya/screens/profile_screen/widget/wallet.dart';
 
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../authentication_page/login_page.dart';
 import '../../resources/color.dart';
+import '../../services/profile_service.dart';
+import '../../support/logger.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+
 
 class profilepage extends StatefulWidget {
   const profilepage({super.key});
@@ -19,9 +26,45 @@ class _profilepageState extends State<profilepage> with TickerProviderStateMixin
 
 
 
+  var userid;
+  var profiledetails;
+  bool isLoading = false;
+
+
+  Future _profiledetailsapi() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    userid = prefs.getString('userid');
+    var response = await ProfileService.getProfile();
+    log.i('profile details show.. $response');
+    setState(() {
+      profiledetails = response;
+    });
+  }
+
+  Future _initLoad() async {
+    await Future.wait(
+      [
+        _profiledetailsapi()
+      ],
+    );
+    isLoading = false;
+  }
+
+  Future<void> logout() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.remove('token');
+
+    Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(
+            builder: (context) => login()),
+            (route) => false);
+  }
+
+
   @override
   void initState() {
     _tabController = TabController(length: 2, vsync: this);
+    _initLoad();
     super.initState();
   }
 
@@ -37,34 +80,196 @@ class _profilepageState extends State<profilepage> with TickerProviderStateMixin
 
         appBar: AppBar(
           centerTitle: true,
-          title: const Text("Rayan_Photographer_",style: TextStyle(fontSize: 12),),
+          automaticallyImplyLeading: false,
+          title:  Text(
+            (profiledetails?['user']?['firstName'] ?? 'loading...'),
+            style: TextStyle(fontSize: 14),
+          ),
           actions: <Widget>[
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Container(
-               height: 40,
-                width: 40,
-                decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [grad1, grad2],
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                    ),
-                  borderRadius: BorderRadius.all(Radius.circular(100))
+              child: InkWell(
+                onTap: (){
+                  showModalBottomSheet(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return Container(
+                        decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.only(
+                          topRight: Radius.circular(40),
+                            topLeft: Radius.circular(40),
+                            )),
+                        height: 400.0,
+
+                        child: Column(
+                          children: [
+
+                            SizedBox(height: 40,),
+
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 40),
+                              child: Align(
+                                alignment:Alignment.topLeft,
+                                child: Row(
+                                  children: [
+
+                                    SvgPicture.asset(
+                                      "assets/svg/settings.svg",
+                                      height: 14,
+                                    ),
+                                    SizedBox(width: 10,),
+                                    Text(
+                                      'Setting and privacy',
+                                      style: TextStyle(
+                                          fontSize: 14.0,color: bluetext,
+                                          fontWeight: FontWeight.w200),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+
+                            SizedBox(height: 25,),
+
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 40),
+                              child: Align(
+                                alignment:Alignment.topLeft,
+                                child: Row(
+                                  children: [
+
+                                    SvgPicture.asset(
+                                      "assets/svg/saved.svg",
+                                      height: 14,
+                                    ),
+                                    SizedBox(width: 10,),
+                                    Text(
+                                      'Saved',
+                                      style: TextStyle(fontSize: 14.0,color: bluetext,
+                                          fontWeight: FontWeight.w200),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+
+                            SizedBox(height: 25,),
+
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 40),
+                              child: Align(
+                                alignment:Alignment.topLeft,
+                                child: Row(
+                                  children: [
+
+                                    SvgPicture.asset(
+                                      "assets/svg/ads.svg",
+                                      height: 14,
+                                    ),
+                                    SizedBox(width: 10,),
+                                    Text(
+                                      'Ads',
+                                      style: TextStyle(fontSize: 14.0,
+                                          color: bluetext,fontWeight: FontWeight.w200),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: 25,),
+                            GestureDetector(
+                              onTap: (){
+                                Navigator.push(context, MaterialPageRoute(builder: (context) => premiumpage()));
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 40),
+                                child: Align(
+                                  alignment:Alignment.topLeft,
+                                  child: Row(
+                                    children: [
+
+                                      Image.asset('assets/image/logopngrubidya.png',height: 20,),
+
+                                      SizedBox(width: 10,),
+                                      Text(
+                                        'Rubidya Premium',
+                                        style: TextStyle(fontSize: 14.0,
+                                            color: bluetext,fontWeight: FontWeight.w500),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+
+                            SizedBox(height: 100,),
+
+
+                            InkWell(
+                              onTap: (){
+                                logout();
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 40),
+                                child: Container(
+                                  height: 40,
+                                  width: 400,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                                    color: bluetext
+                                  ),
+                                  child: Center(
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+
+                                          SvgPicture.asset(
+                                            "assets/svg/logout.svg",
+                                            height: 14,
+                                          ),
+
+                                          SizedBox(width: 10,),
+
+                                          Text("Logout",style: TextStyle(color: white),),
+                                        ],
+                                      )),
+                                ),
+                              ),
+                            )
+
+
+                          ],
+                        ),
+                      );
+                    },
+                  );
+                },
+                child: Container(
+                 height: 40,
+                  width: 40,
+                  decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [grad1, grad2],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                      ),
+                    borderRadius: BorderRadius.all(Radius.circular(100))
+                  ),
+                  child: Icon(Icons.more_horiz),
                 ),
-                child: Icon(Icons.more_horiz),
               ),
             ), //IconButton
           ], //<Widget>[]
           backgroundColor: white,
           // elevation: 50.0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios),
-            tooltip: 'Menu Icon',
-            onPressed: () {
-
-            },
-          ),
+          // leading: IconButton(
+          //   icon: const Icon(Icons.arrow_back_ios),
+          //   tooltip: 'Menu Icon',
+          //   onPressed: () {
+          //
+          //   },
+          // ),
         ),
 
 
@@ -113,11 +318,13 @@ class _profilepageState extends State<profilepage> with TickerProviderStateMixin
 
                           SizedBox(height: 10,),
 
-                          Text("Rayan Moon",
-                            style: TextStyle(color: bluetext,fontSize: 14,
-                                fontWeight: FontWeight.w500),) ,
+                  Text(
+                    (profiledetails?['user']?['firstName'] ?? 'loading...'),
+                    style: TextStyle(fontSize: 14,fontWeight: FontWeight.w500,color: bluetext),
+                  ),
 
-                          Text("Photographer",
+                          Text(
+                            (profiledetails?['user']?['lastName'] ?? 'loading...'),
                             style: TextStyle(color: bluetext,fontSize: 10,
                                 fontWeight: FontWeight.w500),),
                           SizedBox(height: 10,),
@@ -136,6 +343,9 @@ class _profilepageState extends State<profilepage> with TickerProviderStateMixin
 
                           Row(
                             children: [
+
+
+                              profiledetails?['user']['isVerified']== false?
                               GestureDetector(
                                 onTap:(){
                                   Navigator.of(context).push(MaterialPageRoute(builder: (context) => Verification()));
@@ -148,7 +358,32 @@ class _profilepageState extends State<profilepage> with TickerProviderStateMixin
                                       borderRadius: BorderRadius.all(Radius.circular(20))),
                                   child: Center(child: Text("Verify Account",style: TextStyle(color: white,fontSize: 12),)),
                                 ),
+                              ):
+
+                              Container(
+                                height: 40,
+                                width: 130,
+                                decoration: BoxDecoration(
+                                    color: greenbg,
+                                    borderRadius: BorderRadius.all(Radius.circular(20))),
+                                child: Center(
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text("verified",style: TextStyle(color: white,fontSize: 12),),
+
+                                    SizedBox(width: 5,),
+
+                                    SvgPicture.asset(
+                                      "assets/svg/tikmark.svg",
+                                      height: 14,
+                                    ),
+                                    
+                                  ],
+                                )),
                               ),
+
+
 
                               SizedBox(width: 20,),
 
@@ -242,11 +477,9 @@ class _profilepageState extends State<profilepage> with TickerProviderStateMixin
                       )
                   ),
 
-
                 ],
               ),
             ),
-
 
             Container(
               height: 30,
@@ -294,11 +527,6 @@ class _profilepageState extends State<profilepage> with TickerProviderStateMixin
               ),
             ),
 
-
-
-
-
-
           ],
         ),
       ),
@@ -306,6 +534,5 @@ class _profilepageState extends State<profilepage> with TickerProviderStateMixin
     );
   }
 }
-
 
 

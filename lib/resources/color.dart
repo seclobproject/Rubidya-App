@@ -34,5 +34,5 @@ const white1 = Color.fromRGBO(255, 255, 255, 0.4);
 const blueshade = Color.fromRGBO(49, 82, 128, 1);
 const gradnew = Color.fromRGBO(60, 76, 106, 1);
 const gradnew1 = Color.fromRGBO(30, 60, 110, 1);
-
+const greenbg = Color.fromRGBO(139, 161, 110, 1);
 

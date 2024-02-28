@@ -52,6 +52,10 @@ class _uploadscreenState extends State<uploadscreen> {
       if (response.statusCode == 201) {
         print("Image uploaded successfully");
         print(response.data);
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => Bottomnav()),
+        );
       } else {
         Navigator.push(
           context,

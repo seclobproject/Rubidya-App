@@ -44,11 +44,11 @@ class _loginState extends State<login> {
 
       if (response['sts'] == '01') {
         log.i('Login Success');
-        print('User ID: ${response['id']}');
+        print('User ID: ${response['_id']}');
         print('Token: ${response['access_token']}');
 
         // _saveAndRedirectToHome(response['access_token'], response['name']);
-        _saveAndRedirectToHome(response['access_token'],response['id']);
+        _saveAndRedirectToHome(response['access_token'],response['_id']);
 
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text('Login Success'),
