@@ -74,7 +74,7 @@ class _BottomnavState extends State<Bottomnav> {
               items: [
                 BottomNavigationBarItem(
                   icon: Padding(
-                    padding: const EdgeInsets.only(top: 10 ),
+                    padding: const EdgeInsets.only(top: 11 ),
                     child: SvgPicture.asset(
                       "assets/svg/home.svg",
                       color: (_selectedPageIndex == 0) ? bordercolor : null,
@@ -84,7 +84,7 @@ class _BottomnavState extends State<Bottomnav> {
                 ),
                 BottomNavigationBarItem(
                   icon: Padding(
-                    padding: const EdgeInsets.only(top: 10 ),
+                    padding: const EdgeInsets.only(top: 11 ),
                     child: SvgPicture.asset(
                       "assets/svg/search.svg",
                       color: (_selectedPageIndex == 1) ? bordercolor : null,
@@ -94,7 +94,7 @@ class _BottomnavState extends State<Bottomnav> {
                 ),
                 BottomNavigationBarItem(
                   icon: Padding(
-                    padding: const EdgeInsets.only(top: 10 ),
+                    padding: const EdgeInsets.only(top: 11 ),
                     child: SvgPicture.asset(
                       "assets/svg/upload.svg",
                       color: (_selectedPageIndex == 2) ? bordercolor : null,
@@ -104,9 +104,9 @@ class _BottomnavState extends State<Bottomnav> {
                 ),
                 BottomNavigationBarItem(
                   icon: Padding(
-                    padding: const EdgeInsets.only(top: 10  ),
+                    padding: const EdgeInsets.only(top: 11  ),
                     child: SvgPicture.asset(
-                      "assets/svg/chat.svg",
+                      "assets/svg/reelicon.svg",
                       color: (_selectedPageIndex == 3) ? bordercolor : null,
                     ),
                   ),
@@ -114,7 +114,7 @@ class _BottomnavState extends State<Bottomnav> {
                 ),
                 BottomNavigationBarItem(
                   icon: Padding(
-                    padding: const EdgeInsets.only(top: 10 ),
+                    padding: const EdgeInsets.only(top: 9 ),
                     child: SvgPicture.asset(
                       "assets/svg/profile.svg",
                       color: (_selectedPageIndex == 4) ? bordercolor : null,

@@ -4,7 +4,7 @@ import 'package:country_pickers/country_pickers.dart';
 import 'package:country_pickers/utils/utils.dart';
 import '../resources/color.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:flutter_svg/flutter_svg.dart';
 import '../services/auth_service.dart';
 import '../support/logger.dart';
 import 'login_page.dart';
@@ -45,8 +45,8 @@ class _registrationState extends State<registration> {
   Future userRegistration() async {
     try {
       setState(() {});
-      // SharedPreferences prefs = await SharedPreferences.getInstance();
-      // userid = prefs.getString('userid');
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      userid = prefs.getString('userid');
       var reqData = {
         'firstName': firstname,
         'lastName': lastName,
@@ -139,10 +139,10 @@ class _registrationState extends State<registration> {
       return false;
     }
 
-    if (password == null || password!.length < 6) {
+    if (password == null || password!.length < 8) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Password must be at least 6 characters long'),
+          content: Text('Password must be at least 8 characters long'),
           duration: Duration(seconds: 3),
         ),
       );
@@ -165,10 +165,12 @@ class _registrationState extends State<registration> {
 
             SizedBox(height: 150,),
             Center(
-              child: Image.asset(
-                'assets/image/registrationbg.png',
+              child: SvgPicture.asset(
+                "assets/svg/registrationsc.svg",
               ),
             ),
+
+            SizedBox(height: 50,),
 
 
             Padding(
@@ -180,6 +182,8 @@ class _registrationState extends State<registration> {
                     fontSize: 22,color: bluetext),),
               ),
             ),
+
+            SizedBox(height: 10,),
 
 
 
@@ -331,6 +335,7 @@ class _registrationState extends State<registration> {
                   Container(
                     width: 208,
                     child: TextField(
+                      keyboardType: TextInputType.number,
                       decoration: InputDecoration(
                         hintText: 'Phone Number',
                         hintStyle: TextStyle(color: textblack,fontSize: 12),
@@ -490,7 +495,7 @@ class _registrationState extends State<registration> {
                       color: buttoncolor,
                       borderRadius: BorderRadius.all(Radius.circular(10))),
 
-                  child: Center(child: Text("Submit",style: TextStyle(fontSize: 12,color: white),)),
+                  child: Center(child: Text("Sign Up",style: TextStyle(fontSize: 12,color: white),)),
 
                 ),
               ),

@@ -6,6 +6,7 @@ import '../resources/color.dart';
 import '../services/auth_service.dart';
 import '../support/logger.dart';
 import 'forgot_password.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class login extends StatefulWidget {
   const login({super.key});
@@ -37,7 +38,6 @@ class _loginState extends State<login> {
       'password': password,
     };
     try {
-
       var response = await AuthService.Login(reqData);
 
       print(reqData);
@@ -48,21 +48,17 @@ class _loginState extends State<login> {
         print('Token: ${response['access_token']}');
 
         // _saveAndRedirectToHome(response['access_token'], response['name']);
-        _saveAndRedirectToHome(response['access_token'],response['_id']);
+        _saveAndRedirectToHome(response['access_token'], response['_id']);
 
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text('Login Success'),
         ));
         gotoHome();
-      }
-
-      else {
-        // log.e('Login failed: ${response['msg']}');
-
+      } else {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text('Login failed: ${response['msg']}'),
         ));
-
+        // Uncomment the line below if you want to prevent the page refresh on login failure
         // login();
       }
     } catch (error) {
@@ -77,6 +73,7 @@ class _loginState extends State<login> {
       log.e('Error during login: $error');
     }
   }
+
 
   void _saveAndRedirectToHome(usertoken, userId) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -123,19 +120,15 @@ class _loginState extends State<login> {
   Widget build(BuildContext context) {
     return  Scaffold(
 
-      body: _isLoading
-          ? Center(
-        child: CircularProgressIndicator(),
-      )
-          : SingleChildScrollView(
+      body: SingleChildScrollView(
         child: Column(
 
           children: [
 
             SizedBox(height: 150,),
             Center(
-              child: Image.asset(
-                'assets/image/loginbg.png',
+              child:  SvgPicture.asset(
+                "assets/svg/loginsc.svg",
               ),
             ),
 

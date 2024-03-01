@@ -150,7 +150,7 @@ print("payid---------${payid.text}");
 
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              child: Text("Please provide your Pay ID from your Rubidium exchange"),
+              child: Text("Please provide your Pay ID from your Rubideum exchange"),
             ),
 
             Padding(
@@ -212,11 +212,9 @@ print("payid---------${payid.text}");
                     });
 
                     Future.delayed(Duration(seconds:0), () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => Bottomnav()),
-                      );
-
+                      Navigator.of(context).pushAndRemoveUntil(
+                          MaterialPageRoute(builder: (context) => Bottomnav()),
+                              (route) => false);
                     });
                   });
                 }

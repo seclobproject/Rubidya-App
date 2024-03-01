@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:rubidya/resources/color.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../navigation/bottom_navigation.dart';
 import '../../../services/profile_service.dart';
 import '../../../support/logger.dart';
 
@@ -44,6 +45,10 @@ class _premiumpageState extends State<premiumpage> {
         'amount': '5',
 
       };
+      SnackBar(
+        content: Text('Rubidya Successfully'),
+        duration: Duration(seconds: 3),
+      );
 
       var response = await ProfileService.deductbalance(reqData);
       log.i('add member create . $response');
@@ -86,6 +91,10 @@ class _premiumpageState extends State<premiumpage> {
 
       var response = await ProfileService.verifyuser(reqData);
       log.i('verify user create . $response');
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => Bottomnav()),
+      );
 
       // Check for success in the response and show a success SnackBar
       if (response['sts'] == 1) {
@@ -196,20 +205,19 @@ class _premiumpageState extends State<premiumpage> {
 
           SizedBox(height: 250,),
 
-          Text(
-            (profiledetails?['user']?['payId'] ?? 'loading...'),
-            style: TextStyle(fontSize: 14),
-          ),
-
-          Text(
-            (profiledetails?['user']?['uniqueId'] ?? 'loading...'),
-            style: TextStyle(fontSize: 14),
-          ),
-
-
+          // Text(
+          //   (profiledetails?['user']?['payId'] ?? 'loading...'),
+          //   style: TextStyle(fontSize: 14),
+          // ),
+          //
+          // Text(
+          //   (profiledetails?['user']?['uniqueId'] ?? 'loading...'),
+          //   style: TextStyle(fontSize: 14),
+          // ),
 
           InkWell(
             onTap: (){
+
               addData(
                 profiledetails?['user']?['payId'] ?? '',
                 profiledetails?['user']?['uniqueId'] ?? '',

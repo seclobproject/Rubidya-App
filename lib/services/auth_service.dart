@@ -19,7 +19,7 @@ class AuthService {
   static Future registration(data) async {
     try {
       var dio = await DioHelper.getInstance();
-      var response = await dio.post('$baseURL/api/users',data: data);
+      var response = await dio.post('$baseURL/api/users/add-user-by-refferal',data: data);
       return response.data;
     } catch (e) {
       rethrow;

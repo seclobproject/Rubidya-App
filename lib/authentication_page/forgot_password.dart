@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:flutter_svg/flutter_svg.dart';
 import '../resources/color.dart';
 
 class forgotpassword extends StatefulWidget {
@@ -18,12 +18,12 @@ class _forgotpasswordState extends State<forgotpassword> {
 
           SizedBox(height: 150,),
           Center(
-            child: Image.asset(
-              'assets/image/forgottbg.png',
-            ),
+            child: SvgPicture.asset(
+              "assets/svg/otppagesc.svg",
+            )
           ),
-          
-          
+
+          SizedBox(height: 50,),
           
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -39,7 +39,7 @@ class _forgotpasswordState extends State<forgotpassword> {
                 child: Text("To reset your password, enter your email id and verify",style: TextStyle(fontSize: 12),)),
           ),
 
-          SizedBox(height: 10,),
+          SizedBox(height: 20,),
 
 
           Padding(

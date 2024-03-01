@@ -48,7 +48,8 @@ class _Landing_PageState extends State<Landing_Page> {
 
   gotoLogin() {
     Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => login()), (route) => false);
+        MaterialPageRoute(builder: (context) => login()),
+            (route) => false);
   }
 
 }

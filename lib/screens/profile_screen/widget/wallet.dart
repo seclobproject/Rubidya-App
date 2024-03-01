@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -7,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import '../../../../services/wallet_service.dart';
 import '../../../../support/logger.dart';
+import '../../../services/profile_service.dart';
 
 class wallet extends StatefulWidget {
   const wallet({super.key});
@@ -22,6 +24,71 @@ class _walletState extends State<wallet> {
   var walletbalance;
   bool _isLoading = true;
   String balance = '';
+  var profiledetails;
+  String? uniqueId;
+  String? payId;
+  late Timer _timer;
+  var clearvalue;
+
+
+
+  Future fetchamountsync(String payId, String uniqueId,String balance) async {
+    setState(() {});
+    try {
+      setState(() {});
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      userid = prefs.getString('userid');
+      String walletAmount = profiledetails?['user']?['walletAmount'].toString() ?? 'loading...';
+      var reqData = {
+        'payId': payId,
+        'uniqueId': uniqueId,
+        "amount":  walletAmount,
+        'currency': 'RBD'
+      };
+
+      // print(".idididididi.......$payId");
+
+      var response = await ProfileService.fetchbalance(reqData);
+      log.i('verify user create . $response');
+
+      // Check for success in the response and show a success SnackBar
+      if (response['success'] == 1) {
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   SnackBar(
+        //     content: Text('S yncing wallet'),
+        //     duration: Duration(seconds: 3),
+        //   ),
+        // );
+      }
+
+
+    }catch (error) {
+      // Handle specific error cases
+      if (error.toString().contains("User Already Exist")) {
+        // Show a SnackBar to inform the user
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('verify already exists!'),
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+    }
+  }
+
+
+
+  Future _profiledetailsapi() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    userid = prefs.getString('userid');
+    print(userid);
+    var response = await ProfileService.getProfile();
+    log.i('profile details show.. $response');
+    setState(() {
+      profiledetails = response;
+    });
+  }
+
 
 
 
@@ -36,6 +103,16 @@ class _walletState extends State<wallet> {
     });
   }
 
+  Future _clearvalue() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    userid = prefs.getString('userid');
+    var response = await ProfileService.clearwallet();
+    log.i('wallet data Show.. $response');
+    setState(() {
+      clearvalue = response;
+
+    });
+  }
 
 
 
@@ -62,12 +139,19 @@ class _walletState extends State<wallet> {
     }
   }
 
+
+
+
   Future _initLoad() async {
     await Future.wait(
       [
         _marketvalueapi(),
-        fetchBalance()
+        fetchBalance(),
+        _profiledetailsapi(),
+
+
       ],
+
     );
     _isLoading = false;
   }
@@ -77,10 +161,34 @@ class _walletState extends State<wallet> {
     super.initState();
     setState(() {
       _initLoad();
+
+      // Execute fetchBalance and _profiledetailsapi immediately after _initLoad
+      fetchBalance();
+      _profiledetailsapi();
+
+      _timer = Timer.periodic(Duration(seconds: 3), (Timer timer) {
+        // Periodically execute fetchBalance, _profiledetailsapi, and fetchamountsync
+        fetchamountsync(
+          profiledetails?['user']?['payId'] ?? '',
+          profiledetails?['user']?['uniqueId'] ?? '',
+          balance,
+        );
+        fetchBalance();
+        _clearvalue();
+
+
+        _profiledetailsapi();
+
+      });
     });
   }
 
-
+  @override
+  void dispose() {
+    // Cancel the timer when the widget is disposed to prevent memory leaks
+    _timer.cancel();
+    super.dispose();
+  }
 
 
 
@@ -100,39 +208,39 @@ class _walletState extends State<wallet> {
       :Column(
         children: [
 
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Container(
-              height: 40,
-              decoration: BoxDecoration(
-                border: Border.all(color: white,width: .2),
-                borderRadius: BorderRadius.all(Radius.circular(10))
-              ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text("Verify your Wallet",style: TextStyle(color: white),),
-
-                    SvgPicture.asset(
-                      "assets/svg/verify.svg",
-                      height: 18,
-                    ),
-                  ],
-                ),
-              ),
-
-            ),
-          ),
 
           SizedBox(height: 20,),
 
 
+
+          // InkWell(
+          //   onTap: (){
+          //     fetchamountsync(
+          //       profiledetails?['user']?['payId'] ?? '',
+          //       profiledetails?['user']?['uniqueId'] ?? '',
+          //       balance,
+          //
+          //     );
+          //   },
+          //   child: Padding(
+          //     padding: const EdgeInsets.symmetric(horizontal: 20),
+          //     child: Container(
+          //       height: 40,
+          //       width: 400,
+          //       decoration: BoxDecoration(
+          //           color: bluetext,
+          //           borderRadius: BorderRadius.all(Radius.circular(10))
+          //       ),
+          //       child: Center(child: Text("Confirm",style: TextStyle(color: white),)),
+          //     ),
+          //   ),
+          // ),
+
+
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Container(
-              height: 177,
+              height: 220,
 
               decoration: BoxDecoration(
                   gradient: LinearGradient(
@@ -168,6 +276,30 @@ class _walletState extends State<wallet> {
 
                   SizedBox(height: 10,),
 
+                  Text("Wallet Amount",style:TextStyle(color: white,fontSize: 16,fontWeight: FontWeight.w300),),
+
+                  SizedBox(height: 10,),
+
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // SvgPicture.asset(
+                      //   "assets/svg/verify.svg",
+                      //   height: 30,
+                      // ),
+
+                      SizedBox(width: 10,),
+
+                      Text(
+                        (profiledetails?['user']?['walletAmount'].toString() ?? 'loading...'),
+                        style: TextStyle(fontSize: 20,fontWeight: FontWeight.w500,color: white),
+                      ),
+                    ],
+                  ),
+
+
+                  SizedBox(height: 10,),
 
                   Container(
                     height: 36,
@@ -247,7 +379,11 @@ class _walletState extends State<wallet> {
                           ),
 
 
-                          Text(walletmarketvalue['data']['last_price'],style: TextStyle(color: white,fontWeight: FontWeight.w900,fontSize: 25),),
+                          Text(
+                            walletmarketvalue['data']?['last_price'] ?? 'N/A',
+                            style: TextStyle(color: white, fontWeight: FontWeight.w900, fontSize: 25),
+                          ),
+
 
                         ],
                       ),
@@ -282,7 +418,11 @@ class _walletState extends State<wallet> {
 
                           Row(
                             children: [
-                              Text(walletmarketvalue['data']['quote_volume'].toString(),style: TextStyle(color: white,fontWeight: FontWeight.w900,fontSize: 16),),
+                              Text(
+                                (walletmarketvalue['data']?['quote_volume'] ?? 'N/A').toString(),
+                                style: TextStyle(color: white, fontWeight: FontWeight.w900, fontSize: 16),
+                              ),
+
                               SizedBox(width: 3,),
 
                               SvgPicture.asset(
@@ -308,7 +448,10 @@ class _walletState extends State<wallet> {
 
                           Row(
                             children: [
-                              Text(walletmarketvalue['data']['highest_price_24h'].toString(),style: TextStyle(color: white,fontWeight: FontWeight.w900,fontSize: 18),),
+                              Text(
+                                (walletmarketvalue['data']?['highest_price_24h'] ?? 'N/A').toString(),
+                                style: TextStyle(color: white, fontWeight: FontWeight.w900, fontSize: 18),
+                              ),
 
                               SizedBox(width: 3,),
 
@@ -391,8 +534,10 @@ class _walletState extends State<wallet> {
                                       child: Row(
                                         mainAxisAlignment: MainAxisAlignment.center,
                                         children: [
-                                          Text(walletmarketvalue['data']['price_change_percent_24h'].toString(),style: TextStyle(fontSize: 10,color: white),),
-
+                                          Text(
+                                            (walletmarketvalue['data']?['highest_price_24h'] ?? 'N/A').toString(),
+                                            style: TextStyle(color: white, fontWeight: FontWeight.w500, fontSize: 10),
+                                          ),
                                           SizedBox(width: 5,),
 
                                           SvgPicture.asset(
@@ -413,6 +558,7 @@ class _walletState extends State<wallet> {
                   ),
 
                   SizedBox(height: 20,),
+
                 ],
               ),
             ),

@@ -232,6 +232,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:rubidya/screens/home_screen/widgets/referral_page.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -303,7 +304,13 @@ class _homepageState extends State<homepage> {
 
                   InkWell(
                     onTap: (){
-                      Share.share("https://rubidya.com/register/$userid");
+                      // Share.share("https://rubidya.com/register/$userid");
+
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const referralpage()),
+                      );
+
                     },
                     child: SvgPicture.asset(
                       "assets/svg/reffer.svg",

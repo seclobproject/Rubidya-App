@@ -24,6 +24,17 @@ class ProfileService {
   }
 
 
+  static Future fetchbalance(data) async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.post('$baseURLwallet/basic/creditBalanceAuto',data: data);
+      return response.data;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+
   static Future getProfileimage() async {
     try {
       var dio = await DioHelper.getInstance();
@@ -38,6 +49,16 @@ class ProfileService {
     try {
       var dio = await DioHelper.getInstance();
       var response = await dio.get('$baseURL/api/users/profile');
+      return response.data;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  static Future clearwallet() async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.get('$baseURL/api/users/clear-wallet');
       return response.data;
     } catch (e) {
       rethrow;

@@ -90,6 +90,8 @@ class _uploadscreenState extends State<uploadscreen> {
 
         
       children: [
+
+        SizedBox(height: 100,),
         
         InkWell(
           onTap: (){
@@ -98,7 +100,7 @@ class _uploadscreenState extends State<uploadscreen> {
           child: Align(
             alignment: Alignment.center,
             child: Icon(Icons.camera_alt,
-              size: 75,
+              size: 60,
               color: bluetext,
 
             ),
@@ -107,7 +109,7 @@ class _uploadscreenState extends State<uploadscreen> {
 
 
         Container(
-          height: 300,
+          height: 150,
           width: 300,
           child: imageUrl != null
               ? Padding(
@@ -117,29 +119,24 @@ class _uploadscreenState extends State<uploadscreen> {
               : Container(), // This will render an empty container if imageUrl is null
         ),
 
-
-
-        InkWell(
-          onTap: (){
-            uploadImage();
-          },
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Container(
-              height: 40,
-              width: 400,
-              decoration: BoxDecoration(
-               color: bluetext,
-                borderRadius: BorderRadius.circular(10), // Optional: Add borderRadius to round the corners
-              ),
-              child: Center(
-                  child: Text("Upload",style: TextStyle(fontSize: 12,color: white),)),
-            ),
-          ),
-        ),
-
       ],
 
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: SizedBox(
+          height: 40,
+          width: 400,
+          child: FloatingActionButton.extended(
+            backgroundColor: bluetext,
+            onPressed: (){
+
+              uploadImage();
+            },
+            label: Text('Upload',style: TextStyle(fontSize: 10,color: white),),
+          ),
+        ),
       ),
     );
   }

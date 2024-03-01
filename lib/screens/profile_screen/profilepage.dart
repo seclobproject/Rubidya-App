@@ -81,8 +81,8 @@ class _profilepageState extends State<profilepage> with TickerProviderStateMixin
         appBar: AppBar(
           centerTitle: true,
           automaticallyImplyLeading: false,
-          title:  Text(
-            (profiledetails?['user']?['firstName'] ?? 'loading...'),
+          title: Text(
+            ("Profile"),
             style: TextStyle(fontSize: 14),
           ),
           actions: <Widget>[
