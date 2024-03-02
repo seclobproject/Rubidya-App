@@ -1,20 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../resources/color.dart';
+import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../services/auth_service.dart';
 import '../support/logger.dart';
-import 'forgot_otp.dart';
+import 'login_page.dart';
+import 'package:otp_text_field/otp_field.dart';
+import 'package:otp_text_field/style.dart';
 
-class forgotpassword extends StatefulWidget {
-  const forgotpassword({super.key});
+class otpverification extends StatefulWidget {
+  final String userId;
+  const otpverification({required this.userId,super.key});
 
   @override
-  State<forgotpassword> createState() => _forgotpasswordState();
+  State<otpverification> createState() => _otpverificationState();
 }
 
-class _forgotpasswordState extends State<forgotpassword> {
+class _otpverificationState extends State<otpverification> {
+
+  TextEditingController otpController = TextEditingController();
+
 
 
   bool hidePassword = true;
@@ -30,26 +37,27 @@ class _forgotpasswordState extends State<forgotpassword> {
 
   List package = [];
 
-  String email = '';
+  String? userId;
+  String otp = '';
 
 
 
 
-  Future forgetPassword() async {
+  Future requstOtp() async {
     try {
       setState(() {});
       SharedPreferences prefs = await SharedPreferences.getInstance();
       userid = prefs.getString('userid');
 
       var reqData = {
-        'email': email,
+        'userId': widget.userId,
+        'OTP': otp,
       };
 
-      var response = await AuthService.forgotpassword(reqData);
-      log.i('Otp create . $response');
-
+      var response = await AuthService.otpverification(reqData);
+      log.i('Otp Verification create . $response');
       Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => otpverification(email: email)),
+          MaterialPageRoute(builder: (context) => login()),
               (route) => false);
 
       if (response['msg'] == 'User Add Successfully') {
@@ -97,21 +105,30 @@ class _forgotpasswordState extends State<forgotpassword> {
         children: [
 
           SizedBox(height: 150,),
+
+          // Padding(
+          //   padding: const EdgeInsets.symmetric(horizontal: 20),
+          //   child: Text(
+          //     "User ID: ${widget.userId}",  // Displaying the userId
+          //     style: TextStyle(fontSize: 14, color: textblack),
+          //   ),
+          // ),
+
           Center(
-            child: SvgPicture.asset(
-              "assets/svg/otppagesc.svg",
-            )
+              child: SvgPicture.asset(
+                "assets/svg/otppagesc.svg",
+              )
           ),
 
           SizedBox(height: 50,),
-          
+
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Align(
                 alignment: Alignment.topLeft,
-                child: Text("Forgot Password",style: TextStyle(fontSize: 22,fontWeight: FontWeight.w700,color: bluetext),)),
+                child: Text("Otp Verification",style: TextStyle(fontSize: 22,fontWeight: FontWeight.w700,color: bluetext),)),
           ),
-          
+
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Align(
@@ -122,46 +139,44 @@ class _forgotpasswordState extends State<forgotpassword> {
           SizedBox(height: 20,),
 
 
+          // OtpTextField(
+          //   numberOfFields: 4,
+          //   borderColor: Colors.red,
+          //   focusedBorderColor: Colors.blue,
+          //   margin: EdgeInsets.all(8),
+          //   fieldWidth: 50,
+          //   borderRadius: BorderRadius.circular(8),
+          //   onCodeChanged: (String code) {
+          //     otp = code;
+          //   },
+          // ),
+
+
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: 'Enter your Email',
-                hintStyle: TextStyle(color: textblack,fontSize: 12),
-                contentPadding: EdgeInsets.symmetric(vertical: 10,horizontal: 10),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                  borderSide: BorderSide(color: bordercolor, width: 1),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                  borderSide: BorderSide(color: bordercolor),
-                ),
-                prefixIcon: Icon(
-                  Icons.email,
-                  size: 15,// You can replace 'Icons.email' with the icon you want
-                  color: bordercolor,
-                ),
+            child: OTPTextField(
+              length: 4,
+              width: MediaQuery.of(context).size.width,
+              fieldWidth: 50,
+              style: TextStyle(
+                  fontSize: 17
               ),
-
-              onChanged: (text) {
-                setState(() {
-                 email=text;
-
-                });
+              textFieldAlignment: MainAxisAlignment.spaceAround,
+              fieldStyle: FieldStyle.box,
+              onCompleted: (pin) {
+                otp = pin;
+                print(otp);
               },
-              style: TextStyle(color: textblack,fontSize: 14),
             ),
           ),
 
 
-          SizedBox(height: 20,),
-
+          SizedBox(height: 30,),
 
 
           InkWell(
             onTap: (){
-              forgetPassword();
+              requstOtp();
             },
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -190,3 +205,5 @@ class _forgotpasswordState extends State<forgotpassword> {
     );
   }
 }
+
+

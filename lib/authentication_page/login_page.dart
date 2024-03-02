@@ -125,10 +125,11 @@ class _loginState extends State<login> {
 
           children: [
 
-            SizedBox(height: 150,),
+            SizedBox(height: 80,),
             Center(
-              child:  SvgPicture.asset(
-                "assets/svg/loginsc.svg",
+              child: Image.asset(
+                "assets/image/loginbg2.png",
+                height: 238,
               ),
             ),
 

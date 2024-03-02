@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:rubidya/authentication_page/login_page.dart';
 import '../resources/color.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -7,14 +8,16 @@ import '../services/auth_service.dart';
 import '../support/logger.dart';
 import 'forgot_otp.dart';
 
-class forgotpassword extends StatefulWidget {
-  const forgotpassword({super.key});
+class newpassword extends StatefulWidget {
+  final String email;
+
+  const newpassword({required this.email,super.key});
 
   @override
-  State<forgotpassword> createState() => _forgotpasswordState();
+  State<newpassword> createState() => _newpasswordState();
 }
 
-class _forgotpasswordState extends State<forgotpassword> {
+class _newpasswordState extends State<newpassword> {
 
 
   bool hidePassword = true;
@@ -31,25 +34,28 @@ class _forgotpasswordState extends State<forgotpassword> {
   List package = [];
 
   String email = '';
+  String? password;
 
 
 
 
-  Future forgetPassword() async {
+  Future newPassword() async {
     try {
       setState(() {});
       SharedPreferences prefs = await SharedPreferences.getInstance();
       userid = prefs.getString('userid');
 
       var reqData = {
-        'email': email,
+        'email': widget.email,
+        'password': password,
+
       };
 
-      var response = await AuthService.forgotpassword(reqData);
-      log.i('Otp create . $response');
+      var response = await AuthService.newpassword(reqData);
+      log.i('Password create . $response');
 
       Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => otpverification(email: email)),
+          MaterialPageRoute(builder: (context) => login()),
               (route) => false);
 
       if (response['msg'] == 'User Add Successfully') {
@@ -97,26 +103,35 @@ class _forgotpasswordState extends State<forgotpassword> {
         children: [
 
           SizedBox(height: 150,),
+
+          // Padding(
+          //   padding: const EdgeInsets.symmetric(horizontal: 20),
+          //   child: Text(
+          //     "User ID: ${widget.email}",  // Displaying the userId
+          //     style: TextStyle(fontSize: 14, color: textblack),
+          //   ),
+          // ),
+
           Center(
-            child: SvgPicture.asset(
-              "assets/svg/otppagesc.svg",
-            )
+              child: SvgPicture.asset(
+                "assets/svg/otppagesc.svg",
+              )
           ),
 
           SizedBox(height: 50,),
-          
+
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Align(
                 alignment: Alignment.topLeft,
-                child: Text("Forgot Password",style: TextStyle(fontSize: 22,fontWeight: FontWeight.w700,color: bluetext),)),
+                child: Text("New Password",style: TextStyle(fontSize: 22,fontWeight: FontWeight.w700,color: bluetext),)),
           ),
-          
+
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Align(
                 alignment: Alignment.topLeft,
-                child: Text("To reset your password, enter your email id and verify",style: TextStyle(fontSize: 12),)),
+                child: Text("Enter Your New Password",style: TextStyle(fontSize: 12),)),
           ),
 
           SizedBox(height: 20,),
@@ -125,8 +140,9 @@ class _forgotpasswordState extends State<forgotpassword> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: TextField(
+              obscureText: hidePassword,
               decoration: InputDecoration(
-                hintText: 'Enter your Email',
+                hintText: 'New Password',
                 hintStyle: TextStyle(color: textblack,fontSize: 12),
                 contentPadding: EdgeInsets.symmetric(vertical: 10,horizontal: 10),
                 enabledBorder: OutlineInputBorder(
@@ -137,17 +153,29 @@ class _forgotpasswordState extends State<forgotpassword> {
                   borderRadius: BorderRadius.all(Radius.circular(10.0)),
                   borderSide: BorderSide(color: bordercolor),
                 ),
+
+                suffixIcon: IconButton(
+                  icon: hidePassword
+                      ? Icon(Icons.visibility_off)
+                      : Icon(Icons.visibility),
+                  onPressed: () {
+                    setState(() {
+                      hidePassword = !hidePassword;
+                    });
+                  },
+                ),
+
                 prefixIcon: Icon(
-                  Icons.email,
+                  Icons.lock,
                   size: 15,// You can replace 'Icons.email' with the icon you want
                   color: bordercolor,
                 ),
+
               ),
 
               onChanged: (text) {
                 setState(() {
-                 email=text;
-
+                  password=text;
                 });
               },
               style: TextStyle(color: textblack,fontSize: 14),
@@ -157,11 +185,58 @@ class _forgotpasswordState extends State<forgotpassword> {
 
           SizedBox(height: 20,),
 
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: TextField(
+              obscureText: hidePassword,
+              decoration: InputDecoration(
+                hintText: 'Re-Enter New Password',
+                hintStyle: TextStyle(color: textblack,fontSize: 12),
+                contentPadding: EdgeInsets.symmetric(vertical: 10,horizontal: 10),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                  borderSide: BorderSide(color: bordercolor, width: 1),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                  borderSide: BorderSide(color: bordercolor),
+                ),
+
+                suffixIcon: IconButton(
+                  icon: hidePassword
+                      ? Icon(Icons.visibility_off)
+                      : Icon(Icons.visibility),
+                  onPressed: () {
+                    setState(() {
+                      hidePassword = !hidePassword;
+                    });
+                  },
+                ),
+
+                prefixIcon: Icon(
+                  Icons.lock,
+                  size: 15,// You can replace 'Icons.email' with the icon you want
+                  color: bordercolor,
+                ),
+
+              ),
+
+              onChanged: (text) {
+                setState(() {
+                  password=text;
+                });
+              },
+              style: TextStyle(color: textblack,fontSize: 14),
+            ),
+          ),
+
+          SizedBox(height: 20,),
+
 
 
           InkWell(
             onTap: (){
-              forgetPassword();
+              newPassword();
             },
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),

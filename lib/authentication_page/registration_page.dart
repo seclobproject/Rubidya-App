@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:country_pickers/country.dart';
 import 'package:country_pickers/country_pickers.dart';
 import 'package:country_pickers/utils/utils.dart';
+import 'package:rubidya/authentication_page/verify_otp.dart';
 import '../resources/color.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -47,11 +48,12 @@ class _registrationState extends State<registration> {
       setState(() {});
       SharedPreferences prefs = await SharedPreferences.getInstance();
       userid = prefs.getString('userid');
+
       var reqData = {
         'firstName': firstname,
         'lastName': lastName,
         'phone': phone,
-        'countryCode': _selectedCountry.phoneCode,  // Include only the necessary details
+        'countryCode': _selectedCountry.phoneCode,
         "email": email,
         "password": password,
       };
@@ -59,22 +61,29 @@ class _registrationState extends State<registration> {
       var response = await AuthService.registration(reqData);
       log.i('add member create . $response');
 
-      // Check for success in the response and show a success SnackBar
+
+      Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => otpverification(userId: response['userId'])),
+              (route) => false);
+
       if (response['msg'] == 'User Add Successfully') {
+
+        final String userId = response['userId'];
+
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('User added successfully!'),
+            content: Text('User added successfully! UserID'),
             duration: Duration(seconds: 3),
           ),
         );
+
+        setState(() {
+          userid = userId;
+        });
       }
-      Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => login()),
-              (route) => false);
     } catch (error) {
-      // Handle specific error cases
       if (error.toString().contains("User Already Exist")) {
-        // Show a SnackBar to inform the user
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('User already exists!'),
@@ -82,12 +91,10 @@ class _registrationState extends State<registration> {
           ),
         );
       } else {
-        // Handle other errors
         print('Error: $error');
-        // You may choose to show a generic error message to the user
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('erorr'),
+            content: Text('Error: User already exists'),
             duration: Duration(seconds: 3),
           ),
         );
@@ -153,7 +160,6 @@ class _registrationState extends State<registration> {
   }
 
 
-
   @override
   Widget build(BuildContext context) {
 
@@ -163,7 +169,7 @@ class _registrationState extends State<registration> {
         child: Column(
           children: [
 
-            SizedBox(height: 150,),
+            SizedBox(height: 80,),
             Center(
               child: SvgPicture.asset(
                 "assets/svg/registrationsc.svg",
@@ -185,7 +191,10 @@ class _registrationState extends State<registration> {
 
             SizedBox(height: 10,),
 
-
+            // Text(
+            //   'UserID: $userid',
+            //   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            // ),
 
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 10),
@@ -304,20 +313,22 @@ class _registrationState extends State<registration> {
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 10),
                       child: CountryPickerDropdown(
-                        initialValue: 'US',
+                        initialValue: 'IN',
                         itemBuilder: (Country country) {
                           return Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
                             children: <Widget>[
                               CountryPickerUtils.getDefaultFlagImage(country),
-                              SizedBox(
-                                width: 5,
-                              ),
-
-                              Text("${country.phoneCode}",
+                              SizedBox(width: 5),
+                              Text(
+                                "${country.phoneCode}",
                                 style: TextStyle(fontSize: 10),
                               ),
-                              SizedBox(width: 5,),
-                              Text("${country.isoCode}",style: TextStyle(fontSize: 10),),
+                              SizedBox(width: 5),
+                              Text(
+                                "${country.isoCode}",
+                                style: TextStyle(fontSize: 10),
+                              ),
                             ],
                           );
                         },
@@ -511,4 +522,7 @@ class _registrationState extends State<registration> {
     );
   }
 }
+
+
+
 

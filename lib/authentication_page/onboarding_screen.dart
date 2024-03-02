@@ -20,8 +20,9 @@ class _onboardingscreenState extends State<onboardingscreen> {
           child: Column(
 
             children: [
-              SvgPicture.asset(
-                "assets/svg/registrationfinalbg.svg",
+              Image.asset(
+                "assets/image/landingbg1.png",
+                height: 314,
               ),
 
 
