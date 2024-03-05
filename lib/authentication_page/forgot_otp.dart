@@ -100,106 +100,108 @@ class _otpverificationState extends State<otpverification> {
   @override
   Widget build(BuildContext context) {
     return  Scaffold(
-      body: Column(
-        children: [
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
 
-          SizedBox(height: 150,),
+            SizedBox(height: 150,),
 
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Text(
-              "User ID: ${widget.email}",  // Displaying the userId
-              style: TextStyle(fontSize: 14, color: textblack),
+            // Padding(
+            //   padding: const EdgeInsets.symmetric(horizontal: 20),
+            //   child: Text(
+            //     "User ID: ${widget.email}",  // Displaying the userId
+            //     style: TextStyle(fontSize: 14, color: textblack),
+            //   ),
+            // ),
+
+            Center(
+                child: SvgPicture.asset(
+                  "assets/svg/otppagesc.svg",
+                )
             ),
-          ),
 
-          Center(
-              child: SvgPicture.asset(
-                "assets/svg/otppagesc.svg",
-              )
-          ),
+            SizedBox(height: 50,),
 
-          SizedBox(height: 50,),
-
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Align(
-                alignment: Alignment.topLeft,
-                child: Text("Otp Verification",style: TextStyle(fontSize: 22,fontWeight: FontWeight.w700,color: bluetext),)),
-          ),
-
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Align(
-                alignment: Alignment.topLeft,
-                child: Text("To reset your password, enter your email id and verify",style: TextStyle(fontSize: 12),)),
-          ),
-
-          SizedBox(height: 20,),
-
-
-          // OtpTextField(
-          //   numberOfFields: 4,
-          //   borderColor: Colors.red,
-          //   focusedBorderColor: Colors.blue,
-          //   margin: EdgeInsets.all(8),
-          //   fieldWidth: 50,
-          //   borderRadius: BorderRadius.circular(8),
-          //   onCodeChanged: (String code) {
-          //     otp = code;
-          //   },
-          // ),
-
-
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: OTPTextField(
-              length: 4,
-              width: MediaQuery.of(context).size.width,
-              fieldWidth: 50,
-              style: TextStyle(
-                  fontSize: 17
-              ),
-              textFieldAlignment: MainAxisAlignment.spaceAround,
-              fieldStyle: FieldStyle.box,
-              onCompleted: (pin) {
-                otp = pin;
-                print(otp);
-              },
-            ),
-          ),
-
-
-          SizedBox(height: 30,),
-
-
-          InkWell(
-            onTap: (){
-              forgetotp();
-            },
-            child: Padding(
+            Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Container(
-                height: 48,
-                width: 400,
-                decoration: BoxDecoration(
-                    color: buttoncolor,
-                    borderRadius: BorderRadius.all(Radius.circular(10))),
-                child: Center(
-                  child: Text("Submit",style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,color: white),),
-                ),
+              child: Align(
+                  alignment: Alignment.topLeft,
+                  child: Text("OTP Verification",style: TextStyle(fontSize: 22,fontWeight: FontWeight.w700,color: bluetext),)),
+            ),
 
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Align(
+                  alignment: Alignment.topLeft,
+                  child: Text("To reset your password, enter your OTP and verify",style: TextStyle(fontSize: 12),)),
+            ),
+
+            SizedBox(height: 20,),
+
+
+            // OtpTextField(
+            //   numberOfFields: 4,
+            //   borderColor: Colors.red,
+            //   focusedBorderColor: Colors.blue,
+            //   margin: EdgeInsets.all(8),
+            //   fieldWidth: 50,
+            //   borderRadius: BorderRadius.circular(8),
+            //   onCodeChanged: (String code) {
+            //     otp = code;
+            //   },
+            // ),
+
+
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: OTPTextField(
+                length: 4,
+                width: MediaQuery.of(context).size.width,
+                fieldWidth: 50,
+                style: TextStyle(
+                    fontSize: 17
+                ),
+                textFieldAlignment: MainAxisAlignment.spaceAround,
+                fieldStyle: FieldStyle.box,
+                onCompleted: (pin) {
+                  otp = pin;
+                  print(otp);
+                },
               ),
             ),
-          ),
-
-          SizedBox(height: 40,),
 
 
+            SizedBox(height: 30,),
 
-        ],
+
+            InkWell(
+              onTap: (){
+                forgetotp();
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Container(
+                  height: 48,
+                  width: 400,
+                  decoration: BoxDecoration(
+                      color: buttoncolor,
+                      borderRadius: BorderRadius.all(Radius.circular(10))),
+                  child: Center(
+                    child: Text("Submit",style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,color: white),),
+                  ),
+
+                ),
+              ),
+            ),
+
+            SizedBox(height: 40,),
+
+
+
+          ],
+        ),
       ),
     );
   }

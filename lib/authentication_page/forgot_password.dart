@@ -98,8 +98,9 @@ class _forgotpasswordState extends State<forgotpassword> {
 
           SizedBox(height: 150,),
           Center(
-            child: SvgPicture.asset(
-              "assets/svg/otppagesc.svg",
+            child: Image.asset(
+              "assets/image/forgottpng.png",
+              height: 200,
             )
           ),
 
@@ -109,14 +110,14 @@ class _forgotpasswordState extends State<forgotpassword> {
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Align(
                 alignment: Alignment.topLeft,
-                child: Text("Forgot Password",style: TextStyle(fontSize: 22,fontWeight: FontWeight.w700,color: bluetext),)),
+                child: Text("Forget Password",style: TextStyle(fontSize: 22,fontWeight: FontWeight.w700,color: bluetext),)),
           ),
           
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Align(
                 alignment: Alignment.topLeft,
-                child: Text("To reset your password, enter your email id and verify",style: TextStyle(fontSize: 12),)),
+                child: Text("To reset your password, enter your Email-ID and verify",style: TextStyle(fontSize: 12),)),
           ),
 
           SizedBox(height: 20,),

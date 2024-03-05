@@ -178,6 +178,8 @@ class _profilepageState extends State<profilepage> with TickerProviderStateMixin
                               ),
                             ),
                             SizedBox(height: 25,),
+
+                            profiledetails?['user']['isVerified']== false?
                             GestureDetector(
                               onTap: (){
                                 Navigator.push(context, MaterialPageRoute(builder: (context) => premiumpage()));
@@ -201,7 +203,38 @@ class _profilepageState extends State<profilepage> with TickerProviderStateMixin
                                   ),
                                 ),
                               ),
+                            ): Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 40),
+                              child: Align(
+                                alignment:Alignment.topLeft,
+                                child: Column(
+                                  children: [
+
+                                    Align(
+                                        alignment:Alignment.topLeft,
+                                        child: Text("It has been disabled because the account could not be verified!.",style: TextStyle(fontSize: 10),)),
+
+                                    SizedBox(height: 10,),
+
+                                    Row(
+                                      children: [
+
+                                        Image.asset('assets/image/logopngrubidya.png',height: 20,),
+
+                                        SizedBox(width: 10,),
+                                        Text(
+                                          'Rubidya Premium',
+                                          style: TextStyle(fontSize: 14.0,
+                                              color: greybg,fontWeight: FontWeight.w500),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
+
+
 
                             SizedBox(height: 100,),
 
@@ -323,11 +356,11 @@ class _profilepageState extends State<profilepage> with TickerProviderStateMixin
                     style: TextStyle(fontSize: 14,fontWeight: FontWeight.w500,color: bluetext),
                   ),
 
-                          Text(
-                            (profiledetails?['user']?['lastName'] ?? 'loading...'),
-                            style: TextStyle(color: bluetext,fontSize: 10,
-                                fontWeight: FontWeight.w500),),
-                          SizedBox(height: 10,),
+                          // Text(
+                          //   (profiledetails?['user']?['lastName'] ?? 'loading...'),
+                          //   style: TextStyle(color: bluetext,fontSize: 10,
+                          //       fontWeight: FontWeight.w500),),
+                          SizedBox(height: 20,),
 
                           Text(
                             "📸 Capturing life's moments, one click at a time | Visual\nstoryteller with a passion for authenticity | Exploring the \nworld through my lens | Turning emotions into pixels \n| #PhotographyAdventures 🌍✨",

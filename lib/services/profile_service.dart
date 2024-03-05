@@ -83,7 +83,13 @@ class ProfileService {
   static Future verifyuser(data) async {
     var dio = await DioHelper.getInstance();
     var response = await dio.post('$baseURL/api/users/verify-user',data:data);
-    return response;
+    return response.data;
+  }
+
+  static Future deductrubideum(data) async {
+    var dio = await DioHelper.getInstance();
+    var response = await dio.post('$baseURL/api/users/deduct-rubideum',data:data);
+    return response.data;
   }
 
 

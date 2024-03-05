@@ -431,7 +431,7 @@ class _registrationState extends State<registration> {
               child: TextField(
                 obscureText: hidePassword2,
                 decoration: InputDecoration(
-                  hintText: 'Re-Password',
+                  hintText: 'Confirm Password',
                   hintStyle: TextStyle(color: textblack,fontSize: 12),
                   contentPadding: EdgeInsets.symmetric(vertical: 10,horizontal: 10),
                   enabledBorder: OutlineInputBorder(
@@ -512,7 +512,7 @@ class _registrationState extends State<registration> {
               ),
             ),
 
-            SizedBox(height: 50,)
+            SizedBox(height: 70,)
 
 
           ],

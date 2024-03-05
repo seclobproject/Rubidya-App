@@ -126,14 +126,14 @@ class _otpverificationState extends State<otpverification> {
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Align(
                 alignment: Alignment.topLeft,
-                child: Text("Otp Verification",style: TextStyle(fontSize: 22,fontWeight: FontWeight.w700,color: bluetext),)),
+                child: Text("OTP Verification",style: TextStyle(fontSize: 22,fontWeight: FontWeight.w700,color: bluetext),)),
           ),
 
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Align(
                 alignment: Alignment.topLeft,
-                child: Text("To reset your password, enter your email id and verify",style: TextStyle(fontSize: 12),)),
+                child: Text("To reset your password, enter your OTP and verify",style: TextStyle(fontSize: 12),)),
           ),
 
           SizedBox(height: 20,),

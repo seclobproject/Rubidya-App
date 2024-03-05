@@ -127,12 +127,12 @@ class _newpasswordState extends State<newpassword> {
                 child: Text("New Password",style: TextStyle(fontSize: 22,fontWeight: FontWeight.w700,color: bluetext),)),
           ),
 
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Align(
-                alignment: Alignment.topLeft,
-                child: Text("Enter Your New Password",style: TextStyle(fontSize: 12),)),
-          ),
+          // Padding(
+          //   padding: const EdgeInsets.symmetric(horizontal: 20),
+          //   child: Align(
+          //       alignment: Alignment.topLeft,
+          //       child: Text("Enter Your New Password",style: TextStyle(fontSize: 12),)),
+          // ),
 
           SizedBox(height: 20,),
 
@@ -140,7 +140,7 @@ class _newpasswordState extends State<newpassword> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: TextField(
-              obscureText: hidePassword,
+              obscureText: hidePassword2,
               decoration: InputDecoration(
                 hintText: 'New Password',
                 hintStyle: TextStyle(color: textblack,fontSize: 12),
@@ -155,12 +155,12 @@ class _newpasswordState extends State<newpassword> {
                 ),
 
                 suffixIcon: IconButton(
-                  icon: hidePassword
+                  icon: hidePassword2
                       ? Icon(Icons.visibility_off)
                       : Icon(Icons.visibility),
                   onPressed: () {
                     setState(() {
-                      hidePassword = !hidePassword;
+                      hidePassword2 = !hidePassword2;
                     });
                   },
                 ),
@@ -190,7 +190,7 @@ class _newpasswordState extends State<newpassword> {
             child: TextField(
               obscureText: hidePassword,
               decoration: InputDecoration(
-                hintText: 'Re-Enter New Password',
+                hintText: 'Confirm Password',
                 hintStyle: TextStyle(color: textblack,fontSize: 12),
                 contentPadding: EdgeInsets.symmetric(vertical: 10,horizontal: 10),
                 enabledBorder: OutlineInputBorder(
@@ -256,7 +256,7 @@ class _newpasswordState extends State<newpassword> {
             ),
           ),
 
-          SizedBox(height: 40,),
+          SizedBox(height: 50,),
 
 
 

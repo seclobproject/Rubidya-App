@@ -236,7 +236,7 @@ class _referralpageState extends State<referralpage> {
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           Text(refferals['referrals'][index]['firstName'],style: TextStyle(fontSize: 14,color: bluetext),),
-                                          Text(refferals['referrals'][index]['lastName'],style: TextStyle(fontSize: 10,color: bluetext),)
+                                          // Text(refferals['referrals'][index]['lastName'],style: TextStyle(fontSize: 10,color: bluetext),)
                                         ],
                                       ),
 
@@ -244,8 +244,8 @@ class _referralpageState extends State<referralpage> {
 
                                       Text(
                                         refferals['referrals'][index]['isVerified']
-                                            ? 'Verify'
-                                            : 'Not Verify',
+                                            ? 'Verified'
+                                            : 'Not Verified',
                                         style: TextStyle(
                                           fontSize: 10,
                                           color: refferals['referrals'][index]['isVerified']

@@ -26,9 +26,4 @@ class WalletService {
     }
   }
 
-
-
-
-
-
 }
