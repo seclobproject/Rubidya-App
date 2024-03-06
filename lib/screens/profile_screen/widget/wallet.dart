@@ -66,6 +66,7 @@ class _walletState extends State<wallet> {
 
 
   Future fetchamountsync(String payId, String uniqueId,String balance) async {
+
     setState(() {});
     try {
       setState(() {});
@@ -73,8 +74,8 @@ class _walletState extends State<wallet> {
       userid = prefs.getString('userid');
       String walletAmount = profiledetails?['user']?['walletAmount'].toString() ?? 'loading...';
       var reqData = {
-        'payId': payId,
-        'uniqueId': uniqueId,
+        'payId':  profiledetails?['user']?['payId'] ?? '',
+        'uniqueId': profiledetails?['user']?['uniqueId'] ?? '',
         "amount":  walletAmount,
         'currency': 'RBD'
       };
@@ -86,12 +87,12 @@ class _walletState extends State<wallet> {
 
       // Check for success in the response and show a success SnackBar
       if (response['success'] == 1) {
-        // ScaffoldMessenger.of(context).showSnackBar(
-        //   SnackBar(
-        //     content: Text('S yncing wallet'),
-        //     duration: Duration(seconds: 3),
-        //   ),
-        // );
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('S yncing wallet'),
+            duration: Duration(seconds: 3),
+          ),
+        );
       }
 
 
@@ -136,10 +137,10 @@ class _walletState extends State<wallet> {
     });
   }
 
-  Future _clearvalue() async {
+  Future _syncvalue() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     userid = prefs.getString('userid');
-    var response = await ProfileService.clearwallet();
+    var response = await ProfileService.syncwallet();
     log.i('wallet data Show.. $response');
     setState(() {
       clearvalue = response;
@@ -151,6 +152,12 @@ class _walletState extends State<wallet> {
   Future _initLoad() async {
     await Future.wait(
       [
+        _syncvalue(),
+      fetchamountsync(
+      balance,
+      profiledetails?['user']?['payId'] ?? '',
+      profiledetails?['user']?['uniqueId'] ?? '',
+      ),
         _marketvalueapi(),
         _profiledetailsapi(),
         fetchBalance(),
@@ -166,21 +173,34 @@ class _walletState extends State<wallet> {
     setState(() {
       _initLoad();
 
-      // Execute fetchBalance and _profiledetailsapi immediately after _initLoad
+
+      fetchamountsync(
+        balance,
+        profiledetails?['user']?['payId'] ?? '',
+        profiledetails?['user']?['uniqueId'] ?? '',
+      );
+
       fetchBalance();
+      _syncvalue();
       _profiledetailsapi();
 
-      _timer = Timer.periodic(Duration(seconds: 3), (Timer timer) {
-        // Periodically execute fetchBalance, _profiledetailsapi, and fetchamountsync
-        fetchamountsync(
-          balance,
-          profiledetails?['user']?['payId'] ?? '',
-          profiledetails?['user']?['uniqueId'] ?? '',
-        );
 
+
+      // fetchBalance();
+      // _profiledetailsapi();
+
+      _timer = Timer.periodic(Duration(seconds: 3), (Timer timer) {
+
+        // _profiledetailsapi();
+
+        // fetchamountsync(
+        //   balance,
+        //   profiledetails?['user']?['payId'] ?? '',
+        //   profiledetails?['user']?['uniqueId'] ?? '',
+        // );
         fetchBalance();
-        _clearvalue();
-        _profiledetailsapi();
+
+        // _profiledetailsapi();
 
       });
     });
@@ -240,7 +260,7 @@ class _walletState extends State<wallet> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Container(
-              height: 220,
+              height: 180,
 
               decoration: BoxDecoration(
                   gradient: LinearGradient(
@@ -276,9 +296,9 @@ class _walletState extends State<wallet> {
 
                   SizedBox(height: 10,),
 
-                  Text("Unrealised Wallet",style:TextStyle(color: white,fontSize: 16,fontWeight: FontWeight.w300),),
-
-                  SizedBox(height: 10,),
+                  // Text("Unrealised Wallet",style:TextStyle(color: white,fontSize: 16,fontWeight: FontWeight.w300),),
+                  //
+                  // SizedBox(height: 10,),
 
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -291,10 +311,10 @@ class _walletState extends State<wallet> {
 
                       SizedBox(width: 10,),
 
-                      Text(
-                        (profiledetails?['user']?['walletAmount'].toString() ?? 'loading...'),
-                        style: TextStyle(fontSize: 20,fontWeight: FontWeight.w500,color: white),
-                      ),
+                      // Text(
+                      //   (profiledetails?['user']?['walletAmount'].toString() ?? 'loading...'),
+                      //   style: TextStyle(fontSize: 20,fontWeight: FontWeight.w500,color: white),
+                      // ),
                     ],
                   ),
 

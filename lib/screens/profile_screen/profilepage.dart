@@ -179,7 +179,7 @@ class _profilepageState extends State<profilepage> with TickerProviderStateMixin
                             ),
                             SizedBox(height: 25,),
 
-                            profiledetails?['user']['isVerified']== false?
+                            profiledetails?['user']['isAccountVerified']== false?
                             GestureDetector(
                               onTap: (){
                                 Navigator.push(context, MaterialPageRoute(builder: (context) => premiumpage()));

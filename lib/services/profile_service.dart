@@ -55,10 +55,10 @@ class ProfileService {
     }
   }
 
-  static Future clearwallet() async {
+  static Future syncwallet() async {
     try {
       var dio = await DioHelper.getInstance();
-      var response = await dio.get('$baseURL/api/users/clear-wallet');
+      var response = await dio.get('$baseURL/api/users/sync-wallet');
       return response.data;
     } catch (e) {
       rethrow;

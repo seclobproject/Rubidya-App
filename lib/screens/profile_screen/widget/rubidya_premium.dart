@@ -45,7 +45,7 @@ class _premiumpageState extends State<premiumpage> {
 
       if (response['sts'] == '01') {
         setState(() {
-          deductedAmount = response['amount'].toString();
+          deductedAmount = response['rubideumToPass'].toString();
           deductedmsg = response['msg'].toString();
         });
       }
@@ -205,7 +205,7 @@ class _premiumpageState extends State<premiumpage> {
 
             SizedBox(height: 20,),
 
-            // Text('Deducted Amount: ${deductedAmount.isEmpty ? "N/A" : deductedAmount}'),
+            Text('Deducted Amount: ${deductedAmount.isEmpty ? "N/A" : deductedAmount}'),
 
 
             Center(child: Image.asset('assets/image/logopngrubidya.png')),
@@ -350,6 +350,8 @@ class _premiumpageState extends State<premiumpage> {
                 // );
 
                 verifyuser();
+
+
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
