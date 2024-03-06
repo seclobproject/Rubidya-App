@@ -26,4 +26,17 @@ class WalletService {
     }
   }
 
+
+
+
+  static Future getrubidiumbalance(data) async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.post('$baseURLwallet/basic/getBalance',data:data);
+      return response.data;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
 }

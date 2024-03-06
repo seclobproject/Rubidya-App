@@ -47,6 +47,8 @@ class _loginState extends State<login> {
         print('User ID: ${response['_id']}');
         print('Token: ${response['access_token']}');
 
+        print('isOTPVerified: ${response['false']}');
+
         // _saveAndRedirectToHome(response['access_token'], response['name']);
         _saveAndRedirectToHome(response['access_token'], response['_id']);
 
@@ -230,7 +232,6 @@ class _loginState extends State<login> {
             ),
 
 
-
             InkWell(
               onTap: () {
                 if (validateForm()) {
@@ -295,7 +296,6 @@ class _loginState extends State<login> {
             SizedBox(height: 50,),
 
 
-
             InkWell(
               onTap: () {
                 Navigator.push(
@@ -317,8 +317,6 @@ class _loginState extends State<login> {
                 ),
               ),
             )
-
-
 
           ],
         ),

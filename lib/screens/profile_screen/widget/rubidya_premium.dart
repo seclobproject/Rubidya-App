@@ -40,25 +40,17 @@ class _premiumpageState extends State<premiumpage> {
         'amount': '500'
       };
 
-      // SnackBar(
-      //   content: Text('Done deducting.....'),
-      //   duration: Duration(seconds: 3),
-      // );
       var response = await ProfileService.deductrubideum(reqData);
       log.i('Done deducting.... . $response');
-
 
       if (response['sts'] == '01') {
         setState(() {
           deductedAmount = response['amount'].toString();
           deductedmsg = response['msg'].toString();
         });
-
-
       }
-
-
-    }catch (error) {
+    }
+    catch (error) {
       // Handle specific error cases
       if (error.toString().contains("Erorr deducting")) {
         // Show a SnackBar to inform the user
@@ -75,52 +67,53 @@ class _premiumpageState extends State<premiumpage> {
 
 
 
-  Future addData(String payId, String uniqueId) async {
-    setState(() {});
-    try {
-      setState(() {});
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      userid = prefs.getString('userid');
-      var reqData = {
-        'payId': payId,
-        'uniqueId': uniqueId,
-        'currency': 'RBD',
-        'amount': '5',
 
-      };
-      SnackBar(
-        content: Text('Rubidya Successfully'),
-        duration: Duration(seconds: 3),
-      );
-
-      var response = await ProfileService.deductbalance(reqData);
-      log.i('add member create . $response');
-      verifyuser();
-
-      // Check for success in the response and show a success SnackBar
-      if (response['msg'] == 'PayId added successfully') {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Pay Id Added Successfully'),
-            duration: Duration(seconds: 3),
-          ),
-        );
-      }
-
-    }
-    catch (error) {
-      // Handle specific error cases
-      if (error.toString().contains("User Already Exist")) {
-        // Show a SnackBar to inform the user
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('User already exists!'),
-            duration: Duration(seconds: 3),
-          ),
-        );
-      }
-    }
-  }
+  // Future addData(String payId, String uniqueId) async {
+  //   setState(() {});
+  //   try {
+  //     setState(() {});
+  //     SharedPreferences prefs = await SharedPreferences.getInstance();
+  //     userid = prefs.getString('userid');
+  //     var reqData = {
+  //       'payId': payId,
+  //       'uniqueId': uniqueId,
+  //       'currency': 'RBD',
+  //       'amount': '5',
+  //
+  //     };
+  //     SnackBar(
+  //       content: Text('Rubidya Successfully'),
+  //       duration: Duration(seconds: 3),
+  //     );
+  //
+  //     var response = await ProfileService.deductbalance(reqData);
+  //     log.i('add member create . $response');
+  //     verifyuser();
+  //
+  //     // Check for success in the response and show a success SnackBar
+  //     if (response['msg'] == 'PayId added successfully') {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(
+  //           content: Text('Pay Id Added Successfully'),
+  //           duration: Duration(seconds: 3),
+  //         ),
+  //       );
+  //     }
+  //
+  //   }
+  //   catch (error) {
+  //     // Handle specific error cases
+  //     if (error.toString().contains("User Already Exist")) {
+  //       // Show a SnackBar to inform the user
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(
+  //           content: Text('User already exists!'),
+  //           duration: Duration(seconds: 3),
+  //         ),
+  //       );
+  //     }
+  //   }
+  // }
 
   Future verifyuser() async {
     setState(() {});
@@ -225,15 +218,42 @@ class _premiumpageState extends State<premiumpage> {
 
             SizedBox(height: 40,),
 
-            Padding(
-              padding:  EdgeInsets.symmetric(horizontal: 20),
-              child: Text("Enjoy Rubidya Premium starting from 100 RBD",
-                style: TextStyle(fontSize: 14,
-                    color: bluetext,fontWeight:
-                    FontWeight.w700),),
-            ),
+            // Padding(
+            //   padding:  EdgeInsets.symmetric(horizontal: 20),
+            //   child: Text("Enjoy Rubidya Premium starting from 100 RBD",
+            //     style: TextStyle(fontSize: 14,
+            //         color: bluetext,fontWeight:
+            //         FontWeight.w700),),
+            // ),
 
             SizedBox(height: 20,),
+
+
+         Padding(
+           padding: const EdgeInsets.symmetric(horizontal: 20),
+           child: Align(
+             alignment: Alignment.topLeft,
+             child: Text("RUBIDEUM PREMIUM ACCOUNT ACTIVATION",style: TextStyle(
+               fontWeight: FontWeight.bold,
+               color: bluetext
+             ),),
+           ),
+         ),
+
+            SizedBox(height: 10,),
+
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Align(
+                alignment: Alignment.topLeft,
+                child: Text("If you lose coins from Rubideum account after verified you will be credited back within 48 hours.",style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    color: bluetext
+                ),),
+              ),
+            ),
+
+            SizedBox(height: 10,),
 
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 20),
@@ -246,14 +266,14 @@ class _premiumpageState extends State<premiumpage> {
                   ),
                   children: [
                     TextSpan(
-                      text: 'Normal Membership – ',
+                      text: 'Royal Membership – ',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                       ),
                     ),
 
                     TextSpan(
-                      text: 'You will lose 5 rubideum coin to take regular membership of 500 rupees. Rubideum coins value was not ',
+                      text: 'You will lose 500 rupees worth of rubideum coin. \nRubideum coins value was not fixed',
                     ),
 
                   ],
@@ -292,91 +312,11 @@ class _premiumpageState extends State<premiumpage> {
                 ),
               ),
             ),
-            SizedBox(height: 10,),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
-              child: RichText(
-                text: TextSpan(
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: bluetext,
-                    fontWeight: FontWeight.w400,
-                  ),
-                  children: [
-                    TextSpan(
-                      text: 'Prime Membership – ',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
 
-                    TextSpan(
-                      text: 'You will lose 15 rubideum coin to take regular membership of 5000 rupees.Benefit – You will earn a fixed percentage of the companys monthly revenue.',
-                    ),
-
-                  ],
-                ),
-              ),
-            ),
-
-
-            SizedBox(height: 10,),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
-              child: RichText(
-                text: TextSpan(
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: bluetext,
-                    fontWeight: FontWeight.w400,
-                  ),
-                  children: [
-                    TextSpan(
-                      text: 'Golden Membership – ',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-
-                    TextSpan(
-                      text: 'You will lose 25 rubideum coin to take regular membership of 25000 rupees.',
-                    ),
-
-                  ],
-                ),
-              ),
-            ),
-
-            SizedBox(height: 10,),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
-              child: RichText(
-                text: TextSpan(
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: bluetext,
-                    fontWeight: FontWeight.w400,
-                  ),
-                  children: [
-                    TextSpan(
-                      text: 'Benefit – ',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-
-                    TextSpan(
-                      text: 'You will earn a fixed percentage of the companys monthly revenue.',
-                    ),
-
-                  ],
-                ),
-              ),
-            ),
             
 
 
-            SizedBox(height: 80,),
+            SizedBox(height: 200,),
 
             // Text(
             //   (profiledetails?['user']?['payId'] ?? 'loading...'),
@@ -397,17 +337,19 @@ class _premiumpageState extends State<premiumpage> {
                 //   ),
                 // );
 
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('$deductedmsg'),
-                    duration: Duration(seconds: 3),
-                  ),
-                );
+                // ScaffoldMessenger.of(context).showSnackBar(
+                //   SnackBar(
+                //     content: Text('$deductedmsg'),
+                //     duration: Duration(seconds: 3),
+                //   ),
+                // );
 
-                addData(
-                  profiledetails?['user']?['payId'] ?? '',
-                  profiledetails?['user']?['uniqueId'] ?? '',
-                );
+                // addData(
+                //   profiledetails?['user']?['payId'] ?? '',
+                //   profiledetails?['user']?['uniqueId'] ?? '',
+                // );
+
+                verifyuser();
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),

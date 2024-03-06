@@ -55,80 +55,66 @@ class _BottomnavState extends State<Bottomnav> {
     return Scaffold(
       backgroundColor:white,
       body: currentPage['page'] as Widget,
-      bottomNavigationBar: SafeArea(
-        child: Container(
-
-          height: 90,
-          padding: EdgeInsets.all(12),
-          margin: EdgeInsets.symmetric(horizontal: 10),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(20), // Set the desired border radius
-            child: BottomNavigationBar(
-              backgroundColor: gradient1,
-              selectedItemColor: white,
-              unselectedItemColor: white,
-              onTap: _selectPage,
-              currentIndex: _selectedPageIndex,
-              showUnselectedLabels: true,
-              type: BottomNavigationBarType.fixed,
-              items: [
-                BottomNavigationBarItem(
-                  icon: Padding(
-                    padding: const EdgeInsets.only(top: 11 ),
-                    child: SvgPicture.asset(
-                      "assets/svg/home.svg",
-                      color: (_selectedPageIndex == 0) ? bordercolor : null,
-                    ),
-                  ),
-                  label: '',
-                ),
-                BottomNavigationBarItem(
-                  icon: Padding(
-                    padding: const EdgeInsets.only(top: 11 ),
-                    child: SvgPicture.asset(
-                      "assets/svg/search.svg",
-                      color: (_selectedPageIndex == 1) ? bordercolor : null,
-                    ),
-                  ),
-                  label: '',
-                ),
-                BottomNavigationBarItem(
-                  icon: Padding(
-                    padding: const EdgeInsets.only(top: 11 ),
-                    child: SvgPicture.asset(
-                      "assets/svg/upload.svg",
-                      color: (_selectedPageIndex == 2) ? bordercolor : null,
-                    ),
-                  ),
-                  label: '',
-                ),
-                BottomNavigationBarItem(
-                  icon: Padding(
-                    padding: const EdgeInsets.only(top: 11  ),
-                    child: SvgPicture.asset(
-                      "assets/svg/reelicon.svg",
-                      color: (_selectedPageIndex == 3) ? bordercolor : null,
-                    ),
-                  ),
-                  label: '',
-                ),
-                BottomNavigationBarItem(
-                  icon: Padding(
-                    padding: const EdgeInsets.only(top: 9 ),
-                    child: SvgPicture.asset(
-                      "assets/svg/profile.svg",
-                      color: (_selectedPageIndex == 4) ? bordercolor : null,
-                    ),
-                  ),
-                  label: '',
-                ),
-              ],
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: gradient1,
+        selectedItemColor: white,
+        unselectedItemColor: white,
+        onTap: _selectPage,
+        currentIndex: _selectedPageIndex,
+        showUnselectedLabels: true,
+        type: BottomNavigationBarType.fixed,
+        items: [
+          BottomNavigationBarItem(
+            icon: Padding(
+              padding: const EdgeInsets.only(top: 11 ),
+              child: SvgPicture.asset(
+                "assets/svg/home.svg",
+                color: (_selectedPageIndex == 0) ? bordercolor : null,
+              ),
             ),
-
-
-
+            label: '',
           ),
-        ),
+          BottomNavigationBarItem(
+            icon: Padding(
+              padding: const EdgeInsets.only(top: 11 ),
+              child: SvgPicture.asset(
+                "assets/svg/search.svg",
+                color: (_selectedPageIndex == 1) ? bordercolor : null,
+              ),
+            ),
+            label: '',
+          ),
+          BottomNavigationBarItem(
+            icon: Padding(
+              padding: const EdgeInsets.only(top: 11 ),
+              child: SvgPicture.asset(
+                "assets/svg/upload.svg",
+                color: (_selectedPageIndex == 2) ? bordercolor : null,
+              ),
+            ),
+            label: '',
+          ),
+          BottomNavigationBarItem(
+            icon: Padding(
+              padding: const EdgeInsets.only(top: 11  ),
+              child: SvgPicture.asset(
+                "assets/svg/reelicon.svg",
+                color: (_selectedPageIndex == 3) ? bordercolor : null,
+              ),
+            ),
+            label: '',
+          ),
+          BottomNavigationBarItem(
+            icon: Padding(
+              padding: const EdgeInsets.only(top: 9 ),
+              child: SvgPicture.asset(
+                "assets/svg/profile.svg",
+                color: (_selectedPageIndex == 4) ? bordercolor : null,
+              ),
+            ),
+            label: '',
+          ),
+        ],
       ),
     );
   }

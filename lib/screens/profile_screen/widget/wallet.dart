@@ -25,11 +25,44 @@ class _walletState extends State<wallet> {
   bool _isLoading = true;
   String balance = '';
   var profiledetails;
-  String? uniqueId;
-  String? payId;
+  // String? uniqueId;
+  // String? payId;
   late Timer _timer;
   var clearvalue;
+  String balancerubidium = '';
 
+
+
+
+
+
+
+  Future<void> fetchBalance() async {
+    final url = 'https://pwyfklahtrh.rubideum.net/basic/getBalance';
+
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        "payId": profiledetails?['user']?['payId'] ?? '',
+        "uniqueId":profiledetails?['user']?['uniqueId'] ?? '',
+        "currency": "RBD",
+      }),
+    );
+
+    // print("payId: $payId");
+    // print("uniqueId: $uniqueId");
+
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> data = jsonDecode(response.body);
+      setState(() {
+        balance = data['balance'].toString();
+      });
+    } else {
+      print('Failed to load balance');
+    }
+  }
 
 
   Future fetchamountsync(String payId, String uniqueId,String balance) async {
@@ -46,7 +79,7 @@ class _walletState extends State<wallet> {
         'currency': 'RBD'
       };
 
-      // print(".idididididi.......$payId");
+      print(".idididididi.......$payId");
 
       var response = await ProfileService.fetchbalance(reqData);
       log.i('verify user create . $response');
@@ -115,41 +148,12 @@ class _walletState extends State<wallet> {
   }
 
 
-
-  Future<void> fetchBalance() async {
-    final url = 'https://pwyfklahtrh.rubideum.net/basic/getBalance';
-
-    final response = await http.post(
-      Uri.parse(url),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        "payId": "RBD968793034",
-        "uniqueId": "64eaf0a9cec8b5bb72f56d01",
-        "currency": "RBD",
-      }),
-    );
-
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> data = jsonDecode(response.body);
-      setState(() {
-        balance = data['balance'].toString();
-      });
-    } else {
-      print('Failed to load balance');
-    }
-  }
-
-
-
-
   Future _initLoad() async {
     await Future.wait(
       [
         _marketvalueapi(),
-        fetchBalance(),
         _profiledetailsapi(),
-
-
+        fetchBalance(),
       ],
 
     );
@@ -169,14 +173,13 @@ class _walletState extends State<wallet> {
       _timer = Timer.periodic(Duration(seconds: 3), (Timer timer) {
         // Periodically execute fetchBalance, _profiledetailsapi, and fetchamountsync
         fetchamountsync(
+          balance,
           profiledetails?['user']?['payId'] ?? '',
           profiledetails?['user']?['uniqueId'] ?? '',
-          balance,
         );
+
         fetchBalance();
         _clearvalue();
-
-
         _profiledetailsapi();
 
       });
@@ -211,8 +214,6 @@ class _walletState extends State<wallet> {
 
           SizedBox(height: 20,),
 
-
-
           // InkWell(
           //   onTap: (){
           //     fetchamountsync(
@@ -235,7 +236,6 @@ class _walletState extends State<wallet> {
           //     ),
           //   ),
           // ),
-
 
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -276,7 +276,7 @@ class _walletState extends State<wallet> {
 
                   SizedBox(height: 10,),
 
-                  Text("Wallet Amount",style:TextStyle(color: white,fontSize: 16,fontWeight: FontWeight.w300),),
+                  Text("Unrealised Wallet",style:TextStyle(color: white,fontSize: 16,fontWeight: FontWeight.w300),),
 
                   SizedBox(height: 10,),
 

@@ -26,33 +26,116 @@ class _VerificationState extends State<Verification> {
   String pid = '';
 
 
+  // Future<void> fetchBalance() async {
+  //   final url = 'https://pwyfklahtrh.rubideum.net/basic/checkPayIdExist';
+  //   print("payid---------${payid.text}");
+  //   response = await http.post(
+  //     Uri.parse(url),
+  //     headers: {'Content-Type': 'application/json'},
+  //     body: jsonEncode({
+  //       "payId": payid.text.trim(),
+  //     }),
+  //   );
+  //
+  //   if (response.statusCode == 200) {
+  //     final Map<String, dynamic> data = jsonDecode(response.body);
+  //     setState(() {
+  //       uid = data['uniqueId'].toString();
+  //       pid = data['payId'].toString();
+  //     });
+  //     addData();
+  //
+  //
+  //   } else if (response.statusCode == 400) {
+  //     // Handle 400 Bad Request error
+  //     final Map<String, dynamic> errorData = jsonDecode(response.body);
+  //     String errorMessage = errorData['message']; // Assuming the error message is in the 'message' field
+  //     // Show error message to the user, you can use a dialog, a snackbar, or any other UI element
+  //     showDialog(
+  //       context: context,
+  //       builder: (context) => AlertDialog(
+  //         title: Text('Please enter valid Pay Id'),
+  //         content: Text(errorMessage),
+  //         actions: [
+  //           TextButton(
+  //             onPressed: () {
+  //               Navigator.of(context).pop();
+  //             },
+  //             child: Text('OK'),
+  //           ),
+  //         ],
+  //       ),
+  //     );
+  //   }
+  //
+  //   else {
+  //     print('Failed to load balance: ${response.statusCode}');
+  //     print('Response body: ${response.body}');
+  //   }
+  // }
+
+  Future verifyaccount() async {
+    setState(() {});
+    try {
+      setState(() {});
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      userid = prefs.getString('userid');
+      var reqData = {
+        'payId': payid.text.trim(),
+      };
+
+      var response = await ProfileService.verifyaccountrubidia(reqData);
+      log.i('verify account.... . $response');
+
+      if (response['success'] == 1) {
+        setState(() {
+          uid = response['uniqueId'].toString();
+          pid = response['payId'].toString();
+        });
+        Future.delayed(Duration(seconds:0), () {
+          Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (context) => Bottomnav()),
+                  (route) => false);
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('User Verified Successfully'),
+            duration: Duration(seconds: 3),
+          ),
+        );
+        addData();
+
+      }
+
+      else if (response['success']== 0) {
 
 
-  Future<void> fetchBalance() async {
-    final url = 'https://pwyfklahtrh.rubideum.net/basic/checkPayIdExist';
-print("payid---------${payid.text}");
-    response = await http.post(
-      Uri.parse(url),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        "payId": payid.text.trim(),
-      }),
-    );
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Enter Valid Pay ID'),
+            duration: Duration(seconds: 3),
+          ),
+        );
 
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> data = jsonDecode(response.body);
-      setState(() {
-        uid = data['uniqueId'].toString();
-        pid = data['payId'].toString();
-      });
-      addData();
-
-    } else {
-      print('Failed to load balance: ${response.statusCode}');
-      print('Response body: ${response.body}');
+      } else {
+// Handle other status codes if needed
+        print('Unhandled status code: ${response.statusCode}');
+      }
+    }
+    catch (error) {
+      // Handle specific error cases
+      if (error.toString().contains("Erorr deducting")) {
+        // Show a SnackBar to inform the user
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erorr deducting'),
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
     }
   }
-
 
 
 
@@ -72,12 +155,36 @@ print("payid---------${payid.text}");
 
       // Check for success in the response and show a success SnackBar
       if (response['msg'] == 'PayId added successfully') {
+
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Pay Id Added Successfully'),
             duration: Duration(seconds: 3),
           ),
         );
+      }
+      else if (response['message']=='Please send the payId and uniqueId') {
+        final Map<String, dynamic> errorData = jsonDecode(response.body);
+        String errorMessage = errorData['message'];
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text('Please send the payId and uniqueId'),
+            content: Text(errorMessage),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text('OK'),
+              ),
+            ],
+          ),
+        );
+      } else {
+// Handle other status codes if needed
+        print('Unhandled status code: ${response.statusCode}');
       }
 
 
@@ -118,11 +225,9 @@ print("payid---------${payid.text}");
 
 
 
-
-
   Future<void> _initLoad() async {
     try {
-      await fetchBalance();
+      // await verifyaccount();
     } catch (error) {
       print('Error: $error');
 
@@ -152,6 +257,8 @@ print("payid---------${payid.text}");
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               child: Text("Please provide your Pay ID from your Rubideum exchange"),
             ),
+
+            // Text('Deducted Amount: ${pid.isEmpty ? "N/A" : pid}'),
 
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -200,22 +307,19 @@ print("payid---------${payid.text}");
 
             InkWell(
               onTap: () async {
+                // fetchBalance();
+                verifyaccount();
+
                 if (validateForm()) {
                   setState(() {
                     isLoading = true;
                   });
 
-                  // Perform your asynchronous operation, for example, _initLoad()
                   _initLoad().then((result) {
                     setState(() {
                       isLoading = false;
                     });
 
-                    Future.delayed(Duration(seconds:0), () {
-                      Navigator.of(context).pushAndRemoveUntil(
-                          MaterialPageRoute(builder: (context) => Bottomnav()),
-                              (route) => false);
-                    });
                   });
                 }
               },
@@ -240,3 +344,6 @@ print("payid---------${payid.text}");
     );
   }
 }
+
+
+

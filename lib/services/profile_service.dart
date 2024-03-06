@@ -28,7 +28,7 @@ class ProfileService {
     try {
       var dio = await DioHelper.getInstance();
       var response = await dio.post('$baseURLwallet/basic/creditBalanceAuto',data: data);
-      return response.data;
+      return response;
     } catch (e) {
       rethrow;
     }
@@ -77,7 +77,7 @@ class ProfileService {
   static Future checkpayid(data) async {
     var dio = await DioHelper.getInstance();
     var response = await dio.post('$baseURL/api/users/add-pay-id',data:data);
-    return response;
+    return response.data;
   }
 
   static Future verifyuser(data) async {
@@ -89,6 +89,12 @@ class ProfileService {
   static Future deductrubideum(data) async {
     var dio = await DioHelper.getInstance();
     var response = await dio.post('$baseURL/api/users/deduct-rubideum',data:data);
+    return response.data;
+  }
+
+  static Future verifyaccountrubidia(data) async {
+    var dio = await DioHelper.getInstance();
+    var response = await dio.post('$baseURLwallet/basic/checkPayIdExist',data:data);
     return response.data;
   }
 

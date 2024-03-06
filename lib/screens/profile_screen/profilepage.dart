@@ -212,7 +212,7 @@ class _profilepageState extends State<profilepage> with TickerProviderStateMixin
 
                                     Align(
                                         alignment:Alignment.topLeft,
-                                        child: Text("It has been disabled because the account could not be verified!.",style: TextStyle(fontSize: 10),)),
+                                        child: Text("You Are Already Verified.",style: TextStyle(fontSize: 10),)),
 
                                     SizedBox(height: 10,),
 
@@ -403,7 +403,7 @@ class _profilepageState extends State<profilepage> with TickerProviderStateMixin
                                     child: Row(
                                       mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Text("verified",style: TextStyle(color: white,fontSize: 12),),
+                                    Text("Verified",style: TextStyle(color: white,fontSize: 12),),
 
                                     SizedBox(width: 5,),
 
@@ -419,7 +419,7 @@ class _profilepageState extends State<profilepage> with TickerProviderStateMixin
 
 
                               SizedBox(width: 20,),
-
+                              profiledetails?['user']['isVerified']== true?
                               InkWell(
                                 onTap: (){
                                   Navigator.of(context).push(MaterialPageRoute(builder: (context) => wallet()));
@@ -432,7 +432,15 @@ class _profilepageState extends State<profilepage> with TickerProviderStateMixin
                                       borderRadius: BorderRadius.all(Radius.circular(20))),
                                   child: Center(child: Text("Wallet",style: TextStyle(color: white,fontSize: 12),)),
                                 ),
+                              ):Container(
+                                height: 40,
+                                width: 130,
+                                decoration: BoxDecoration(
+                                    color: greybg,
+                                    borderRadius: BorderRadius.all(Radius.circular(20))),
+                                child: Center(child: Text("Wallet",style: TextStyle(color: white,fontSize: 12),)),
                               ),
+
                             ],
                           ),
 
@@ -457,7 +465,7 @@ class _profilepageState extends State<profilepage> with TickerProviderStateMixin
                             Column(
                               children: [
                                 SizedBox(height: 10,),
-                                Text("50",style: TextStyle(fontSize: 18,fontWeight: FontWeight.w500,color: bluetext),),
+                                Text("0",style: TextStyle(fontSize: 18,fontWeight: FontWeight.w500,color: bluetext),),
                                 Text("Post",style: TextStyle(fontSize: 10,color:bluetext ))
                               ],
                             ),
@@ -465,14 +473,14 @@ class _profilepageState extends State<profilepage> with TickerProviderStateMixin
 
                               children: [
                                 SizedBox(height: 10,),
-                                Text("564",style: TextStyle(fontSize: 18,fontWeight: FontWeight.w500,color: bluetext)),
+                                Text("0",style: TextStyle(fontSize: 18,fontWeight: FontWeight.w500,color: bluetext)),
                                 Text("Followers",style: TextStyle(fontSize: 10,color:bluetext ))
                               ],
                             ),
                             Column(
                               children: [
                                 SizedBox(height: 10,),
-                                Text("564",style: TextStyle(fontSize: 18,fontWeight: FontWeight.w500,color: bluetext)),
+                                Text("0",style: TextStyle(fontSize: 18,fontWeight: FontWeight.w500,color: bluetext)),
                                 Text("Following",style: TextStyle(fontSize: 10,color:bluetext ),)
                               ],
                             ),

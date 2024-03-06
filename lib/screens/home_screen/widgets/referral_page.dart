@@ -64,7 +64,10 @@ class _referralpageState extends State<referralpage> {
         "uniqueId": "64eaf0a9cec8b5bb72f56d01",
         "currency": "RBD",
       }),
+
     );
+
+    print(profiledetails?['user']?['payId'] ?? '',);
 
     if (response.statusCode == 200) {
       final Map<String, dynamic> data = jsonDecode(response.body);
@@ -72,17 +75,19 @@ class _referralpageState extends State<referralpage> {
         balance = data['balance'].toString();
       });
     } else {
-      print('Failed to load balance');
+
     }
   }
 
   Future _initLoad() async {
     await Future.wait(
+
       [
         _profiledetailsapi(),
         fetchBalance(),
         _refferalhistoryapi()
       ],
+
     );
     _isLoading = false;
   }
@@ -104,11 +109,19 @@ class _referralpageState extends State<referralpage> {
       //   title: Text("Referral Page",style: TextStyle(fontSize: 12),),
       // ),
       backgroundColor: bluetext,
-      body: SingleChildScrollView(
+      body: _isLoading
+          ? Center(
+        child: CircularProgressIndicator(),
+      )
+          :SingleChildScrollView(
         child: Column(
           children: [
 
             SizedBox(height: 100,),
+
+            //
+            // Text(profiledetails['user']['payId']),
+            // Text(profiledetails['user']['uniqueId']),
 
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -129,7 +142,7 @@ class _referralpageState extends State<referralpage> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     SizedBox(height: 20,),
-                    Text("Wallet Amount",style:TextStyle(color: white,fontSize: 16,fontWeight: FontWeight.w300),),
+                    Text("Available Balance",style:TextStyle(color: white,fontSize: 16,fontWeight: FontWeight.w300),),
 
                     SizedBox(height: 10,),
 
@@ -144,7 +157,7 @@ class _referralpageState extends State<referralpage> {
 
                         SizedBox(width: 10,),
 
-                        Text(balance,style: TextStyle(fontWeight: FontWeight.w900,fontSize: 18,color: white),)
+                        Text(profiledetails['user']['totalReferralAmount'].toString(),style: TextStyle(fontWeight: FontWeight.w900,fontSize: 18,color: white),)
                       ],
                     ),
 
