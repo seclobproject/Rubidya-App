@@ -236,9 +236,10 @@ import 'package:rubidya/screens/home_screen/widgets/referral_page.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../commonpage/test.dart';
 import '../../services/profile_service.dart';
 import '../../support/logger.dart';
-
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class homepage extends StatefulWidget {
   const homepage({Key? key}) : super(key: key);
@@ -252,6 +253,7 @@ class _homepageState extends State<homepage> {
   var userid;
   var profiledetails;
   bool isLoading = false;
+  late YoutubePlayerController _controller;
 
 
   Future _profiledetailsapi() async {
@@ -265,6 +267,11 @@ class _homepageState extends State<homepage> {
     });
   }
 
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   Future _initLoad() async {
     await Future.wait(
@@ -278,6 +285,13 @@ class _homepageState extends State<homepage> {
   @override
   void initState() {
     _initLoad();
+    _controller = YoutubePlayerController(
+      initialVideoId: 'https://www.youtube.com/watch?v=Cp9XtBuO2d4&list=RDCp9XtBuO2d4&start_radio=1',
+      flags: YoutubePlayerFlags(
+        autoPlay: true,
+        mute: false,
+      ),
+    );
     super.initState();
   }
 
@@ -318,8 +332,16 @@ class _homepageState extends State<homepage> {
                   ),
                   SizedBox(width: 20,),
 
-                  SvgPicture.asset(
-                    "assets/svg/massage.svg",
+                  InkWell(
+                    onTap: (){
+                      // Navigator.push(
+                      //   context,
+                      //   MaterialPageRoute(builder: (context) =>  YoutubePlayerScreen()),
+                      // );
+                    },
+                    child: SvgPicture.asset(
+                      "assets/svg/massage.svg",
+                    ),
                   ),
                   SizedBox(width: 20,),
 
@@ -387,7 +409,7 @@ class _homepageState extends State<homepage> {
             Expanded(
               child: ListView.builder(
                 shrinkWrap: true,
-                itemCount: 10,
+                itemCount: 1,
                 itemBuilder: (BuildContext context, int index) {
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -462,8 +484,13 @@ class _homepageState extends State<homepage> {
                               padding: const EdgeInsets.symmetric(horizontal: 10),
                               child: ClipRRect(
                                 borderRadius: BorderRadius.all(Radius.circular(10)),
-                                child: Image.network('https://images.carandbike.com/car-images/large/skoda/octavia/skoda-octavia.jpg?v=28',
-                                  fit: BoxFit.fill,
+                                child: YoutubePlayer(
+                                  controller: _controller,
+                                  showVideoProgressIndicator: true,
+                                  onReady: () {
+
+                                    // Do something when the video is ready to play
+                                  },
                                 ),
                               ),
                             ),
@@ -518,3 +545,5 @@ class _homepageState extends State<homepage> {
     );
   }
 }
+
+

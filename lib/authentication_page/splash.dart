@@ -32,9 +32,9 @@ class _MyHomePageState extends State<MyHomePage> {
       backgroundColor: white,
       body: Center(
         child: Image.asset(
-          'assets/logo/logo.png',
-          width: 200, // Set the desired width
-          height: 200, // Set the desired height
+          'assets/logo/logo3.png',
+          width: 150, // Set the desired width
+          height: 150, // Set the desired height
         ),
       ),
     );

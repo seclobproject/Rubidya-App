@@ -53,14 +53,12 @@ class _forgotpasswordState extends State<forgotpassword> {
               (route) => false);
 
       if (response['msg'] == 'User Add Successfully') {
-
         final String userId = response['userId'];
-
         print(userId);
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('User added successfully! UserID'),
+            content: Text('User added successfully! UserID: $userId'), // Add $userId here
             duration: Duration(seconds: 3),
           ),
         );
@@ -69,6 +67,15 @@ class _forgotpasswordState extends State<forgotpassword> {
           userid = userId;
         });
       }
+      else {
+        (response['msg'] == 'Email does not exist');
+
+        SnackBar(
+          content: Text('Email does not exist'), // Add $userId here
+          duration: Duration(seconds: 3),
+        );
+      }
+      
     } catch (error) {
       if (error.toString().contains("User Already Exist")) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -81,7 +88,7 @@ class _forgotpasswordState extends State<forgotpassword> {
         print('Error: $error');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Invalid OTP code passed!'),
+            content: Text('Email does not exist'),
             duration: Duration(seconds: 3),
           ),
         );

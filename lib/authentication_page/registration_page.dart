@@ -299,7 +299,7 @@ class _registrationState extends State<registration> {
             SizedBox(height: 10,),
 
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 18,),
+              padding: const EdgeInsets.symmetric(horizontal: 20,),
               child: Row(
                 children: [
                   Container(
@@ -341,39 +341,43 @@ class _registrationState extends State<registration> {
                     ),
                   ),
 
-                  SizedBox(width: 5,),
+                  // SizedBox(width: 5,),
 
-                  Container(
-                    width: 208,
-                    child: TextField(
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        hintText: 'Phone Number',
-                        hintStyle: TextStyle(color: textblack,fontSize: 12),
-                        contentPadding: EdgeInsets.symmetric(vertical: 10,horizontal: 10),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                          borderSide: BorderSide(color: bordercolor, width: 1),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                          borderSide: BorderSide(color: bordercolor),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Container(
+                      width: 169,
+
+                      child: TextField(
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          hintText: 'Phone Number',
+                          hintStyle: TextStyle(color: textblack,fontSize: 12),
+                          contentPadding: EdgeInsets.symmetric(vertical: 10,horizontal: 10),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                            borderSide: BorderSide(color: bordercolor, width: 1),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                            borderSide: BorderSide(color: bordercolor),
+                          ),
+
+                          prefixIcon: Icon(
+                            Icons.phone_android,
+                            size: 15,// You can replace 'Icons.email' with the icon you want
+                            color: bordercolor,
+                          ),
+
                         ),
 
-                        prefixIcon: Icon(
-                          Icons.phone_android,
-                          size: 15,// You can replace 'Icons.email' with the icon you want
-                          color: bordercolor,
-                        ),
-
+                        onChanged: (text) {
+                          setState(() {
+                            phone=text;
+                          });
+                        },
+                        style: TextStyle(color: textblack,fontSize: 14),
                       ),
-
-                      onChanged: (text) {
-                        setState(() {
-                          phone=text;
-                        });
-                      },
-                      style: TextStyle(color: textblack,fontSize: 14),
                     ),
                   ),
                 ],

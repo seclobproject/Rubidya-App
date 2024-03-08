@@ -205,7 +205,7 @@ class _premiumpageState extends State<premiumpage> {
 
             SizedBox(height: 20,),
 
-            Text('Deducted Amount: ${deductedAmount.isEmpty ? "N/A" : deductedAmount}'),
+
 
 
             Center(child: Image.asset('assets/image/logopngrubidya.png')),
@@ -316,7 +316,7 @@ class _premiumpageState extends State<premiumpage> {
             
 
 
-            SizedBox(height: 200,),
+            SizedBox(height: 180,),
 
             // Text(
             //   (profiledetails?['user']?['payId'] ?? 'loading...'),
@@ -327,7 +327,15 @@ class _premiumpageState extends State<premiumpage> {
             //   (profiledetails?['user']?['uniqueId'] ?? 'loading...'),
             //   style: TextStyle(fontSize: 14),
             // ),
-
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text("Rubideum to be deducted:"),
+                Text(' ${deductedAmount.isEmpty ? "N/A" : deductedAmount}',style: TextStyle(color: appBlueColor),),
+              ],
+            ),
+            SizedBox(height: 10,),
             InkWell(
               onTap: (){
                 // ScaffoldMessenger.of(context).showSnackBar(

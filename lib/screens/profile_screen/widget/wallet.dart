@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../resources/color.dart';
@@ -30,10 +29,6 @@ class _walletState extends State<wallet> {
   late Timer _timer;
   var clearvalue;
   String balancerubidium = '';
-
-
-
-
 
 
 
@@ -230,6 +225,10 @@ class _walletState extends State<wallet> {
       )
       :Column(
         children: [
+
+
+
+
 
 
           SizedBox(height: 20,),

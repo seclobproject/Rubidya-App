@@ -5,8 +5,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../navigation/bottom_navigation.dart';
 import '../../../../resources/color.dart';
 import '../../../../services/profile_service.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 import '../../../../support/logger.dart';
 import 'package:http/http.dart' as http;
+import 'package:url_launcher/url_launcher.dart';
 
 class Verification extends StatefulWidget {
   const Verification({super.key});
@@ -337,11 +339,46 @@ class _VerificationState extends State<Verification> {
               ),
             ),
 
+            SizedBox(height: 20,),
+
+
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text("Don't have PayID? ",style: TextStyle(color: bluetext),),
+
+
+              InkWell(
+                onTap: () {
+                  _launchURL("https://rubideum.net/signup");
+                },
+                child: Text(
+                  "Sign Up ",
+                  style: TextStyle(
+                    color: bluetext,
+                    fontSize: 16,
+                    decoration: TextDecoration.underline,
+                    decorationColor: bluetext,// Add underline
+                  ),
+                ),
+              )
+
+            ],
+          )
 
           ],
         ),
       ),
     );
+  }
+
+  _launchURL(String url) async {
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
   }
 }
 
