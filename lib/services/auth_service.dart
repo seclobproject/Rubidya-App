@@ -60,6 +60,8 @@ class AuthService {
     }
   }
 
+
+
   static Future newpassword(data) async {
     try {
       var dio = await DioHelper.getInstance();

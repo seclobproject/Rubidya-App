@@ -286,10 +286,11 @@ class _homepageState extends State<homepage> {
   void initState() {
     _initLoad();
     _controller = YoutubePlayerController(
-      initialVideoId: 'https://www.youtube.com/watch?v=Cp9XtBuO2d4&list=RDCp9XtBuO2d4&start_radio=1',
+      initialVideoId: 'dpm2FUS8oWU', // Use only the video ID here
       flags: YoutubePlayerFlags(
         autoPlay: true,
         mute: false,
+        forceHD: false,
       ),
     );
     super.initState();

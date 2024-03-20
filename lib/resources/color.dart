@@ -36,4 +36,12 @@ const gradnew = Color.fromRGBO(60, 76, 106, 1);
 const gradnew1 = Color.fromRGBO(30, 60, 110, 1);
 const greenbg = Color.fromRGBO(139, 161, 110, 1);
 const greenbg2 = Color.fromRGBO(120, 172, 110, 1);
+const premiumcard1 = Color.fromRGBO(134, 140, 255, 1);
+const premiumcard2 = Color.fromRGBO(67, 24, 255, 1);
+const g1button = Color.fromRGBO(93, 99, 170, 1);
+const g2button = Color.fromRGBO(56, 65, 142, 1);
+const golden = Color.fromRGBO(221, 188, 135, 1);
+const yellow = Color.fromRGBO(249, 165, 33, 1);
+const yellowborder = Color.fromRGBO(207, 172, 113, 1);
+const yellowborder1 = Color.fromRGBO(232, 139, 35, 1);
 

@@ -332,7 +332,7 @@ class _profilepageState extends State<profilepage>
                     height: 70,
                   ),
                   Container(
-                    height: 355,
+                    height: 383,
                     // width: 400,
                     decoration: BoxDecoration(
                         color: profilebg,
@@ -357,8 +357,8 @@ class _profilepageState extends State<profilepage>
                                         BorderRadius.all(Radius.circular(100)),
                                   ),
                                   child: ClipOval(
-                                    child: Image.network(
-                                      'https://burst.shopifycdn.com/photos/model-in-gold-fashion.jpg?width=1000&format=pjpg&exif=0&iptc=0',
+                                    child: Image.asset(
+                                      'assets/logo/logo3.png',
                                       fit: BoxFit.cover,
                                       width: 86,
                                       // Set the width to match the container's width
@@ -390,7 +390,7 @@ class _profilepageState extends State<profilepage>
                                 ),
 
                                 Text(
-                                  "📸 Capturing life's moments, one click at a time | Visual\nstoryteller with a passion for authenticity | Exploring the \nworld through my lens | Turning emotions into pixels \n| #PhotographyAdventures 🌍✨",
+                                  "📸 🌟 You are beautiful, and I'm here to capture it! 🌟 🌍✨",
                                   style: TextStyle(
                                       color: bluetext,
                                       fontSize: 10,
@@ -401,6 +401,118 @@ class _profilepageState extends State<profilepage>
 
                                 SizedBox(
                                   height: 20,
+                                ),
+
+                                Row(
+                                  children: [
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          "Prime Membership",
+                                          style: TextStyle(fontSize: 10,color: yellowborder),
+                                        ),
+                                        SizedBox(height: 5,),
+                                        Container(
+                                          height: 50,
+                                          width: 130,
+                                          decoration: BoxDecoration(
+                                              border: Border.all(
+                                                  color: yellowborder),
+                                              borderRadius: BorderRadius.all(
+                                                  Radius.circular(10))),
+                                          child: Row(
+                                            crossAxisAlignment: CrossAxisAlignment.center,
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+
+                                              Column(
+                                                children: [
+                                                  SizedBox(height: 10,),
+                                                  Text("Member’s",style: TextStyle(fontSize: 8),),
+                                                  Text("200",style: TextStyle(fontSize: 12,fontWeight: FontWeight.w700),),
+                                                ],
+                                              ),
+
+                                              Padding(
+                                                padding: const EdgeInsets.symmetric(vertical: 5),
+                                                child: VerticalDivider(
+                                                  color: Colors.black,
+                                                  thickness: .1,
+                                                ),
+                                              ),
+
+                                              Column(
+                                                children: [
+                                                  SizedBox(height: 10,),
+                                                  Text("Amount",style: TextStyle(fontSize: 8,),),
+                                                  Text("1000",style: TextStyle(fontSize: 12,fontWeight: FontWeight.w700),),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(
+                                      width: 10,
+                                    ),
+                                    Column(
+                                      crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          "Gold Membership",
+                                          style: TextStyle(fontSize: 10,color: yellowborder1),
+                                        ),
+                                        SizedBox(height: 5,),
+                                        Container(
+                                          height: 50,
+                                          width: 130,
+                                          decoration: BoxDecoration(
+                                              border: Border.all(
+                                                  color: yellowborder),
+                                              borderRadius: BorderRadius.all(
+                                                  Radius.circular(10))),
+                                          child: Row(
+                                            crossAxisAlignment: CrossAxisAlignment.center,
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+
+                                              Column(
+                                                children: [
+                                                  SizedBox(height: 10,),
+                                                  Text("Member’s",style: TextStyle(fontSize: 8),),
+                                                  Text("200",style: TextStyle(fontSize: 12,fontWeight: FontWeight.w700),),
+                                                ],
+                                              ),
+
+                                              Padding(
+                                                padding: const EdgeInsets.symmetric(vertical: 5),
+                                                child: VerticalDivider(
+                                                  color: Colors.black,
+                                                  thickness: .1,
+                                                ),
+                                              ),
+
+                                              Column(
+                                                children: [
+                                                  SizedBox(height: 10,),
+                                                  Text("Amount",style: TextStyle(fontSize: 8,),),
+                                                  Text("1000",style: TextStyle(fontSize: 12,fontWeight: FontWeight.w700),),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+
+                                SizedBox(
+                                  height: 10,
                                 ),
 
                                 Row(
