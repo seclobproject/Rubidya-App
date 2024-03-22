@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:rubidya/resources/color.dart';
+import 'package:rubidya/screens/profile_screen/widget/premium_inner_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../../navigation/bottom_navigation.dart';
@@ -23,6 +24,8 @@ class _premiumpageState extends State<premiumpage> {
   String? currency;
   String? payId;
 
+  var packages;
+
   var profiledetails;
   bool isLoading = false;
 
@@ -35,7 +38,9 @@ class _premiumpageState extends State<premiumpage> {
       setState(() {});
       SharedPreferences prefs = await SharedPreferences.getInstance();
       userid = prefs.getString('userid');
-      var reqData = {'amount': '500'};
+      var reqData = {
+        'amount': '500'
+      };
 
       var response = await ProfileService.deductrubideum(reqData);
       log.i('Done deducting.... . $response');
@@ -160,12 +165,25 @@ class _premiumpageState extends State<premiumpage> {
     });
   }
 
+  Future peremiumapi() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    userid = prefs.getString('userid');
+    var response = await ProfileService.getpackage();
+    log.i('packages show....... $response');
+    setState(() {
+      packages = response;
+    });
+  }
+
   Future _initLoad() async {
     await Future.wait(
-      [_profiledetailsapi(), deductbalance()],
+      [_profiledetailsapi(),
+        peremiumapi(),
+        deductbalance()],
     );
     isLoading = false;
   }
+
 
   @override
   void initState() {
@@ -257,620 +275,24 @@ class _premiumpageState extends State<premiumpage> {
               height: 20,
             ),
 
-            Stack(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Container(
-                    height: 400,
-                    width: 354,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [premiumcard1, premiumcard2],
-                      ),
-                      borderRadius: BorderRadius.all(Radius.circular(10)),
-                    ),
-                    child: Column(
-                      children: [
-                        SizedBox(
-                          height: 20,
-                        ),
-                        Row(
-                          children: [
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 20),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Royal Membership",
-                                    style: TextStyle(
-                                        fontSize: 17,
-                                        fontWeight: FontWeight.w900,
-                                        color: white),
-                                  ),
-                                  Text(
-                                    "₹500",
-                                    style: TextStyle(
-                                        fontSize: 32,
-                                        fontWeight: FontWeight.w900,
-                                        color: white),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 10),
-                          child: Row(
-                            children: [
-                              SvgPicture.asset(
-                                'assets/svg/trueicon.svg',
-                                fit: BoxFit.cover,
-                              ),
-                              SizedBox(
-                                width: 10,
-                              ),
-                              Text(
-                                'You will debit 500 rupees worth of\nrubideum coin.',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 10),
-                          child: Row(
-                            children: [
-                              SvgPicture.asset(
-                                'assets/svg/trueicon.svg',
-                                fit: BoxFit.cover,
-                              ),
-                              SizedBox(
-                                width: 10,
-                              ),
-                              Text(
-                                'Rubideum coins value was not certain.',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 10),
-                          child: Row(
-                            children: [
-                              SvgPicture.asset(
-                                'assets/svg/trueicon.svg',
-                                fit: BoxFit.cover,
-                              ),
-                              SizedBox(
-                                width: 10,
-                              ),
-                              Text(
-                                'If your friend shares your post and their\nfriend likes it, you will earn a certain\npercentage of income.',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 10),
-                          child: Row(
-                            children: [
-                              SvgPicture.asset(
-                                'assets/svg/trueicon.svg',
-                                fit: BoxFit.cover,
-                              ),
-                              SizedBox(
-                                width: 10,
-                              ),
-                              Text(
-                                'This benefit also comes with Prime and\nGolden membership.',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: Container(
-                            height: 35,
-                            width: 400,
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                                colors: [g1button, g2button],
-                              ),
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(10)),
-                            ),
-                            child: Center(
-                              child: Text(
-                                "Choose Your Plan",
-                                style: TextStyle(color: white, fontSize: 12),
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: 10,)
-                      ],
-                    ),
-                  ),
-                ),
-                Positioned(
-                  top: 0,
-                  right: 20, // Adjust this value as needed
-                  child: SvgPicture.asset(
-                    'assets/svg/whiteshape.svg',
-                    fit: BoxFit.scaleDown,
-                  ),
-                ),
-                Positioned(
-                  top: 40,
-                  right: 20, // Adjust this value as needed
-                  child: Image.asset(
-                    'assets/image/wave.png',
-                    height: 360,
-                    fit: BoxFit.contain,
-                  ),
-                ),
-              ],
-            ),
+
             SizedBox(
-              height: 20,
-            ),
-            Stack(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Container(
-                    height: 400,
-                    width: 354,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [premiumcard1, premiumcard2],
-                      ),
-                      borderRadius: BorderRadius.all(Radius.circular(10)),
-                    ),
-                    child: Column(
-                      children: [
-                        SizedBox(
-                          height: 20,
-                        ),
-                        Row(
-                          children: [
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 20),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Prime Membership",
-                                    style: TextStyle(
-                                        fontSize: 17,
-                                        fontWeight: FontWeight.w900,
-                                        color: golden),
-                                  ),
-                                  Text(
-                                    "₹5000",
-                                    style: TextStyle(
-                                        fontSize: 32,
-                                        fontWeight: FontWeight.w900,
-                                        color: white),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 10),
-                          child: Row(
-                            children: [
-                              SvgPicture.asset(
-                                'assets/svg/trueicon.svg',
-                                fit: BoxFit.cover,
-                              ),
-                              SizedBox(
-                                width: 10,
-                              ),
-                              Text(
-                                'You will debit 5000 rupees worth of\nrubideum coin.',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 10),
-                          child: Row(
-                            children: [
-                              SvgPicture.asset(
-                                'assets/svg/trueicon.svg',
-                                fit: BoxFit.cover,
-                              ),
-                              SizedBox(
-                                width: 10,
-                              ),
-                              Text(
-                                'You will earn a certain percentage of the\ncompanies monthly revenue.',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 10),
-                          child: Row(
-                            children: [
-                              SvgPicture.asset(
-                                'assets/svg/trueicon.svg',
-                                fit: BoxFit.cover,
-                              ),
-                              SizedBox(
-                                width: 10,
-                              ),
-                              Text(
-                                'You will get many offers from the\ncompanies in the future.',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 10),
-                          child: Row(
-                            children: [
-                              SvgPicture.asset(
-                                'assets/svg/trueicon.svg',
-                                fit: BoxFit.cover,
-                              ),
-                              SizedBox(
-                                width: 10,
-                              ),
-                              Text(
-                                'There is a lot of potential for future\nupgrades.',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: Container(
-                            height: 35,
-                            width: 400,
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                                colors: [g1button, g2button],
-                              ),
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(10)),
-                            ),
-                            child: Center(
-                              child: Text(
-                                "Choose Your Plan",
-                                style: TextStyle(color: white, fontSize: 12),
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: 10,)
-                      ],
-                    ),
-                  ),
-                ),
-                Positioned(
-                  top: 0,
-                  right: 20, // Adjust this value as needed
-                  child: SvgPicture.asset(
-                    'assets/svg/goldenshape.svg',
-                    fit: BoxFit.scaleDown,
-                  ),
-                ),
-                Positioned(
-                  top: 40,
-                  right: 20, // Adjust this value as needed
-                  child: Image.asset(
-                    'assets/image/wave.png',
-                    height: 360,
-                    fit: BoxFit.contain,
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(
-              height: 20,
-            ),
-            Stack(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Container(
-                    height: 400,
-                    width: 354,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [premiumcard1, premiumcard2],
-                      ),
-                      borderRadius: BorderRadius.all(Radius.circular(10)),
-                    ),
-                    child: Column(
-                      children: [
-                        SizedBox(
-                          height: 20,
-                        ),
-                        Row(
-                          children: [
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 20),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Golden Membership",
-                                    style: TextStyle(
-                                        fontSize: 17,
-                                        fontWeight: FontWeight.w900,
-                                        color: yellow),
-                                  ),
-                                  Text(
-                                    "₹25000",
-                                    style: TextStyle(
-                                        fontSize: 32,
-                                        fontWeight: FontWeight.w900,
-                                        color: white),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 10),
-                          child: Row(
-                            children: [
-                              SvgPicture.asset(
-                                'assets/svg/trueicon.svg',
-                                fit: BoxFit.cover,
-                              ),
-                              SizedBox(
-                                width: 10,
-                              ),
-                              Text(
-                                'You will debit 25000 rupees worth of\nrubideum coin.',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 10),
-                          child: Row(
-                            children: [
-                              SvgPicture.asset(
-                                'assets/svg/trueicon.svg',
-                                fit: BoxFit.cover,
-                              ),
-                              SizedBox(
-                                width: 10,
-                              ),
-                              Text(
-                                'You will earn a certain percentage\nof the companies monthly revenue.',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 10),
-                          child: Row(
-                            children: [
-                              SvgPicture.asset(
-                                'assets/svg/trueicon.svg',
-                                fit: BoxFit.cover,
-                              ),
-                              SizedBox(
-                                width: 10,
-                              ),
-                              Text(
-                                'You will get many offers from the\nompanies in the future.',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 10),
-                          child: Row(
-                            children: [
-                              SvgPicture.asset(
-                                'assets/svg/trueicon.svg',
-                                fit: BoxFit.cover,
-                              ),
-                              SizedBox(
-                                width: 10,
-                              ),
-                              Text(
-                                'There is a lot of potential for future\nupgrades.',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: Container(
-                            height: 35,
-                            width: 400,
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                                colors: [g1button, g2button],
-                              ),
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(10)),
-                            ),
-                            child: Center(
-                              child: Text(
-                                "Choose Your Plan",
-                                style: TextStyle(color: white, fontSize: 12),
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: 10,)
-                      ],
-                    ),
-                  ),
-                ),
-                Positioned(
-                  top: 0,
-                  right: 20, // Adjust this value as needed
-                  child: SvgPicture.asset(
-                    'assets/svg/yellowgoldenshape.svg',
-                    fit: BoxFit.contain,
-                  ),
-                ),
-                Positioned(
-                  top: 40,
-                  right: 20, // Adjust this value as needed
-                  child: Image.asset(
-                    'assets/image/wave.png',
-                    height: 360,
-                    fit: BoxFit.contain,
-                  ),
-                ),
-              ],
+              height: 1280,
+              child: packages != null && packages['packages'] != null // Check if packages is not null and 'packages' key exists
+                  ? ListView.builder(
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: packages['packages'].length,
+                itemBuilder: (BuildContext context, int index) {
+                  return premiumListing(
+                    id: packages['packages'][index]['_id'],
+                    amount: packages['packages'][index]['amount'].toString(),
+                    packageName: packages['packages'][index]['packageName'],
+                  );
+                },
+              )
+                  : Container(), // Return an empty container or some default widget if packages is null or 'packages' key doesn't exist
             ),
 
-            // Padding(
-            //   padding:  EdgeInsets.symmetric(horizontal: 20),
-            //   child: Text("Enjoy Rubidya Premium starting from 100 RBD",
-            //     style: TextStyle(fontSize: 14,
-            //         color: bluetext,fontWeight:
-            //         FontWeight.w700),),
-            // ),
-
-            // Padding(
-            //   padding: const EdgeInsets.symmetric(horizontal: 20),
-            //   child: Align(
-            //     alignment: Alignment.topLeft,
-            //     child: Text("RUBIDEUM PREMIUM ACCOUNT ACTIVATION",style: TextStyle(
-            //       fontWeight: FontWeight.bold,
-            //       color: bluetext
-            //     ),),
-            //   ),
-            // ),
-            //
-            //    SizedBox(height: 10,),
-            //
-            //    Padding(
-            //      padding: const EdgeInsets.symmetric(horizontal: 20),
-            //      child: Align(
-            //        alignment: Alignment.topLeft,
-            //        child: Text("If you lose coins from Rubideum account after verified you will be credited back within 48 hours.",style: TextStyle(
-            //            fontWeight: FontWeight.w500,
-            //            color: bluetext
-            //        ),),
-            //      ),
-            //    ),
-            //
-            //    SizedBox(height: 10,),
-            //
-            //    Padding(
-            //      padding: EdgeInsets.symmetric(horizontal: 20),
-            //      child: RichText(
-            //        text: TextSpan(
-            //          style: TextStyle(
-            //            fontSize: 14,
-            //            color: bluetext,
-            //            fontWeight: FontWeight.w400,
-            //          ),
-            //          children: [
-            //            TextSpan(
-            //              text: 'Royal Membership – ',
-            //              style: TextStyle(
-            //                fontWeight: FontWeight.bold,
-            //              ),
-            //            ),
-            //
-            //            TextSpan(
-            //              text: 'You will lose 500 rupees worth of rubideum coin. \nRubideum coins value was not fixed',
-            //            ),
-            //
-            //          ],
-            //        ),
-            //      ),
-            //    ),
-            //
-            //    SizedBox(height: 10,),
-            //
-            //    Padding(
-            //      padding: EdgeInsets.symmetric(horizontal: 20),
-            //      child: RichText(
-            //        text: TextSpan(
-            //          style: TextStyle(
-            //            fontSize: 14,
-            //            color: bluetext,
-            //            fontWeight: FontWeight.w400,
-            //          ),
-            //          children: [
-            //            TextSpan(
-            //              text: 'Benefit - ',
-            //              style: TextStyle(
-            //                fontWeight: FontWeight.bold,
-            //              ),
-            //            ),
-            //
-            //            TextSpan(
-            //              text: 'If you share an Advertisement and your friends like it, you will earn a certain percentage of income with every like.\n',
-            //            ),
-            //
-            //            TextSpan(
-            //              text: '* This benefit also comes with Prime and Golden membership.*',
-            //            ),
-            //
-            //          ],
-            //        ),
-            //      ),
-            //    ),
 
             SizedBox(
               height: 50,
@@ -885,63 +307,260 @@ class _premiumpageState extends State<premiumpage> {
             //   (profiledetails?['user']?['uniqueId'] ?? 'loading...'),
             //   style: TextStyle(fontSize: 14),
             // ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text("Rubideum to be deducted:"),
-                Text(
-                  ' ${deductedAmount.isEmpty ? "N/A" : deductedAmount}',
-                  style: TextStyle(color: appBlueColor),
-                ),
-              ],
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            InkWell(
-              onTap: () {
-                // ScaffoldMessenger.of(context).showSnackBar(
-                //   SnackBar(
-                //     content: Text('Successfully Updated'),
-                //     duration: Duration(seconds: 3),
-                //   ),
-                // );
-
-                // ScaffoldMessenger.of(context).showSnackBar(
-                //   SnackBar(
-                //     content: Text('$deductedmsg'),
-                //     duration: Duration(seconds: 3),
-                //   ),
-                // );
-
-                // addData(
-                //   profiledetails?['user']?['payId'] ?? '',
-                //   profiledetails?['user']?['uniqueId'] ?? '',
-                // );
-
-                verifyuser();
-              },
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Container(
-                  height: 40,
-                  width: 400,
-                  decoration: BoxDecoration(
-                      color: white,
-                      borderRadius: BorderRadius.all(Radius.circular(10))),
-                  child: Center(
-                      child: Text(
-                    "Confirm",
-                    style: TextStyle(color: textblack),
-                  )),
-                ),
-              ),
-            ),
+            // Column(
+            //   crossAxisAlignment: CrossAxisAlignment.center,
+            //   mainAxisAlignment: MainAxisAlignment.center,
+            //   children: [
+            //     Text("Rubideum to be deducted:"),
+            //     Text(
+            //       ' ${deductedAmount.isEmpty ? "N/A" : deductedAmount}',
+            //       style: TextStyle(color: appBlueColor),
+            //     ),
+            //   ],
+            // ),
+            // SizedBox(
+            //   height: 10,
+            // ),
+            // InkWell(
+            //   onTap: () {
+            //     // ScaffoldMessenger.of(context).showSnackBar(
+            //     //   SnackBar(
+            //     //     content: Text('Successfully Updated'),
+            //     //     duration: Duration(seconds: 3),
+            //     //   ),
+            //     // );
+            //
+            //     // ScaffoldMessenger.of(context).showSnackBar(
+            //     //   SnackBar(
+            //     //     content: Text('$deductedmsg'),
+            //     //     duration: Duration(seconds: 3),
+            //     //   ),
+            //     // );
+            //
+            //     // addData(
+            //     //   profiledetails?['user']?['payId'] ?? '',
+            //     //   profiledetails?['user']?['uniqueId'] ?? '',
+            //     // );
+            //
+            //     verifyuser();
+            //   },
+            //   child: Padding(
+            //     padding: const EdgeInsets.symmetric(horizontal: 20),
+            //     child: Container(
+            //       height: 40,
+            //       width: 400,
+            //       decoration: BoxDecoration(
+            //           color: white,
+            //           borderRadius: BorderRadius.all(Radius.circular(10))),
+            //       child: Center(
+            //           child: Text(
+            //         "Confirm",
+            //         style: TextStyle(color: textblack),
+            //       )),
+            //     ),
+            //   ),
+            // ),
 
             SizedBox(height: 50,)
           ],
         ),
+      ),
+    );
+  }
+}
+
+class premiumListing extends StatelessWidget {
+  const premiumListing({
+    required this.id,
+    required this.amount,
+    required this.packageName,
+    super.key,
+  });
+
+  final String id;
+  final String amount;
+  final String packageName;
+
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: (){
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => premiuminnerpage(id: id,amount: amount,packageName:packageName)),);
+      },
+      child: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 10),
+            child: Container(
+              height: 400,
+              width: 354,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [premiumcard1, premiumcard2],
+                ),
+                borderRadius: BorderRadius.all(Radius.circular(10)),
+              ),
+              child: Column(
+                children: [
+                  SizedBox(
+                    height: 20,
+                  ),
+                  Row(
+                    children: [
+                      Padding(
+                        padding:
+                        const EdgeInsets.symmetric(horizontal: 20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              packageName,
+                              style: TextStyle(
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w900,
+                                  color: white),
+                            ),
+                            Text(
+                              amount,
+                              style: TextStyle(
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.w900,
+                                  color: white),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 10),
+                    child: Row(
+                      children: [
+                        SvgPicture.asset(
+                          'assets/svg/trueicon.svg',
+                          fit: BoxFit.cover,
+                        ),
+                        SizedBox(
+                          width: 10,
+                        ),
+                        Text(
+                          'You will debit 500 rupees worth of\nrubideum coin.',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 10),
+                    child: Row(
+                      children: [
+                        SvgPicture.asset(
+                          'assets/svg/trueicon.svg',
+                          fit: BoxFit.cover,
+                        ),
+                        SizedBox(
+                          width: 10,
+                        ),
+                        Text(
+                          'Rubideum coins value was not certain.',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 10),
+                    child: Row(
+                      children: [
+                        SvgPicture.asset(
+                          'assets/svg/trueicon.svg',
+                          fit: BoxFit.cover,
+                        ),
+                        SizedBox(
+                          width: 10,
+                        ),
+                        Text(
+                          'If your friend shares your post and their\nfriend likes it, you will earn a certain\npercentage of income.',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 10),
+                    child: Row(
+                      children: [
+                        SvgPicture.asset(
+                          'assets/svg/trueicon.svg',
+                          fit: BoxFit.cover,
+                        ),
+                        SizedBox(
+                          width: 10,
+                        ),
+                        Text(
+                          'This benefit also comes with Prime and\nGolden membership.',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Container(
+                      height: 35,
+                      width: 400,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [g1button, g2button],
+                        ),
+                        borderRadius:
+                        BorderRadius.all(Radius.circular(10)),
+                      ),
+                      child: Center(
+                        child: Text(
+                          "Choose Your Plan",
+                          style: TextStyle(color: white, fontSize: 12),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 10,)
+                ],
+              ),
+            ),
+          ),
+          Positioned(
+            top: 10,
+            right: 20, // Adjust this value as needed
+            child: SvgPicture.asset(
+              'assets/svg/whiteshape.svg',
+              fit: BoxFit.scaleDown,
+            ),
+          ),
+          Positioned(
+            top: 40,
+            right: 20, // Adjust this value as needed
+            child: Image.asset(
+              'assets/image/wave.png',
+              height: 360,
+              fit: BoxFit.contain,
+            ),
+          ),
+        ],
       ),
     );
   }

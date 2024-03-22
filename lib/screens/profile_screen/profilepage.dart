@@ -332,7 +332,7 @@ class _profilepageState extends State<profilepage>
                     height: 70,
                   ),
                   Container(
-                    height: 383,
+                    height: 410,
                     // width: 400,
                     decoration: BoxDecoration(
                         color: profilebg,
@@ -411,12 +411,12 @@ class _profilepageState extends State<profilepage>
                                       children: [
                                         Text(
                                           "Prime Membership",
-                                          style: TextStyle(fontSize: 10,color: yellowborder),
+                                          style: TextStyle(fontSize: 12,color: yellowborder1),
                                         ),
                                         SizedBox(height: 5,),
                                         Container(
-                                          height: 50,
-                                          width: 130,
+                                          height: 65,
+                                          width: 140,
                                           decoration: BoxDecoration(
                                               border: Border.all(
                                                   color: yellowborder),
@@ -429,8 +429,8 @@ class _profilepageState extends State<profilepage>
 
                                               Column(
                                                 children: [
-                                                  SizedBox(height: 10,),
-                                                  Text("Member’s",style: TextStyle(fontSize: 8),),
+                                                  SizedBox(height: 20,),
+                                                  Text("Member’s",style: TextStyle(fontSize: 10),),
                                                   Text("200",style: TextStyle(fontSize: 12,fontWeight: FontWeight.w700),),
                                                 ],
                                               ),
@@ -445,8 +445,8 @@ class _profilepageState extends State<profilepage>
 
                                               Column(
                                                 children: [
-                                                  SizedBox(height: 10,),
-                                                  Text("Amount",style: TextStyle(fontSize: 8,),),
+                                                  SizedBox(height: 20,),
+                                                  Text("Amount",style: TextStyle(fontSize: 10,),),
                                                   Text("1000",style: TextStyle(fontSize: 12,fontWeight: FontWeight.w700),),
                                                 ],
                                               ),
@@ -463,13 +463,13 @@ class _profilepageState extends State<profilepage>
                                       CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          "Gold Membership",
-                                          style: TextStyle(fontSize: 10,color: yellowborder1),
+                                          "Golden Membership",
+                                          style: TextStyle(fontSize: 12,color: yellowborder1),
                                         ),
                                         SizedBox(height: 5,),
                                         Container(
-                                          height: 50,
-                                          width: 130,
+                                          height: 65,
+                                          width: 140,
                                           decoration: BoxDecoration(
                                               border: Border.all(
                                                   color: yellowborder),
@@ -482,8 +482,8 @@ class _profilepageState extends State<profilepage>
 
                                               Column(
                                                 children: [
-                                                  SizedBox(height: 10,),
-                                                  Text("Member’s",style: TextStyle(fontSize: 8),),
+                                                  SizedBox(height: 20,),
+                                                  Text("Member’s",style: TextStyle(fontSize: 10),),
                                                   Text("200",style: TextStyle(fontSize: 12,fontWeight: FontWeight.w700),),
                                                 ],
                                               ),
@@ -498,8 +498,8 @@ class _profilepageState extends State<profilepage>
 
                                               Column(
                                                 children: [
-                                                  SizedBox(height: 10,),
-                                                  Text("Amount",style: TextStyle(fontSize: 8,),),
+                                                  SizedBox(height: 20,),
+                                                  Text("Amount",style: TextStyle(fontSize: 10,),),
                                                   Text("1000",style: TextStyle(fontSize: 12,fontWeight: FontWeight.w700),),
                                                 ],
                                               ),

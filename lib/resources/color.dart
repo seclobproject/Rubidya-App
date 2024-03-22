@@ -44,4 +44,6 @@ const golden = Color.fromRGBO(221, 188, 135, 1);
 const yellow = Color.fromRGBO(249, 165, 33, 1);
 const yellowborder = Color.fromRGBO(207, 172, 113, 1);
 const yellowborder1 = Color.fromRGBO(232, 139, 35, 1);
-
+const premiuminner1 = Color.fromRGBO(63, 86, 150, 0.2);
+const premiuminner2 = Color.fromRGBO(60, 76, 106, 1);
+const pink = Color.fromRGBO(223, 122, 122, 0.87);

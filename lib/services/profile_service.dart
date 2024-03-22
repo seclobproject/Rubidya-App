@@ -65,6 +65,16 @@ class ProfileService {
     }
   }
 
+  static Future getpackage() async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.get('$baseURL/api/users/get-packages');
+      return response.data;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
 
 
   // static Future verification(data) async {
@@ -95,6 +105,14 @@ class ProfileService {
   static Future verifyaccountrubidia(data) async {
     var dio = await DioHelper.getInstance();
     var response = await dio.post('$baseURLwallet/basic/checkPayIdExist',data:data);
+    return response.data;
+  }
+
+
+
+  static Future premiuminner(data) async {
+    var dio = await DioHelper.getInstance();
+    var response = await dio.post('$baseURL/api/users/get-package-by-id',data:data);
     return response.data;
   }
 
