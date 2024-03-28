@@ -5,6 +5,7 @@ import '../navigation/bottom_navigation.dart';
 import '../resources/color.dart';
 import '../services/auth_service.dart';
 import '../support/logger.dart';
+import 'first_otp_verification.dart';
 import 'forgot_password.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -49,19 +50,47 @@ class _loginState extends State<login> {
 
         print('isOTPVerified: ${response['false']}');
 
+
+
         // _saveAndRedirectToHome(response['access_token'], response['name']);
         _saveAndRedirectToHome(response['access_token'], response['_id']);
 
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Login Success'),
-        ));
-        gotoHome();
+    //     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+    //       content: Text('Login Success'),
+    //     ));
+    //     gotoHome();
+    //   } else {
+    //     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+    //       content: Text('Login failed: ${response['msg']}'),
+    //     ));
+    //     // Uncomment the line below if you want to prevent the page refresh on login failure
+    //     // login();
+    //   }
+    // } catch (error) {
+    //   setState(() {
+    //     _isLoading = false;
+    //     _isLoader = false;
+    //   });
+
+        if (response['isOTPVerified'] == false) {
+          // Navigate to firstotppassword page
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => firstotppassword()),
+          );
+        } else {
+          // Proceed with normal login flow
+          _saveAndRedirectToHome(response['access_token'], response['_id']);
+
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('Login Success'),
+          ));
+          gotoHome();
+        }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text('Login failed: ${response['msg']}'),
         ));
-        // Uncomment the line below if you want to prevent the page refresh on login failure
-        // login();
       }
     } catch (error) {
       setState(() {
@@ -111,8 +140,6 @@ class _loginState extends State<login> {
       );
       return false;
     }
-
-
 
     return true;
   }

@@ -1,3 +1,4 @@
+
 def localProperties = new Properties()
 def localPropertiesFile = rootProject.file('local.properties')
 if (localPropertiesFile.exists()) {
@@ -50,8 +51,8 @@ android {
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
         minSdkVersion 21
         targetSdkVersion 33
-        versionCode 16
-        versionName '2.0.0'
+        versionCode 20
+        versionName '2.0.4'
     }
 
     buildTypes {

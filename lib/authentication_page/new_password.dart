@@ -99,168 +99,170 @@ class _newpasswordState extends State<newpassword> {
   @override
   Widget build(BuildContext context) {
     return  Scaffold(
-      body: Column(
-        children: [
-
-          SizedBox(height: 150,),
-
-          // Padding(
-          //   padding: const EdgeInsets.symmetric(horizontal: 20),
-          //   child: Text(
-          //     "User ID: ${widget.email}",  // Displaying the userId
-          //     style: TextStyle(fontSize: 14, color: textblack),
-          //   ),
-          // ),
-
-          Center(
-              child: SvgPicture.asset(
-                "assets/svg/otppagesc.svg",
-              )
-          ),
-
-          SizedBox(height: 50,),
-
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Align(
-                alignment: Alignment.topLeft,
-                child: Text("New Password",style: TextStyle(fontSize: 22,fontWeight: FontWeight.w700,color: bluetext),)),
-          ),
-
-          // Padding(
-          //   padding: const EdgeInsets.symmetric(horizontal: 20),
-          //   child: Align(
-          //       alignment: Alignment.topLeft,
-          //       child: Text("Enter Your New Password",style: TextStyle(fontSize: 12),)),
-          // ),
-
-          SizedBox(height: 20,),
-
-
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: TextField(
-              obscureText: hidePassword2,
-              decoration: InputDecoration(
-                hintText: 'New Password',
-                hintStyle: TextStyle(color: textblack,fontSize: 12),
-                contentPadding: EdgeInsets.symmetric(vertical: 10,horizontal: 10),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                  borderSide: BorderSide(color: bordercolor, width: 1),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                  borderSide: BorderSide(color: bordercolor),
-                ),
-
-                suffixIcon: IconButton(
-                  icon: hidePassword2
-                      ? Icon(Icons.visibility_off)
-                      : Icon(Icons.visibility),
-                  onPressed: () {
-                    setState(() {
-                      hidePassword2 = !hidePassword2;
-                    });
-                  },
-                ),
-
-                prefixIcon: Icon(
-                  Icons.lock,
-                  size: 15,// You can replace 'Icons.email' with the icon you want
-                  color: bordercolor,
-                ),
-
-              ),
-
-              onChanged: (text) {
-                setState(() {
-                  password=text;
-                });
-              },
-              style: TextStyle(color: textblack,fontSize: 14),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+        
+            SizedBox(height: 150,),
+        
+            // Padding(
+            //   padding: const EdgeInsets.symmetric(horizontal: 20),
+            //   child: Text(
+            //     "User ID: ${widget.email}",  // Displaying the userId
+            //     style: TextStyle(fontSize: 14, color: textblack),
+            //   ),
+            // ),
+        
+            Center(
+                child: SvgPicture.asset(
+                  "assets/svg/otppagesc.svg",
+                )
             ),
-          ),
-
-
-          SizedBox(height: 20,),
-
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: TextField(
-              obscureText: hidePassword,
-              decoration: InputDecoration(
-                hintText: 'Confirm Password',
-                hintStyle: TextStyle(color: textblack,fontSize: 12),
-                contentPadding: EdgeInsets.symmetric(vertical: 10,horizontal: 10),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                  borderSide: BorderSide(color: bordercolor, width: 1),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                  borderSide: BorderSide(color: bordercolor),
-                ),
-
-                suffixIcon: IconButton(
-                  icon: hidePassword
-                      ? Icon(Icons.visibility_off)
-                      : Icon(Icons.visibility),
-                  onPressed: () {
-                    setState(() {
-                      hidePassword = !hidePassword;
-                    });
-                  },
-                ),
-
-                prefixIcon: Icon(
-                  Icons.lock,
-                  size: 15,// You can replace 'Icons.email' with the icon you want
-                  color: bordercolor,
-                ),
-
-              ),
-
-              onChanged: (text) {
-                setState(() {
-                  password=text;
-                });
-              },
-              style: TextStyle(color: textblack,fontSize: 14),
-            ),
-          ),
-
-          SizedBox(height: 20,),
-
-
-
-          InkWell(
-            onTap: (){
-              newPassword();
-            },
-            child: Padding(
+        
+            SizedBox(height: 50,),
+        
+            Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Container(
-                height: 48,
-                width: 400,
-                decoration: BoxDecoration(
-                    color: buttoncolor,
-                    borderRadius: BorderRadius.all(Radius.circular(10))),
-                child: Center(
-                  child: Text("Submit",style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,color: white),),
+              child: Align(
+                  alignment: Alignment.topLeft,
+                  child: Text("New Password",style: TextStyle(fontSize: 22,fontWeight: FontWeight.w700,color: bluetext),)),
+            ),
+        
+            // Padding(
+            //   padding: const EdgeInsets.symmetric(horizontal: 20),
+            //   child: Align(
+            //       alignment: Alignment.topLeft,
+            //       child: Text("Enter Your New Password",style: TextStyle(fontSize: 12),)),
+            // ),
+        
+            SizedBox(height: 20,),
+        
+        
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: TextField(
+                obscureText: hidePassword2,
+                decoration: InputDecoration(
+                  hintText: 'New Password',
+                  hintStyle: TextStyle(color: textblack,fontSize: 12),
+                  contentPadding: EdgeInsets.symmetric(vertical: 10,horizontal: 10),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                    borderSide: BorderSide(color: bordercolor, width: 1),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                    borderSide: BorderSide(color: bordercolor),
+                  ),
+        
+                  suffixIcon: IconButton(
+                    icon: hidePassword2
+                        ? Icon(Icons.visibility_off)
+                        : Icon(Icons.visibility),
+                    onPressed: () {
+                      setState(() {
+                        hidePassword2 = !hidePassword2;
+                      });
+                    },
+                  ),
+        
+                  prefixIcon: Icon(
+                    Icons.lock,
+                    size: 15,// You can replace 'Icons.email' with the icon you want
+                    color: bordercolor,
+                  ),
+        
                 ),
-
+        
+                onChanged: (text) {
+                  setState(() {
+                    password=text;
+                  });
+                },
+                style: TextStyle(color: textblack,fontSize: 14),
               ),
             ),
-          ),
-
-          SizedBox(height: 50,),
-
-
-
-        ],
+        
+        
+            SizedBox(height: 20,),
+        
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: TextField(
+                obscureText: hidePassword,
+                decoration: InputDecoration(
+                  hintText: 'Confirm Password',
+                  hintStyle: TextStyle(color: textblack,fontSize: 12),
+                  contentPadding: EdgeInsets.symmetric(vertical: 10,horizontal: 10),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                    borderSide: BorderSide(color: bordercolor, width: 1),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                    borderSide: BorderSide(color: bordercolor),
+                  ),
+        
+                  suffixIcon: IconButton(
+                    icon: hidePassword
+                        ? Icon(Icons.visibility_off)
+                        : Icon(Icons.visibility),
+                    onPressed: () {
+                      setState(() {
+                        hidePassword = !hidePassword;
+                      });
+                    },
+                  ),
+        
+                  prefixIcon: Icon(
+                    Icons.lock,
+                    size: 15,// You can replace 'Icons.email' with the icon you want
+                    color: bordercolor,
+                  ),
+        
+                ),
+        
+                onChanged: (text) {
+                  setState(() {
+                    password=text;
+                  });
+                },
+                style: TextStyle(color: textblack,fontSize: 14),
+              ),
+            ),
+        
+            SizedBox(height: 20,),
+        
+        
+        
+            InkWell(
+              onTap: (){
+                newPassword();
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Container(
+                  height: 48,
+                  width: 400,
+                  decoration: BoxDecoration(
+                      color: buttoncolor,
+                      borderRadius: BorderRadius.all(Radius.circular(10))),
+                  child: Center(
+                    child: Text("Submit",style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,color: white),),
+                  ),
+        
+                ),
+              ),
+            ),
+        
+            SizedBox(height: 50,),
+        
+        
+        
+          ],
+        ),
       ),
     );
   }

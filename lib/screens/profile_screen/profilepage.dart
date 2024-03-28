@@ -1,6 +1,9 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:rubidya/screens/profile_screen/tab_profile/photo_tab.dart';
 import 'package:rubidya/screens/profile_screen/tab_profile/vedio_tab.dart';
+import 'package:rubidya/screens/profile_screen/widget/edit_profile.dart';
 import 'package:rubidya/screens/profile_screen/widget/rubidya_premium.dart';
 import 'package:rubidya/screens/profile_screen/widget/verification_page.dart';
 import 'package:rubidya/screens/profile_screen/widget/wallet.dart';
@@ -25,6 +28,7 @@ class _profilepageState extends State<profilepage>
 
   var userid;
   var profiledetails;
+  var profilepagestatus;
   bool isLoading = false;
   bool _isLoading = true;
 
@@ -38,9 +42,23 @@ class _profilepageState extends State<profilepage>
     });
   }
 
+  Future _profilestatussapi() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    userid = prefs.getString('userid');
+    var response = await ProfileService.profilestatus();
+    log.i('profile statsus show.. $response');
+    setState(() {
+      profilepagestatus = response;
+    });
+  }
+
   Future _initLoad() async {
     await Future.wait(
-      [_profiledetailsapi()],
+      [
+        _profiledetailsapi(),
+        _profilestatussapi()
+
+      ],
     );
     _isLoading = false;
   }
@@ -332,7 +350,7 @@ class _profilepageState extends State<profilepage>
                     height: 70,
                   ),
                   Container(
-                    height: 410,
+                    height: 300,
                     // width: 400,
                     decoration: BoxDecoration(
                         color: profilebg,
@@ -348,28 +366,65 @@ class _profilepageState extends State<profilepage>
                             right: 25,
                             child: Column(
                               children: [
-                                Container(
-                                  height: 86,
-                                  width: 86,
-                                  decoration: BoxDecoration(
-                                    color: bluetext,
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(100)),
-                                  ),
-                                  child: ClipOval(
-                                    child: Image.asset(
-                                      'assets/logo/logo3.png',
-                                      fit: BoxFit.cover,
-                                      width: 86,
-                                      // Set the width to match the container's width
-                                      height:
-                                          86, // Set the height to match the container's height
-                                    ),
-                                  ),
+                                // Container(
+                                //   height: 86,
+                                //   width: 86,
+                                //   decoration: BoxDecoration(
+                                //     color: bluetext,
+                                //     borderRadius:
+                                //         BorderRadius.all(Radius.circular(100)),
+                                //   ),
+                                //   child: ClipOval(
+                                //     child: Image.asset(
+                                //       'assets/logo/logo3.png',
+                                //       fit: BoxFit.cover,
+                                //       width: 86,
+                                //       // Set the width to match the container's width
+                                //       height:
+                                //           86, // Set the height to match the container's height
+                                //     ),
+                                //   ),
+                                // ),
+
+                                Stack(
+                                    children: [
+
+                                      Container(
+                                        margin: EdgeInsets.only(top: 20),
+                                        height: 50, // Set a specific height
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(16.0),
+                                          color: Colors.blue, // Example background color
+                                        ),
+                                      ),
+                                      Align(
+                                        alignment: Alignment.topCenter,
+                                        child: CircleAvatar(
+                                          radius: 40.0,
+                                          backgroundColor: Colors.white,
+                                          child: CircleAvatar(
+                                            radius: 60.0,
+                                            backgroundImage: AssetImage('assets/logo/logo3.png'),
+                                            child: Align(
+                                              alignment: Alignment.bottomRight,
+                                              child: CircleAvatar(
+                                                radius: 18.0,
+                                                backgroundColor: Colors.white,
+                                                child: SvgPicture.asset(
+                                                  'assets/svg/whitelogorubidia.svg',
+                                                  height: 25,
+                                                  width: 25,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ]
                                 ),
 
                                 SizedBox(
-                                  height: 10,
+                                  height: 5,
                                 ),
 
                                 Text(
@@ -386,130 +441,21 @@ class _profilepageState extends State<profilepage>
                                 //   style: TextStyle(color: bluetext,fontSize: 10,
                                 //       fontWeight: FontWeight.w500),),
                                 SizedBox(
-                                  height: 20,
+                                  height: 10,
                                 ),
 
                                 Text(
-                                  "📸 🌟 You are beautiful, and I'm here to capture it! 🌟 🌍✨",
+                                    (profiledetails?['user']?['bio'] ??
+                                        ''),
                                   style: TextStyle(
                                       color: bluetext,
-                                      fontSize: 10,
+                                      fontSize: 12,
                                       fontWeight: FontWeight.w200),
                                   textAlign:
                                       TextAlign.center, // Center-align the text
                                 ),
 
-                                SizedBox(
-                                  height: 20,
-                                ),
 
-                                Row(
-                                  children: [
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          "Prime Membership",
-                                          style: TextStyle(fontSize: 12,color: yellowborder1),
-                                        ),
-                                        SizedBox(height: 5,),
-                                        Container(
-                                          height: 65,
-                                          width: 140,
-                                          decoration: BoxDecoration(
-                                              border: Border.all(
-                                                  color: yellowborder),
-                                              borderRadius: BorderRadius.all(
-                                                  Radius.circular(10))),
-                                          child: Row(
-                                            crossAxisAlignment: CrossAxisAlignment.center,
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: [
-
-                                              Column(
-                                                children: [
-                                                  SizedBox(height: 20,),
-                                                  Text("Member’s",style: TextStyle(fontSize: 10),),
-                                                  Text("200",style: TextStyle(fontSize: 12,fontWeight: FontWeight.w700),),
-                                                ],
-                                              ),
-
-                                              Padding(
-                                                padding: const EdgeInsets.symmetric(vertical: 5),
-                                                child: VerticalDivider(
-                                                  color: Colors.black,
-                                                  thickness: .1,
-                                                ),
-                                              ),
-
-                                              Column(
-                                                children: [
-                                                  SizedBox(height: 20,),
-                                                  Text("Amount",style: TextStyle(fontSize: 10,),),
-                                                  Text("1000",style: TextStyle(fontSize: 12,fontWeight: FontWeight.w700),),
-                                                ],
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    SizedBox(
-                                      width: 10,
-                                    ),
-                                    Column(
-                                      crossAxisAlignment:
-                                      CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          "Golden Membership",
-                                          style: TextStyle(fontSize: 12,color: yellowborder1),
-                                        ),
-                                        SizedBox(height: 5,),
-                                        Container(
-                                          height: 65,
-                                          width: 140,
-                                          decoration: BoxDecoration(
-                                              border: Border.all(
-                                                  color: yellowborder),
-                                              borderRadius: BorderRadius.all(
-                                                  Radius.circular(10))),
-                                          child: Row(
-                                            crossAxisAlignment: CrossAxisAlignment.center,
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: [
-
-                                              Column(
-                                                children: [
-                                                  SizedBox(height: 20,),
-                                                  Text("Member’s",style: TextStyle(fontSize: 10),),
-                                                  Text("200",style: TextStyle(fontSize: 12,fontWeight: FontWeight.w700),),
-                                                ],
-                                              ),
-
-                                              Padding(
-                                                padding: const EdgeInsets.symmetric(vertical: 5),
-                                                child: VerticalDivider(
-                                                  color: Colors.black,
-                                                  thickness: .1,
-                                                ),
-                                              ),
-
-                                              Column(
-                                                children: [
-                                                  SizedBox(height: 20,),
-                                                  Text("Amount",style: TextStyle(fontSize: 10,),),
-                                                  Text("1000",style: TextStyle(fontSize: 12,fontWeight: FontWeight.w700),),
-                                                ],
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
 
                                 SizedBox(
                                   height: 10,
@@ -517,85 +463,159 @@ class _profilepageState extends State<profilepage>
 
                                 Row(
                                   children: [
+                                    // profiledetails?['user']
+                                    //             ['isAccountVerified'] ==
+                                    //         false
+                                    //     ? Container(
+                                    //         child: profiledetails?['user']
+                                    //                     ['isVerified'] ==
+                                    //                 false
+                                    //             ? Container(
+                                    //                 height: 40,
+                                    //                 width: 130,
+                                    //                 decoration: BoxDecoration(
+                                    //                     color: greybg,
+                                    //                     borderRadius:
+                                    //                         BorderRadius.all(
+                                    //                             Radius.circular(
+                                    //                                 20))),
+                                    //                 child: Center(
+                                    //                     child: Text(
+                                    //                   "Premium",
+                                    //                   style: TextStyle(
+                                    //                       color: white,
+                                    //                       fontSize: 12),
+                                    //                 )),
+                                    //               )
+                                    //             : GestureDetector(
+                                    //                 onTap: () {
+                                    //                   Navigator.of(context).push(
+                                    //                       MaterialPageRoute(
+                                    //                           builder: (context) =>
+                                    //                               premiumpage()));
+                                    //                 },
+                                    //                 child: Container(
+                                    //                   height: 40,
+                                    //                   width: 130,
+                                    //                   decoration: BoxDecoration(
+                                    //                       color: buttoncolor,
+                                    //                       borderRadius:
+                                    //                           BorderRadius.all(
+                                    //                               Radius
+                                    //                                   .circular(
+                                    //                                       20))),
+                                    //                   child: Center(
+                                    //                       child: Text(
+                                    //                     "Premium",
+                                    //                     style: TextStyle(
+                                    //                         color: white,
+                                    //                         fontSize: 12),
+                                    //                   )),
+                                    //                 ),
+                                    //               ),
+                                    //       )
+                                    //     : Container(
+                                    //         height: 40,
+                                    //         width: 130,
+                                    //         decoration: BoxDecoration(
+                                    //             color: greenbg,
+                                    //             borderRadius: BorderRadius.all(
+                                    //                 Radius.circular(20))),
+                                    //         child: Center(
+                                    //             child: Row(
+                                    //           mainAxisAlignment:
+                                    //               MainAxisAlignment.center,
+                                    //           children: [
+                                    //             Text(
+                                    //               "Verified",
+                                    //               style: TextStyle(
+                                    //                   color: white,
+                                    //                   fontSize: 12),
+                                    //             ),
+                                    //             SizedBox(
+                                    //               width: 5,
+                                    //             ),
+                                    //             SvgPicture.asset(
+                                    //               "assets/svg/tikmark.svg",
+                                    //               height: 14,
+                                    //             ),
+                                    //           ],
+                                    //         )),
+                                    //       ),
+
+
+                                    // InkWell(
+                                    //   onTap: () {
+                                    //     Navigator.of(context).push(
+                                    //         MaterialPageRoute(
+                                    //             builder: (context) =>
+                                    //                 premiumpage()));
+                                    //   },
+                                    //   child: Container(
+                                    //     height: 40,
+                                    //     width: 130,
+                                    //     decoration: BoxDecoration(
+                                    //         color: bluetext,
+                                    //         borderRadius:
+                                    //         BorderRadius.all(
+                                    //             Radius.circular(
+                                    //                 20))),
+                                    //     child: Center(
+                                    //         child: Text(
+                                    //           "Premium",
+                                    //           style: TextStyle(
+                                    //               color: white,
+                                    //               fontSize: 12),
+                                    //         )),
+                                    //   ),
+                                    // ),
+
                                     profiledetails?['user']
-                                                ['isAccountVerified'] ==
+                                                ['isVerified'] ==
                                             false
-                                        ? Container(
-                                            child: profiledetails?['user']
-                                                        ['isVerified'] ==
-                                                    false
-                                                ? Container(
-                                                    height: 40,
-                                                    width: 130,
-                                                    decoration: BoxDecoration(
-                                                        color: greybg,
-                                                        borderRadius:
-                                                            BorderRadius.all(
-                                                                Radius.circular(
-                                                                    20))),
-                                                    child: Center(
-                                                        child: Text(
-                                                      "Premium",
-                                                      style: TextStyle(
-                                                          color: white,
-                                                          fontSize: 12),
-                                                    )),
-                                                  )
-                                                : GestureDetector(
-                                                    onTap: () {
-                                                      Navigator.of(context).push(
-                                                          MaterialPageRoute(
-                                                              builder: (context) =>
-                                                                  premiumpage()));
-                                                    },
-                                                    child: Container(
-                                                      height: 40,
-                                                      width: 130,
-                                                      decoration: BoxDecoration(
-                                                          color: buttoncolor,
-                                                          borderRadius:
-                                                              BorderRadius.all(
-                                                                  Radius
-                                                                      .circular(
-                                                                          20))),
-                                                      child: Center(
-                                                          child: Text(
-                                                        "Premium",
-                                                        style: TextStyle(
-                                                            color: white,
-                                                            fontSize: 12),
-                                                      )),
-                                                    ),
-                                                  ),
-                                          )
-                                        : Container(
-                                            height: 40,
-                                            width: 130,
-                                            decoration: BoxDecoration(
-                                                color: greenbg,
-                                                borderRadius: BorderRadius.all(
-                                                    Radius.circular(20))),
-                                            child: Center(
-                                                child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                Text(
-                                                  "Verified",
-                                                  style: TextStyle(
-                                                      color: white,
-                                                      fontSize: 12),
-                                                ),
-                                                SizedBox(
-                                                  width: 5,
-                                                ),
-                                                SvgPicture.asset(
-                                                  "assets/svg/tikmark.svg",
-                                                  height: 14,
-                                                ),
-                                              ],
+                                        ?
+                                Container(
+                                height: 40,
+                                  width: 130,
+                                  decoration: BoxDecoration(
+                                      color: greybg,
+                                      borderRadius:
+                                      BorderRadius.all(
+                                          Radius.circular(
+                                              20))),
+                                  child: Center(
+                                      child: Text(
+                                        "Premium",
+                                        style: TextStyle(
+                                            color: white,
+                                            fontSize: 12),
+                                      )),
+                                ):GestureDetector(
+                                      onTap: () {
+                                        Navigator.of(context).push(
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    premiumpage()));
+                                      },
+                                      child: Container(
+                                        height: 40,
+                                        width: 130,
+                                        decoration: BoxDecoration(
+                                            color: buttoncolor,
+                                            borderRadius:
+                                            BorderRadius.all(
+                                                Radius
+                                                    .circular(
+                                                    20))),
+                                        child: Center(
+                                            child: Text(
+                                              "Premium",
+                                              style: TextStyle(
+                                                  color: white,
+                                                  fontSize: 12),
                                             )),
-                                          ),
+                                      ),
+                                    ),
                                     SizedBox(
                                       width: 20,
                                     ),
@@ -730,19 +750,40 @@ class _profilepageState extends State<profilepage>
 
                                 Row(
                                   children: [
-                                    Container(
-                                      height: 31,
-                                      width: 165,
-                                      decoration: BoxDecoration(
-                                          color: conainer220,
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(10))),
-                                      child: Center(
-                                          child: Text(
-                                        "Edit profile",
-                                        style: TextStyle(
-                                            fontSize: 10, color: bluetext),
-                                      )),
+                                    InkWell(
+                                      onTap: () {
+                                        Navigator.of(context).push(
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    editprofile(
+                                                      bio: profiledetails['user']['bio'] ?? "",
+                                                      firstname: profiledetails['user']['firstName'] ?? "",
+                                                      lastName: profiledetails['user']['lastName'] ?? "",
+                                                      countryCode: profiledetails['user']['countryCode']?.toString() ?? "",
+                                                      phone: profiledetails['user']['phone']?.toString() ?? "",
+                                                      email: profiledetails['user']['email'] ?? "",
+                                                      dateOfBirth: profiledetails['user']['dateOfBirth'] ?? "",
+                                                      gender: profiledetails['user']['gender'] ?? "",
+                                                      location: profiledetails['user']['location'] ?? "",
+                                                      profession: profiledetails['user']['profession'] ?? "",
+                                                      district: profiledetails['user']['district'] ?? "",
+                                                    ),));
+                                      },
+
+                                      child: Container(
+                                        height: 31,
+                                        width: 165,
+                                        decoration: BoxDecoration(
+                                            color: conainer220,
+                                            borderRadius: BorderRadius.all(
+                                                Radius.circular(10))),
+                                        child: Center(
+                                            child: Text(
+                                          "Edit profile",
+                                          style: TextStyle(
+                                              fontSize: 10, color: bluetext),
+                                        )),
+                                      ),
                                     ),
                                     SizedBox(
                                       width: 15,
@@ -768,9 +809,91 @@ class _profilepageState extends State<profilepage>
                       ],
                     ),
                   ),
+
+                  SizedBox(height: 5,),
+
+
+                  SizedBox(
+                    height: 65,
+                    child: ListView.builder(
+                        itemCount: profilepagestatus['memberProfits'].length,
+                        scrollDirection: Axis.horizontal,
+                        itemBuilder: (BuildContext context, int index) {
+                          return  Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                            child: Row(
+                              children: [
+                                Column(
+                                  crossAxisAlignment:
+                                  CrossAxisAlignment.start,
+                                  children: [
+
+                                    SizedBox(height: 5,),
+
+                                    Container(
+                                      // height: 60,
+                                      width: 175,
+                                      decoration: BoxDecoration(
+                                          border: Border.all(
+                                              color: yellowborder),
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(5))),
+                                      child: Column(
+                                        children: [
+                                          SizedBox(height: 5,),
+
+                                          Text(
+                                            profilepagestatus['memberProfits'][index]['packageName'],
+                                            style: TextStyle(fontSize: 12,color: yellowborder1),
+                                          ),
+                                          Row(
+                                            crossAxisAlignment: CrossAxisAlignment.center,
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+
+                                              Column(
+                                                children: [
+                                                  Text("Members",style: TextStyle(fontSize: 10),),
+                                                  Text( profilepagestatus['memberProfits'][index]['usersCount'].toString(),style: TextStyle(fontSize: 12,),),
+                                                ],
+                                              ),
+
+                                              Padding(
+                                                padding: const EdgeInsets.symmetric(vertical: 5),
+                                                child: VerticalDivider(
+                                                  color: Colors.black,
+                                                  thickness: .2,
+                                                ),
+                                              ),
+
+                                              Column(
+                                                children: [
+
+                                                  Text("Amount",style: TextStyle(fontSize: 10,),),
+                                                  Text( profilepagestatus['memberProfits'][index]['splitAmount'].toString(),style: TextStyle(fontSize: 12,fontWeight: FontWeight.w700),),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+
+                              ],
+                            ),
+                          );
+                        }),
+                  ),
+
+                  SizedBox(height: 15,),
+
                   Container(
                     height: 30,
+
                     decoration: BoxDecoration(color: white, boxShadow: [
+
                       BoxShadow(
                         color: white1,
                         blurRadius: 1.0,
@@ -799,7 +922,10 @@ class _profilepageState extends State<profilepage>
                     height: 600,
                     child: TabBarView(
                       controller: _tabController,
-                      children: [phototab(), vediotab()],
+                      children: [
+                        phototab(),
+                        vediotab()
+                      ],
                     ),
                   ),
                 ],

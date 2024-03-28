@@ -37,6 +37,7 @@ dev_dependencies:
   webview_flutter: ^2.0.13
   url_launcher: ^6.0.6
   youtube_player_flutter: ^8.0.0
+  scroll_loop_auto_scroll: ^0.0.2
 
 
 

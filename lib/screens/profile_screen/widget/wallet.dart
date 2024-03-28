@@ -44,11 +44,8 @@ class _walletState extends State<wallet> {
         "currency": "RBD",
       }),
     );
-
     // print("payId: $payId");
     // print("uniqueId: $uniqueId");
-
-
     if (response.statusCode == 200) {
       final Map<String, dynamic> data = jsonDecode(response.body);
       setState(() {
@@ -89,9 +86,8 @@ class _walletState extends State<wallet> {
           ),
         );
       }
-
-
-    }catch (error) {
+    }
+    catch (error) {
       // Handle specific error cases
       if (error.toString().contains("User Already Exist")) {
         // Show a SnackBar to inform the user
@@ -147,7 +143,7 @@ class _walletState extends State<wallet> {
   Future _initLoad() async {
     await Future.wait(
       [
-        _syncvalue(),
+        // _syncvalue(),
       fetchamountsync(
       balance,
       profiledetails?['user']?['payId'] ?? '',
@@ -178,7 +174,6 @@ class _walletState extends State<wallet> {
       fetchBalance();
       _syncvalue();
       _profiledetailsapi();
-
 
 
       // fetchBalance();

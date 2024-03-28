@@ -55,7 +55,7 @@ class _onboardingscreenState extends State<onboardingscreen> {
 
               InkWell(
                 onTap: (){
-                  Navigator.push(context,MaterialPageRoute(builder: (context) =>Landing_Page(title: 'tittle',)));
+                  Navigator.push(context,MaterialPageRoute(builder: (context) =>login()));
                 },
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),

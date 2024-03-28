@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../navigation/bottom_navigation.dart';
 import 'login_page.dart';
+import 'onboarding_screen.dart';
 
 
 
@@ -48,7 +49,7 @@ class _Landing_PageState extends State<Landing_Page> {
 
   gotoLogin() {
     Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => login()),
+        MaterialPageRoute(builder: (context) => onboardingscreen()),
             (route) => false);
   }
 

@@ -40,7 +40,7 @@ class _registrationState extends State<registration> {
   String? password;
 
 
-  Country _selectedCountry = CountryPickerUtils.getCountryByIsoCode('US');
+  Country _selectedCountry = CountryPickerUtils.getCountryByIsoCode('IN');
 
 
   Future userRegistration() async {
@@ -57,6 +57,8 @@ class _registrationState extends State<registration> {
         "email": email,
         "password": password,
       };
+
+      print(_selectedCountry.phoneCode);
 
       var response = await AuthService.registration(reqData);
       log.i('add member create . $response');
@@ -313,7 +315,7 @@ class _registrationState extends State<registration> {
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 10),
                       child: CountryPickerDropdown(
-                        initialValue: 'IN',
+                        initialValue: _selectedCountry == null ? 'IN' : _selectedCountry.isoCode,
                         itemBuilder: (Country country) {
                           return Row(
                             mainAxisAlignment: MainAxisAlignment.start,

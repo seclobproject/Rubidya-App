@@ -102,6 +102,13 @@ class ProfileService {
     return response.data;
   }
 
+
+  static Future onvertinr(data) async {
+    var dio = await DioHelper.getInstance();
+    var response = await dio.post('$baseURL/api/users/convert-inr',data:data);
+    return response.data;
+  }
+
   static Future verifyaccountrubidia(data) async {
     var dio = await DioHelper.getInstance();
     var response = await dio.post('$baseURLwallet/basic/checkPayIdExist',data:data);
@@ -114,6 +121,24 @@ class ProfileService {
     var dio = await DioHelper.getInstance();
     var response = await dio.post('$baseURL/api/users/get-package-by-id',data:data);
     return response.data;
+  }
+
+  static Future profilestatus() async {
+    var dio = await DioHelper.getInstance();
+    var response = await dio.get('$baseURL/api/users/get-stats');
+    return response.data;
+  }
+
+
+
+  static Future ProfileEditing(data) async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.put('$baseURL/api/users/edit-profile',data: data);
+      return response.data;
+    } catch (e) {
+      rethrow;
+    }
   }
 
 

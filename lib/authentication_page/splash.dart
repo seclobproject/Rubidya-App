@@ -23,7 +23,7 @@ class _MyHomePageState extends State<MyHomePage> {
             () => Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-                builder: (context) => onboardingscreen())));
+                builder: (context) => Landing_Page(title: 'hi',))));
   }
 
   @override

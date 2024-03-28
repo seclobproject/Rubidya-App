@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import '../navigation/bottom_navigation.dart';
 import '../resources/color.dart';
 import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -12,15 +13,15 @@ import 'package:otp_text_field/style.dart';
 
 import 'new_password.dart';
 
-class otpverification extends StatefulWidget {
-   final String email;
-  const otpverification({required this.email,super.key});
+class firstotpenter extends StatefulWidget {
+  final String email;
+  const firstotpenter({required this.email,super.key});
 
   @override
-  State<otpverification> createState() => _otpverificationState();
+  State<firstotpenter> createState() => _firstotpenterState();
 }
 
-class _otpverificationState extends State<otpverification> {
+class _firstotpenterState extends State<firstotpenter> {
 
   TextEditingController otpController = TextEditingController();
 
@@ -40,6 +41,8 @@ class _otpverificationState extends State<otpverification> {
   String otp = '';
 
 
+
+
   Future forgetotp() async {
     try {
       setState(() {});
@@ -54,7 +57,7 @@ class _otpverificationState extends State<otpverification> {
       var response = await AuthService.forgotpasswordotp(reqData);
       log.i('Otp Verification create . $response');
       Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => newpassword(email: widget.email)),
+          MaterialPageRoute(builder: (context) => Bottomnav()),
               (route) => false);
 
       if (response['msg'] == 'User Add Successfully') {
