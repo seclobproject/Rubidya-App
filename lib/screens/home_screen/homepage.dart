@@ -326,6 +326,11 @@ class _homepageState extends State<homepage> {
                         MaterialPageRoute(builder: (context) => const referralpage()),
                       );
 
+                      // Navigator.push(
+                      //   context,
+                      //   MaterialPageRoute(builder: (context) => const uploadscreens()),
+                      // );
+
                     },
                     child: SvgPicture.asset(
                       "assets/svg/reffer.svg",

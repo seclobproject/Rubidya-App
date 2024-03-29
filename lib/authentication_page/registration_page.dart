@@ -337,6 +337,7 @@ class _registrationState extends State<registration> {
                         onValuePicked: (Country country) {
                           setState(() {
                             _selectedCountry = country;
+                            print(_selectedCountry);
                           });
                         },
                       ),

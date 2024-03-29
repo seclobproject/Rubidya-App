@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import '../../../resources/color.dart';
 import '../../../services/profile_service.dart';
 import '../../../support/logger.dart';
+import 'package:country_pickers/country.dart';
+import 'package:country_pickers/utils/utils.dart';
+import 'package:country_pickers/country_pickers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class editprofile extends StatefulWidget {
@@ -39,6 +42,17 @@ class editprofile extends StatefulWidget {
 class _editprofileState extends State<editprofile> {
   late TextEditingController bioController;
   late TextEditingController firstnameController;
+  late TextEditingController lastnameController;
+  late TextEditingController emailController;
+  late TextEditingController professionController;
+  late TextEditingController genderController;
+  late TextEditingController dateOfBirthController;
+  late TextEditingController districtController;
+  late TextEditingController locationController;
+  late TextEditingController phoneController;
+
+
+  Country _selectedCountry = CountryPickerUtils.getCountryByIsoCode('IN');
 
 
   late String bio;
@@ -55,12 +69,24 @@ class _editprofileState extends State<editprofile> {
 
   var userid;
 
+
   bool isLoading = false;
   @override
   void initState() {
     super.initState();
+    // editWorkReport();
     bioController = TextEditingController(text: widget.bio);
     firstnameController = TextEditingController(text: widget.firstname);
+    lastnameController = TextEditingController(text: widget.lastName);
+    emailController = TextEditingController(text: widget.email);
+    professionController = TextEditingController(text: widget.profession);
+    genderController = TextEditingController(text: widget.gender);
+    dateOfBirthController = TextEditingController(text: widget.dateOfBirth);
+    districtController = TextEditingController(text: widget.district);
+    locationController = TextEditingController(text: widget.location);
+    phoneController = TextEditingController(text: widget.phone);
+
+
   }
 
   Future<void> editWorkReport() async {
@@ -68,7 +94,18 @@ class _editprofileState extends State<editprofile> {
     userid = prefs.getString('userid');
     print(userid);
     var reqData = {
+      'firstName': firstnameController.text,
+      'lastName': lastnameController.text,
+      'countryCode': _selectedCountry.phoneCode,
+      'email': emailController.text,
       'bio': bioController.text,
+      'profession': professionController.text,
+      'gender': genderController.text,
+      'dateOfBirth': dateOfBirthController.text,
+      'district': districtController.text,
+      'location': locationController.text,
+      'phone': phoneController.text,
+
     };
 
     print(bioController.text);
@@ -88,16 +125,16 @@ class _editprofileState extends State<editprofile> {
         MaterialPageRoute(builder: (context) => editprofile(
           // Pass the same parameters to recreate the page
           bio: bioController.text,
-          firstname: widget.firstname,
-          lastName: widget.lastName,
+          firstname: firstnameController.text,
+          lastName: lastnameController.text,
           countryCode: widget.countryCode,
-          phone: widget.phone,
-          email: widget.email,
-          dateOfBirth: widget.dateOfBirth,
-          gender: widget.gender,
-          location: widget.location,
-          profession: widget.profession,
-          district: widget.district,
+          phone: phoneController.text,
+          email: emailController.text,
+          dateOfBirth: dateOfBirthController.text,
+          gender: genderController.text,
+          location: locationController.text,
+          profession: professionController.text,
+          district: districtController.text,
         )),
       );
     } catch (error) {
@@ -119,7 +156,7 @@ class _editprofileState extends State<editprofile> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-        
+
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               child: TextField(
@@ -128,6 +165,39 @@ class _editprofileState extends State<editprofile> {
                   hintText: 'Pay ID',
                   hintStyle: TextStyle(color: textblack, fontSize: 12),
                   contentPadding:
+                  EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                    borderSide: BorderSide(color: bordercolor, width: 1),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                    borderSide: BorderSide(color: bordercolor),
+                  ),
+                  // prefixIcon: Icon(
+                  //   Icons.person,
+                  //   size: 15,
+                  //   color: bordercolor,
+                  // ),
+                ),
+                onChanged: (text) {
+                  setState(() {
+                    firstname = text;
+
+                  });
+                },
+                style: TextStyle(color: textblack, fontSize: 14),
+              ),
+            ),
+
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              child: TextField(
+                controller: lastnameController,
+                decoration: InputDecoration(
+                  hintText: 'Pay ID',
+                  hintStyle: TextStyle(color: textblack, fontSize: 12),
+                  contentPadding:
                   EdgeInsets.symmetric(vertical: 10, horizontal: 10),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10.0)),
@@ -145,8 +215,127 @@ class _editprofileState extends State<editprofile> {
                 ),
                 onChanged: (text) {
                   setState(() {
-                     bio = text;
-                     print(">>......>.>>...>$bio");
+                    lastName = text;
+                  });
+                },
+                style: TextStyle(color: textblack, fontSize: 14),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20,),
+              child: Row(
+                children: [
+                  Container(
+
+                    decoration: BoxDecoration(
+                        border: Border.all(
+                            color: bordercolor
+                        ),
+                        borderRadius: BorderRadius.all(Radius.circular(10))
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: CountryPickerDropdown(
+
+                        initialValue: _selectedCountry == null ? 'IN' : _selectedCountry.isoCode,
+                        itemBuilder: (Country country) {
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: <Widget>[
+                              CountryPickerUtils.getDefaultFlagImage(country),
+                              SizedBox(width: 5),
+                              Text(
+                                "${country.phoneCode}",
+                                style: TextStyle(fontSize: 10),
+                              ),
+                              SizedBox(width: 5),
+                              Text(
+                                "${country.isoCode}",
+                                style: TextStyle(fontSize: 10),
+                              ),
+                            ],
+                          );
+                        },
+                        onValuePicked: (Country country) {
+                          setState(() {
+                            _selectedCountry = country;
+                            print(_selectedCountry);
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+
+                  // SizedBox(width: 5,),
+
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Container(
+                      width: 169,
+
+                      child: TextField(
+                        controller: phoneController,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          hintText: 'Phone Number',
+                          hintStyle: TextStyle(color: textblack,fontSize: 12),
+                          contentPadding: EdgeInsets.symmetric(vertical: 10,horizontal: 20),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                            borderSide: BorderSide(color: bordercolor, width: 1),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                            borderSide: BorderSide(color: bordercolor),
+                          ),
+
+                          // prefixIcon: Icon(
+                          //   Icons.phone_android,
+                          //   size: 15,// You can replace 'Icons.email' with the icon you want
+                          //   color: bordercolor,
+                          // ),
+
+                        ),
+
+                        onChanged: (text) {
+                          setState(() {
+                            phone=text;
+                          });
+                        },
+                        style: TextStyle(color: textblack,fontSize: 14),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              child: TextField(
+                controller: emailController,
+                decoration: InputDecoration(
+                  hintText: 'Pay ID',
+                  hintStyle: TextStyle(color: textblack, fontSize: 12),
+                  contentPadding:
+                  EdgeInsets.symmetric(vertical: 10, horizontal: 0),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                    borderSide: BorderSide(color: bordercolor, width: 1),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                    borderSide: BorderSide(color: bordercolor),
+                  ),
+                  prefixIcon: Icon(
+                    Icons.person,
+                    size: 15,
+                    color: bordercolor,
+                  ),
+                ),
+                onChanged: (text) {
+                  setState(() {
+                    email = text;
                   });
                 },
                 style: TextStyle(color: textblack, fontSize: 14),
@@ -177,7 +366,7 @@ class _editprofileState extends State<editprofile> {
                 ),
                 onChanged: (text) {
                   setState(() {
-                    // description = text;
+                    bio = text;
                   });
                 },
                 style: TextStyle(color: textblack, fontSize: 14),
@@ -186,7 +375,7 @@ class _editprofileState extends State<editprofile> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               child: TextField(
-                controller: bioController,
+                controller: professionController,
                 decoration: InputDecoration(
                   hintText: 'Pay ID',
                   hintStyle: TextStyle(color: textblack, fontSize: 12),
@@ -208,7 +397,7 @@ class _editprofileState extends State<editprofile> {
                 ),
                 onChanged: (text) {
                   setState(() {
-                    // description = text;
+                    profession = text;
                   });
                 },
                 style: TextStyle(color: textblack, fontSize: 14),
@@ -217,7 +406,38 @@ class _editprofileState extends State<editprofile> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               child: TextField(
-                controller: bioController,
+                controller: genderController,
+                decoration: InputDecoration(
+                  hintText: 'Enter Your Gender',
+                  hintStyle: TextStyle(color: textblack, fontSize: 12),
+                  contentPadding:
+                  EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                    borderSide: BorderSide(color: bordercolor, width: 1),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                    borderSide: BorderSide(color: bordercolor),
+                  ),
+                  prefixIcon: Icon(
+                    Icons.person,
+                    size: 15,
+                    color: bordercolor,
+                  ),
+                ),
+                onChanged: (text) {
+                  setState(() {
+                    gender = text;
+                  });
+                },
+                style: TextStyle(color: textblack, fontSize: 14),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              child: TextField(
+                controller: dateOfBirthController,
                 decoration: InputDecoration(
                   hintText: 'Pay ID',
                   hintStyle: TextStyle(color: textblack, fontSize: 12),
@@ -239,7 +459,7 @@ class _editprofileState extends State<editprofile> {
                 ),
                 onChanged: (text) {
                   setState(() {
-                    // description = text;
+                    dateOfBirth = text;
                   });
                 },
                 style: TextStyle(color: textblack, fontSize: 14),
@@ -248,7 +468,7 @@ class _editprofileState extends State<editprofile> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               child: TextField(
-                controller: bioController,
+                controller: districtController,
                 decoration: InputDecoration(
                   hintText: 'Pay ID',
                   hintStyle: TextStyle(color: textblack, fontSize: 12),
@@ -270,7 +490,7 @@ class _editprofileState extends State<editprofile> {
                 ),
                 onChanged: (text) {
                   setState(() {
-                    // description = text;
+                    district = text;
                   });
                 },
                 style: TextStyle(color: textblack, fontSize: 14),
@@ -279,7 +499,7 @@ class _editprofileState extends State<editprofile> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               child: TextField(
-                controller: bioController,
+                controller: locationController,
                 decoration: InputDecoration(
                   hintText: 'Pay ID',
                   hintStyle: TextStyle(color: textblack, fontSize: 12),
@@ -301,167 +521,14 @@ class _editprofileState extends State<editprofile> {
                 ),
                 onChanged: (text) {
                   setState(() {
-                    // description = text;
+                    location= text;
                   });
                 },
                 style: TextStyle(color: textblack, fontSize: 14),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              child: TextField(
-                controller: bioController,
-                decoration: InputDecoration(
-                  hintText: 'Pay ID',
-                  hintStyle: TextStyle(color: textblack, fontSize: 12),
-                  contentPadding:
-                  EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                    borderSide: BorderSide(color: bordercolor, width: 1),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                    borderSide: BorderSide(color: bordercolor),
-                  ),
-                  prefixIcon: Icon(
-                    Icons.person,
-                    size: 15,
-                    color: bordercolor,
-                  ),
-                ),
-                onChanged: (text) {
-                  setState(() {
-                    // description = text;
-                  });
-                },
-                style: TextStyle(color: textblack, fontSize: 14),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              child: TextField(
-                controller: bioController,
-                decoration: InputDecoration(
-                  hintText: 'Pay ID',
-                  hintStyle: TextStyle(color: textblack, fontSize: 12),
-                  contentPadding:
-                  EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                    borderSide: BorderSide(color: bordercolor, width: 1),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                    borderSide: BorderSide(color: bordercolor),
-                  ),
-                  prefixIcon: Icon(
-                    Icons.person,
-                    size: 15,
-                    color: bordercolor,
-                  ),
-                ),
-                onChanged: (text) {
-                  setState(() {
-                    // description = text;
-                  });
-                },
-                style: TextStyle(color: textblack, fontSize: 14),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              child: TextField(
-                controller: bioController,
-                decoration: InputDecoration(
-                  hintText: 'Pay ID',
-                  hintStyle: TextStyle(color: textblack, fontSize: 12),
-                  contentPadding:
-                  EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                    borderSide: BorderSide(color: bordercolor, width: 1),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                    borderSide: BorderSide(color: bordercolor),
-                  ),
-                  prefixIcon: Icon(
-                    Icons.person,
-                    size: 15,
-                    color: bordercolor,
-                  ),
-                ),
-                onChanged: (text) {
-                  setState(() {
-                    // description = text;
-                  });
-                },
-                style: TextStyle(color: textblack, fontSize: 14),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              child: TextField(
-                controller: bioController,
-                decoration: InputDecoration(
-                  hintText: 'Pay ID',
-                  hintStyle: TextStyle(color: textblack, fontSize: 12),
-                  contentPadding:
-                  EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                    borderSide: BorderSide(color: bordercolor, width: 1),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                    borderSide: BorderSide(color: bordercolor),
-                  ),
-                  prefixIcon: Icon(
-                    Icons.person,
-                    size: 15,
-                    color: bordercolor,
-                  ),
-                ),
-                onChanged: (text) {
-                  setState(() {
-                    // description = text;
-                  });
-                },
-                style: TextStyle(color: textblack, fontSize: 14),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              child: TextField(
-                controller: bioController,
-                decoration: InputDecoration(
-                  hintText: 'Pay ID',
-                  hintStyle: TextStyle(color: textblack, fontSize: 12),
-                  contentPadding:
-                  EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                    borderSide: BorderSide(color: bordercolor, width: 1),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                    borderSide: BorderSide(color: bordercolor),
-                  ),
-                  prefixIcon: Icon(
-                    Icons.person,
-                    size: 15,
-                    color: bordercolor,
-                  ),
-                ),
-                onChanged: (text) {
-                  setState(() {
-                    // description = text;
-                  });
-                },
-                style: TextStyle(color: textblack, fontSize: 14),
-              ),
-            ),
+
+
 
             SizedBox(height: 40,),
 

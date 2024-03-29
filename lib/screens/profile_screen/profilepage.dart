@@ -7,13 +7,16 @@ import 'package:rubidya/screens/profile_screen/widget/edit_profile.dart';
 import 'package:rubidya/screens/profile_screen/widget/rubidya_premium.dart';
 import 'package:rubidya/screens/profile_screen/widget/verification_page.dart';
 import 'package:rubidya/screens/profile_screen/widget/wallet.dart';
-
+import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../authentication_page/login_page.dart';
+import '../../networking/constant.dart';
 import '../../resources/color.dart';
 import '../../services/profile_service.dart';
 import '../../support/logger.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:dio/dio.dart';
+import 'dart:io';
 
 class profilepage extends StatefulWidget {
   const profilepage({super.key});
@@ -31,6 +34,7 @@ class _profilepageState extends State<profilepage>
   var profilepagestatus;
   bool isLoading = false;
   bool _isLoading = true;
+  String? imageUrl;
 
   Future _profiledetailsapi() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -54,11 +58,7 @@ class _profilepageState extends State<profilepage>
 
   Future _initLoad() async {
     await Future.wait(
-      [
-        _profiledetailsapi(),
-        _profilestatussapi()
-
-      ],
+      [_profiledetailsapi(), _profilestatussapi()],
     );
     _isLoading = false;
   }
@@ -69,6 +69,48 @@ class _profilepageState extends State<profilepage>
 
     Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (context) => login()), (route) => false);
+  }
+
+  Future<void> uploadImage() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    userid = (prefs.getString('userid') ?? "");
+    try {
+      if (imageUrl == null) {
+        print("Please pick an image first");
+        return;
+      }
+      FormData formData = FormData.fromMap({
+        'media': await MultipartFile.fromFile(imageUrl!),
+      });
+      var response = await ProfileService.verificationimage(formData);
+      if (response.statusCode == 201) {
+        print("Image uploaded successfully");
+        print(response.data);
+        // Navigator.push(
+        //   context,
+        //   MaterialPageRoute(builder: (context) => Bottomnav()),
+        // );
+      } else {
+        // Navigator.push(
+        //   context,
+        //   MaterialPageRoute(builder: (context) => Bottomnav()),
+        // );
+        print(response.statusCode);
+        print(response.data);
+      }
+    } catch (e) {
+      print("Exception during image upload: $e");
+    }
+  }
+
+  Future<void> pickImages() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        imageUrl = pickedFile.path;
+      });
+    }
   }
 
   @override
@@ -196,79 +238,79 @@ class _profilepageState extends State<profilepage>
                           SizedBox(
                             height: 25,
                           ),
-                          profiledetails?['user']['isAccountVerified'] == false
-                              ? GestureDetector(
-                                  onTap: () {
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                premiumpage()));
-                                  },
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 40),
-                                    child: Align(
-                                      alignment: Alignment.topLeft,
-                                      child: Row(
-                                        children: [
-                                          Image.asset(
-                                            'assets/image/logopngrubidya.png',
-                                            height: 20,
-                                          ),
-                                          SizedBox(
-                                            width: 10,
-                                          ),
-                                          Text(
-                                            'Rubidya Premium',
-                                            style: TextStyle(
-                                                fontSize: 14.0,
-                                                color: bluetext,
-                                                fontWeight: FontWeight.w500),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                )
-                              : Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 40),
-                                  child: Align(
-                                    alignment: Alignment.topLeft,
-                                    child: Column(
-                                      children: [
-                                        Align(
-                                            alignment: Alignment.topLeft,
-                                            child: Text(
-                                              "You Are Already Verified.",
-                                              style: TextStyle(fontSize: 10),
-                                            )),
-                                        SizedBox(
-                                          height: 10,
-                                        ),
-                                        Row(
-                                          children: [
-                                            Image.asset(
-                                              'assets/image/logopngrubidya.png',
-                                              height: 20,
-                                            ),
-                                            SizedBox(
-                                              width: 10,
-                                            ),
-                                            Text(
-                                              'Rubidya Premium',
-                                              style: TextStyle(
-                                                  fontSize: 14.0,
-                                                  color: greybg,
-                                                  fontWeight: FontWeight.w500),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
+                          // profiledetails?['user']['isAccountVerified'] == false
+                          //     ? GestureDetector(
+                          //         onTap: () {
+                          //           Navigator.push(
+                          //               context,
+                          //               MaterialPageRoute(
+                          //                   builder: (context) =>
+                          //                       premiumpage()));
+                          //         },
+                          //         child: Padding(
+                          //           padding: const EdgeInsets.symmetric(
+                          //               horizontal: 40),
+                          //           child: Align(
+                          //             alignment: Alignment.topLeft,
+                          //             child: Row(
+                          //               children: [
+                          //                 Image.asset(
+                          //                   'assets/image/logopngrubidya.png',
+                          //                   height: 20,
+                          //                 ),
+                          //                 SizedBox(
+                          //                   width: 10,
+                          //                 ),
+                          //                 Text(
+                          //                   'Rubidya Premium',
+                          //                   style: TextStyle(
+                          //                       fontSize: 14.0,
+                          //                       color: bluetext,
+                          //                       fontWeight: FontWeight.w500),
+                          //                 ),
+                          //               ],
+                          //             ),
+                          //           ),
+                          //         ),
+                          //       )
+                          //     : Padding(
+                          //         padding: const EdgeInsets.symmetric(
+                          //             horizontal: 40),
+                          //         child: Align(
+                          //           alignment: Alignment.topLeft,
+                          //           child: Column(
+                          //             children: [
+                          //               Align(
+                          //                   alignment: Alignment.topLeft,
+                          //                   child: Text(
+                          //                     "You Are Already Verified.",
+                          //                     style: TextStyle(fontSize: 10),
+                          //                   )),
+                          //               SizedBox(
+                          //                 height: 10,
+                          //               ),
+                          //               Row(
+                          //                 children: [
+                          //                   Image.asset(
+                          //                     'assets/image/logopngrubidya.png',
+                          //                     height: 20,
+                          //                   ),
+                          //                   SizedBox(
+                          //                     width: 10,
+                          //                   ),
+                          //                   Text(
+                          //                     'Rubidya Premium',
+                          //                     style: TextStyle(
+                          //                         fontSize: 14.0,
+                          //                         color: greybg,
+                          //                         fontWeight: FontWeight.w500),
+                          //                   ),
+                          //                 ],
+                          //               ),
+                          //             ],
+                          //           ),
+                          //         ),
+                          //       ),
                           SizedBox(
                             height: 100,
                           ),
@@ -386,42 +428,64 @@ class _profilepageState extends State<profilepage>
                                 //   ),
                                 // ),
 
-                                Stack(
-                                    children: [
+                                Stack(children: [
+                                  Container(
+                                    margin: EdgeInsets.only(top: 20),
+                                    height: 20, // Set a specific height
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(16.0),
+                                      color: Colors
+                                          .blue, // Example background color
+                                    ),
+                                  ),
+                                  // InkWell(
+                                  //   onTap: (){
+                                  //     pickImages();
+                                  //   },
+                                  //   child: Align(
+                                  //     alignment: Alignment.topCenter,
+                                  //     child: CircleAvatar(
+                                  //       radius: 40.0,
+                                  //       backgroundColor: Colors.white,
+                                  //       child: CircleAvatar(
+                                  //         radius: 60.0,
+                                  //         backgroundImage: NetworkImage(imageUrl!),
+                                  //         child: Align(
+                                  //           alignment: Alignment.bottomRight,
+                                  //           child: CircleAvatar(
+                                  //             radius: 15.0,
+                                  //             backgroundColor: Colors.white,
+                                  //             child: Icon(CupertinoIcons.camera_circle_fill)
+                                  //           ),
+                                  //         ),
+                                  //       ),
+                                  //     ),
+                                  //   ),
+                                  // ),
 
-                                      Container(
-                                        margin: EdgeInsets.only(top: 20),
-                                        height: 50, // Set a specific height
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(16.0),
-                                          color: Colors.blue, // Example background color
-                                        ),
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(100),
+                                    child: Container(
+                                      width: 90,
+                                      height: 90,
+                                      child: Image.network(
+                                        '$baseURL/' + profiledetails['user']['profilePic'],
+                                        fit: BoxFit.cover,
                                       ),
-                                      Align(
-                                        alignment: Alignment.topCenter,
-                                        child: CircleAvatar(
-                                          radius: 40.0,
-                                          backgroundColor: Colors.white,
-                                          child: CircleAvatar(
-                                            radius: 60.0,
-                                            backgroundImage: AssetImage('assets/logo/logo3.png'),
-                                            child: Align(
-                                              alignment: Alignment.bottomRight,
-                                              child: CircleAvatar(
-                                                radius: 18.0,
-                                                backgroundColor: Colors.white,
-                                                child: SvgPicture.asset(
-                                                  'assets/svg/whitelogorubidia.svg',
-                                                  height: 25,
-                                                  width: 25,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ]
-                                ),
+                                    ),
+                                  ),
+
+                                  // Container(
+                                  //   height: 150,
+                                  //   width: 300,
+                                  //   child: imageUrl != null
+                                  //       ? Padding(
+                                  //     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                                  //     child: Image.file(File(imageUrl!)),
+                                  //   )
+                                  //       : Container(), // This will render an empty container if imageUrl is null
+                                  // ),
+                                ]),
 
                                 SizedBox(
                                   height: 5,
@@ -445,8 +509,7 @@ class _profilepageState extends State<profilepage>
                                 ),
 
                                 Text(
-                                    (profiledetails?['user']?['bio'] ??
-                                        ''),
+                                  (profiledetails?['user']?['bio'] ?? ''),
                                   style: TextStyle(
                                       color: bluetext,
                                       fontSize: 12,
@@ -454,8 +517,6 @@ class _profilepageState extends State<profilepage>
                                   textAlign:
                                       TextAlign.center, // Center-align the text
                                 ),
-
-
 
                                 SizedBox(
                                   height: 10,
@@ -543,7 +604,6 @@ class _profilepageState extends State<profilepage>
                                     //         )),
                                     //       ),
 
-
                                     // InkWell(
                                     //   onTap: () {
                                     //     Navigator.of(context).push(
@@ -570,52 +630,45 @@ class _profilepageState extends State<profilepage>
                                     //   ),
                                     // ),
 
-                                    profiledetails?['user']
-                                                ['isVerified'] ==
+                                    profiledetails?['user']['isVerified'] ==
                                             false
-                                        ?
-                                Container(
-                                height: 40,
-                                  width: 130,
-                                  decoration: BoxDecoration(
-                                      color: greybg,
-                                      borderRadius:
-                                      BorderRadius.all(
-                                          Radius.circular(
-                                              20))),
-                                  child: Center(
-                                      child: Text(
-                                        "Premium",
-                                        style: TextStyle(
-                                            color: white,
-                                            fontSize: 12),
-                                      )),
-                                ):GestureDetector(
-                                      onTap: () {
-                                        Navigator.of(context).push(
-                                            MaterialPageRoute(
-                                                builder: (context) =>
-                                                    premiumpage()));
-                                      },
-                                      child: Container(
-                                        height: 40,
-                                        width: 130,
-                                        decoration: BoxDecoration(
-                                            color: buttoncolor,
-                                            borderRadius:
-                                            BorderRadius.all(
-                                                Radius
-                                                    .circular(
-                                                    20))),
-                                        child: Center(
-                                            child: Text(
+                                        ? Container(
+                                            height: 40,
+                                            width: 130,
+                                            decoration: BoxDecoration(
+                                                color: greybg,
+                                                borderRadius: BorderRadius.all(
+                                                    Radius.circular(20))),
+                                            child: Center(
+                                                child: Text(
                                               "Premium",
                                               style: TextStyle(
-                                                  color: white,
-                                                  fontSize: 12),
+                                                  color: white, fontSize: 12),
                                             )),
-                                      ),
-                                    ),
+                                          )
+                                        : GestureDetector(
+                                            onTap: () {
+                                              Navigator.of(context).push(
+                                                  MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          premiumpage()));
+                                            },
+                                            child: Container(
+                                              height: 40,
+                                              width: 130,
+                                              decoration: BoxDecoration(
+                                                  color: buttoncolor,
+                                                  borderRadius:
+                                                      BorderRadius.all(
+                                                          Radius.circular(20))),
+                                              child: Center(
+                                                  child: Text(
+                                                "Premium",
+                                                style: TextStyle(
+                                                    color: white, fontSize: 12),
+                                              )),
+                                            ),
+                                          ),
                                     SizedBox(
                                       width: 20,
                                     ),
@@ -752,24 +805,47 @@ class _profilepageState extends State<profilepage>
                                   children: [
                                     InkWell(
                                       onTap: () {
-                                        Navigator.of(context).push(
-                                            MaterialPageRoute(
-                                                builder: (context) =>
-                                                    editprofile(
-                                                      bio: profiledetails['user']['bio'] ?? "",
-                                                      firstname: profiledetails['user']['firstName'] ?? "",
-                                                      lastName: profiledetails['user']['lastName'] ?? "",
-                                                      countryCode: profiledetails['user']['countryCode']?.toString() ?? "",
-                                                      phone: profiledetails['user']['phone']?.toString() ?? "",
-                                                      email: profiledetails['user']['email'] ?? "",
-                                                      dateOfBirth: profiledetails['user']['dateOfBirth'] ?? "",
-                                                      gender: profiledetails['user']['gender'] ?? "",
-                                                      location: profiledetails['user']['location'] ?? "",
-                                                      profession: profiledetails['user']['profession'] ?? "",
-                                                      district: profiledetails['user']['district'] ?? "",
-                                                    ),));
+                                        Navigator.of(context)
+                                            .push(MaterialPageRoute(
+                                          builder: (context) => editprofile(
+                                            bio: profiledetails['user']
+                                                    ['bio'] ??
+                                                "",
+                                            firstname: profiledetails['user']
+                                                    ['firstName'] ??
+                                                "",
+                                            lastName: profiledetails['user']
+                                                    ['lastName'] ??
+                                                "",
+                                            countryCode: profiledetails['user']
+                                                        ['countryCode']
+                                                    ?.toString() ??
+                                                "",
+                                            phone: profiledetails['user']
+                                                        ['phone']
+                                                    ?.toString() ??
+                                                "",
+                                            email: profiledetails['user']
+                                                    ['email'] ??
+                                                "",
+                                            dateOfBirth: profiledetails['user']
+                                                    ['dateOfBirth'] ??
+                                                "",
+                                            gender: profiledetails['user']
+                                                    ['gender'] ??
+                                                "",
+                                            location: profiledetails['user']
+                                                    ['location'] ??
+                                                "",
+                                            profession: profiledetails['user']
+                                                    ['profession'] ??
+                                                "",
+                                            district: profiledetails['user']
+                                                    ['district'] ??
+                                                "",
+                                          ),
+                                        ));
                                       },
-
                                       child: Container(
                                         height: 31,
                                         width: 165,
@@ -809,68 +885,98 @@ class _profilepageState extends State<profilepage>
                       ],
                     ),
                   ),
-
-                  SizedBox(height: 5,),
-
-
+                  SizedBox(
+                    height: 5,
+                  ),
                   SizedBox(
                     height: 65,
                     child: ListView.builder(
                         itemCount: profilepagestatus['memberProfits'].length,
                         scrollDirection: Axis.horizontal,
                         itemBuilder: (BuildContext context, int index) {
-                          return  Padding(
+                          return Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 10),
                             child: Row(
                               children: [
                                 Column(
-                                  crossAxisAlignment:
-                                  CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-
-                                    SizedBox(height: 5,),
-
+                                    SizedBox(
+                                      height: 5,
+                                    ),
                                     Container(
                                       // height: 60,
                                       width: 175,
                                       decoration: BoxDecoration(
-                                          border: Border.all(
-                                              color: yellowborder),
+                                          border:
+                                              Border.all(color: yellowborder),
                                           borderRadius: BorderRadius.all(
                                               Radius.circular(5))),
                                       child: Column(
                                         children: [
-                                          SizedBox(height: 5,),
-
+                                          SizedBox(
+                                            height: 5,
+                                          ),
                                           Text(
-                                            profilepagestatus['memberProfits'][index]['packageName'],
-                                            style: TextStyle(fontSize: 12,color: yellowborder1),
+                                            profilepagestatus['memberProfits']
+                                                [index]['packageName'],
+                                            style: TextStyle(
+                                                fontSize: 12,
+                                                color: yellowborder1),
                                           ),
                                           Row(
-                                            crossAxisAlignment: CrossAxisAlignment.center,
-                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
                                             children: [
-
                                               Column(
                                                 children: [
-                                                  Text("Members",style: TextStyle(fontSize: 10),),
-                                                  Text( profilepagestatus['memberProfits'][index]['usersCount'].toString(),style: TextStyle(fontSize: 12,),),
+                                                  Text(
+                                                    "Members",
+                                                    style:
+                                                        TextStyle(fontSize: 10),
+                                                  ),
+                                                  Text(
+                                                    profilepagestatus[
+                                                                'memberProfits']
+                                                            [
+                                                            index]['usersCount']
+                                                        .toString(),
+                                                    style: TextStyle(
+                                                      fontSize: 12,
+                                                    ),
+                                                  ),
                                                 ],
                                               ),
-
                                               Padding(
-                                                padding: const EdgeInsets.symmetric(vertical: 5),
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        vertical: 5),
                                                 child: VerticalDivider(
                                                   color: Colors.black,
                                                   thickness: .2,
                                                 ),
                                               ),
-
                                               Column(
                                                 children: [
-
-                                                  Text("Amount",style: TextStyle(fontSize: 10,),),
-                                                  Text( profilepagestatus['memberProfits'][index]['splitAmount'].toString(),style: TextStyle(fontSize: 12,fontWeight: FontWeight.w700),),
+                                                  Text(
+                                                    "Amount",
+                                                    style: TextStyle(
+                                                      fontSize: 10,
+                                                    ),
+                                                  ),
+                                                  Text(
+                                                    profilepagestatus[
+                                                                'memberProfits']
+                                                            [
+                                                            index]['splitAmount']
+                                                        .toString(),
+                                                    style: TextStyle(
+                                                        fontSize: 12,
+                                                        fontWeight:
+                                                            FontWeight.w700),
+                                                  ),
                                                 ],
                                               ),
                                             ],
@@ -880,20 +986,17 @@ class _profilepageState extends State<profilepage>
                                     ),
                                   ],
                                 ),
-
                               ],
                             ),
                           );
                         }),
                   ),
-
-                  SizedBox(height: 15,),
-
+                  SizedBox(
+                    height: 15,
+                  ),
                   Container(
                     height: 30,
-
                     decoration: BoxDecoration(color: white, boxShadow: [
-
                       BoxShadow(
                         color: white1,
                         blurRadius: 1.0,
@@ -922,10 +1025,7 @@ class _profilepageState extends State<profilepage>
                     height: 600,
                     child: TabBarView(
                       controller: _tabController,
-                      children: [
-                        phototab(),
-                        vediotab()
-                      ],
+                      children: [phototab(), vediotab()],
                     ),
                   ),
                 ],

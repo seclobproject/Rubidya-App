@@ -142,4 +142,15 @@ class ProfileService {
   }
 
 
+  static Future ProfileImageUpload(data) async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.post('$baseURL/api/users/add-profile-pic',data: data);
+      return response.data;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+
 }
