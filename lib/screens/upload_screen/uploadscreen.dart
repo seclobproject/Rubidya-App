@@ -169,6 +169,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 
+import '../../services/upload_image.dart';
+
 
 class uploadscreen extends StatefulWidget {
   const uploadscreen({super.key});
@@ -195,10 +197,12 @@ class _uploadscreenState extends State<uploadscreen> {
       FormData formData = FormData.fromMap({
         'media': await MultipartFile.fromFile(imageUrl!),
       });
-      var response = await ProfileService.ProfileImageUpload(formData);
-      if (response.statusCode == 201) {
+      var response = await UploadService.uploadimage(formData);
+
+      // Assuming response is a map
+      if (response['sts'] == "01") {
         print("Image uploaded successfully");
-        print(response.data);
+        print(response['msg']);
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => Bottomnav()),
@@ -208,13 +212,15 @@ class _uploadscreenState extends State<uploadscreen> {
           context,
           MaterialPageRoute(builder: (context) => Bottomnav()),
         );
-        print(response.statusCode);
-        print(response.data);
+        print(response['sts']);
+        print(response['msg']);
       }
     } catch (e) {
       print("Exception during image upload: $e");
     }
   }
+
+
 
 
   Future<void> pickImages() async {

@@ -39,10 +39,9 @@ class _premiuminnerpageState extends State<premiuminnerpage> {
   String deductedAmount = '';
   String deductedmsg = '';
 
+
   Future<void> deductbalance() async {
-    setState(() {});
     try {
-      setState(() {});
       SharedPreferences prefs = await SharedPreferences.getInstance();
       userid = prefs.getString('userid');
 
@@ -54,7 +53,9 @@ class _premiuminnerpageState extends State<premiuminnerpage> {
 
       var response = await ProfileService.deductrubideum(reqData);
       log.i('Done deducting.... . $response');
+
       verifyuser();
+
       if (response['sts'] == '01') {
         setState(() {
           deductedAmount = response['rubideumToPass'].toString();
@@ -70,11 +71,19 @@ class _premiuminnerpageState extends State<premiuminnerpage> {
       }
     } catch (error) {
       // Handle specific error cases
-      if (error.toString().contains("Erorr deducting")) {
+      print(error); // Check if any error is being caught
+      if (error.toString().contains("Error deducting")) { // Corrected typo in error string
         // Show a SnackBar to inform the user
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Insufficient Balance'),
+            duration: Duration(seconds: 3),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Deducting Rubideum failed. Check your Rubideum balance'), // Show a generic error message
             duration: Duration(seconds: 3),
           ),
         );
@@ -83,21 +92,18 @@ class _premiuminnerpageState extends State<premiuminnerpage> {
   }
 
 
+
   Future verifyuser() async {
     setState(() {});
     try {
       setState(() {});
       SharedPreferences prefs = await SharedPreferences.getInstance();
       userid = prefs.getString('userid');
-
-
       String packageid = widget.id ?? '';
       var reqData = {
-
         'amount': deductedAmount,
         'packageId':packageid,
       };
-
       SnackBar(
         content: Text('verify user create'),
         duration: Duration(seconds: 3),
@@ -108,7 +114,6 @@ class _premiuminnerpageState extends State<premiuminnerpage> {
         context,
         MaterialPageRoute(builder: (context) => successpage()),
       );
-
       // Check for success in the response and show a success SnackBar
       if (response['sts'] == 1) {
         // ScaffoldMessenger.of(context).showSnackBar(
@@ -118,6 +123,9 @@ class _premiuminnerpageState extends State<premiuminnerpage> {
         //   ),
         // );
       }
+
+      print("object");
+
     } catch (error) {
       // Handle specific error cases
       if (error.toString().contains("Insufficient Balance")) {
@@ -149,6 +157,7 @@ class _premiuminnerpageState extends State<premiuminnerpage> {
       log.i('Done deducting.... . $response');
 
       if (response['sts'] == '01') {
+
         // ScaffoldMessenger.of(context).showSnackBar(
         //   SnackBar(
         //     content: Text('Rubideum deducted successfully'),

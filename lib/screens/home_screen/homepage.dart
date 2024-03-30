@@ -232,11 +232,13 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:rubidya/resources/color.dart';
 import 'package:rubidya/screens/home_screen/widgets/referral_page.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../commonpage/test.dart';
+import '../../networking/constant.dart';
 import '../../services/profile_service.dart';
 import '../../support/logger.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
@@ -252,8 +254,21 @@ class _homepageState extends State<homepage> {
   bool isFavorite = false;
   var userid;
   var profiledetails;
+  var profilelist;
   bool isLoading = false;
+  bool _isLoading = true;
   late YoutubePlayerController _controller;
+
+
+  Future _profileapi() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    userid = prefs.getString('userid');
+    var response = await ProfileService.getProfileimage();
+    log.i('profile data Show.. $response');
+    setState(() {
+      profilelist = response; // This line is causing the error
+    });
+  }
 
 
   Future _profiledetailsapi() async {
@@ -276,10 +291,11 @@ class _homepageState extends State<homepage> {
   Future _initLoad() async {
     await Future.wait(
       [
-        _profiledetailsapi()
+        _profiledetailsapi(),
+        _profileapi()
       ],
     );
-    isLoading = false;
+    _isLoading = false;
   }
 
   @override
@@ -301,7 +317,14 @@ class _homepageState extends State<homepage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Container(
+      body: _isLoading
+          ? Center(
+        child: CircularProgressIndicator(
+          strokeWidth: 6.0,
+          valueColor : AlwaysStoppedAnimation(bluetext),
+        ),
+      )
+          :Container(
         height: MediaQuery.of(context).size.height,
         child: Column(
           children: [
@@ -361,7 +384,7 @@ class _homepageState extends State<homepage> {
             Padding(
               padding: const EdgeInsets.only(left: 20),
               child: Container(
-                height: 92,
+                height: 109,
                 decoration: BoxDecoration(
                   color: Colors.white,
                   boxShadow: [
@@ -398,7 +421,7 @@ class _homepageState extends State<homepage> {
                               ),
                               child: Image.network(
                                 'https://assets.vogue.in/photos/5d288836e2f0130008fa5d30/1:1/w_1080,h_1080,c_limit/model%20nidhi%20sunil.jpg',
-                                height: 51,
+                                height: 65,
                                 fit: BoxFit.cover,
                               ),
                             ),
@@ -415,7 +438,7 @@ class _homepageState extends State<homepage> {
             Expanded(
               child: ListView.builder(
                 shrinkWrap: true,
-                itemCount: 1,
+                itemCount: profilelist['media'].length,
                 itemBuilder: (BuildContext context, int index) {
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -490,13 +513,17 @@ class _homepageState extends State<homepage> {
                               padding: const EdgeInsets.symmetric(horizontal: 10),
                               child: ClipRRect(
                                 borderRadius: BorderRadius.all(Radius.circular(10)),
-                                child: YoutubePlayer(
-                                  controller: _controller,
-                                  showVideoProgressIndicator: true,
-                                  onReady: () {
-
-                                    // Do something when the video is ready to play
-                                  },
+                                // child: YoutubePlayer(
+                                //   controller: _controller,
+                                //   showVideoProgressIndicator: true,
+                                //   onReady: () {
+                                //
+                                //     // Do something when the video is ready to play
+                                //   },
+                                // ),
+                                child: Image.network(
+                                  '$baseURL/' + profilelist['media'][index]['filePath'],
+                                  fit: BoxFit.cover,
                                 ),
                               ),
                             ),

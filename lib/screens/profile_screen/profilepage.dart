@@ -32,6 +32,7 @@ class _profilepageState extends State<profilepage>
   var userid;
   var profiledetails;
   var profilepagestatus;
+  var profileimgshow;
   bool isLoading = false;
   bool _isLoading = true;
   String? imageUrl;
@@ -56,9 +57,21 @@ class _profilepageState extends State<profilepage>
     });
   }
 
+  Future _profileimgget() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    userid = prefs.getString('userid');
+    var response = await ProfileService.ProfileImageget();
+    log.i('profile statsus show.. $response');
+    setState(() {
+      profileimgshow = response;
+    });
+  }
+
   Future _initLoad() async {
     await Future.wait(
-      [_profiledetailsapi(), _profilestatussapi()],
+      [_profiledetailsapi(),
+        _profileimgget(),
+        _profilestatussapi()],
     );
     _isLoading = false;
   }
@@ -381,11 +394,7 @@ class _profilepageState extends State<profilepage>
         // ),
       ),
       backgroundColor: white,
-      body: _isLoading
-          ? Center(
-              child: CircularProgressIndicator(),
-            )
-          : SingleChildScrollView(
+      body:  SingleChildScrollView(
               child: Column(
                 children: [
                   SizedBox(
@@ -468,12 +477,26 @@ class _profilepageState extends State<profilepage>
                                     child: Container(
                                       width: 90,
                                       height: 90,
-                                      child: Image.network(
-                                        '$baseURL/' + profiledetails['user']['profilePic'],
+                                      child: profileimgshow != null && profileimgshow['profilePic'] != null && profileimgshow['profilePic']['filePath'] != null
+                                          ? Image.network(
+                                        '$baseURL/' + profileimgshow['profilePic']['filePath'],
                                         fit: BoxFit.cover,
+                                      )
+                                          : Center(
+                                        child: Container(
+                                          height: 90,
+                                          width: 90,
+                                          decoration: BoxDecoration(
+                                            color: grad2,
+                                            borderRadius: BorderRadius.all(Radius.circular(100))
+                                          ),
+                                          child: Center(child: Text("No Img",style: TextStyle(color: greybg),)),
+                                        ),
                                       ),
                                     ),
                                   ),
+
+
 
                                   // Container(
                                   //   height: 150,
@@ -828,9 +851,9 @@ class _profilepageState extends State<profilepage>
                                             email: profiledetails['user']
                                                     ['email'] ??
                                                 "",
-                                            dateOfBirth: profiledetails['user']
-                                                    ['dateOfBirth'] ??
-                                                "",
+                                            // dateOfBirth: profiledetails['user']
+                                            //         ['updatedDOB'] ??
+                                            //     "",
                                             gender: profiledetails['user']
                                                     ['gender'] ??
                                                 "",
@@ -891,105 +914,103 @@ class _profilepageState extends State<profilepage>
                   SizedBox(
                     height: 65,
                     child: ListView.builder(
-                        itemCount: profilepagestatus['memberProfits'].length,
-                        scrollDirection: Axis.horizontal,
-                        itemBuilder: (BuildContext context, int index) {
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 10),
-                            child: Row(
-                              children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    SizedBox(
-                                      height: 5,
+                      itemCount: profilepagestatus != null && profilepagestatus.containsKey('memberProfits')
+                          ? profilepagestatus['memberProfits'].length
+                          : 0, // Check if profilepagestatus is not null and contains 'memberProfits'
+                      scrollDirection: Axis.horizontal,
+                      itemBuilder: (BuildContext context, int index) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          child: Row(
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(
+                                    height: 5,
+                                  ),
+                                  Container(
+                                    width: 175,
+                                    decoration: BoxDecoration(
+                                      border: Border.all(color: yellowborder),
+                                      borderRadius: BorderRadius.all(Radius.circular(5)),
                                     ),
-                                    Container(
-                                      // height: 60,
-                                      width: 175,
-                                      decoration: BoxDecoration(
-                                          border:
-                                              Border.all(color: yellowborder),
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(5))),
-                                      child: Column(
-                                        children: [
-                                          SizedBox(
-                                            height: 5,
-                                          ),
-                                          Text(
-                                            profilepagestatus['memberProfits']
-                                                [index]['packageName'],
-                                            style: TextStyle(
-                                                fontSize: 12,
-                                                color: yellowborder1),
-                                          ),
-                                          Row(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.center,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              Column(
-                                                children: [
-                                                  Text(
-                                                    "Members",
-                                                    style:
-                                                        TextStyle(fontSize: 10),
-                                                  ),
-                                                  Text(
-                                                    profilepagestatus[
-                                                                'memberProfits']
-                                                            [
-                                                            index]['usersCount']
-                                                        .toString(),
-                                                    style: TextStyle(
-                                                      fontSize: 12,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                              Padding(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                        vertical: 5),
-                                                child: VerticalDivider(
-                                                  color: Colors.black,
-                                                  thickness: .2,
+                                    child: Column(
+                                      children: [
+                                        SizedBox(
+                                          height: 5,
+                                        ),
+                                        Text(
+                                          profilepagestatus != null &&
+                                              profilepagestatus.containsKey('memberProfits')
+                                              ? profilepagestatus['memberProfits'][index]
+                                          ['packageName']
+                                              : '', // Check again before accessing nested keys
+                                          style: TextStyle(fontSize: 12, color: yellowborder1),
+                                        ),
+                                        Row(
+                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Column(
+                                              children: [
+                                                Text(
+                                                  "Members",
+                                                  style: TextStyle(fontSize: 10),
                                                 ),
+                                                Text(
+                                                  profilepagestatus != null &&
+                                                      profilepagestatus.containsKey('memberProfits')
+                                                      ? profilepagestatus['memberProfits'][index]
+                                                  ['usersCount']
+                                                      .toString()
+                                                      : '', // Check again before accessing nested keys
+                                                  style: TextStyle(fontSize: 12),
+                                                ),
+                                              ],
+                                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.symmetric(vertical: 5),
+                                              child: VerticalDivider(
+                                                color: Colors.black,
+                                                thickness: .2,
                                               ),
-                                              Column(
-                                                children: [
-                                                  Text(
-                                                    "Amount",
-                                                    style: TextStyle(
-                                                      fontSize: 10,
-                                                    ),
+                                            ),
+                                            Column(
+                                              children: [
+                                                Text(
+                                                  "Amount",
+                                                  style: TextStyle(
+                                                    fontSize: 10,
                                                   ),
-                                                  Text(
-                                                    profilepagestatus[
-                                                                'memberProfits']
-                                                            [
-                                                            index]['splitAmount']
-                                                        .toString(),
-                                                    style: TextStyle(
-                                                        fontSize: 12,
-                                                        fontWeight:
-                                                            FontWeight.w700),
+                                                ),
+                                                Text(
+                                                  profilepagestatus != null &&
+                                                      profilepagestatus.containsKey('memberProfits')
+                                                      ? profilepagestatus['memberProfits'][index]
+                                                  ['splitAmount']
+                                                      .toString()
+                                                      : '', // Check again before accessing nested keys
+                                                  style: TextStyle(
+                                                    fontSize: 12,
+                                                    fontWeight: FontWeight.w700,
                                                   ),
-                                                ],
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ],
                                     ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          );
-                        }),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+
                   ),
                   SizedBox(
                     height: 15,

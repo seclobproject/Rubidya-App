@@ -152,5 +152,15 @@ class ProfileService {
     }
   }
 
+  static Future ProfileImageget() async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.get('$baseURL/api/users/get-profile-pic');
+      return response.data;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
 
 }
