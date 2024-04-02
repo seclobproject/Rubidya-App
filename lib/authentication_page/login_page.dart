@@ -283,21 +283,37 @@ class _loginState extends State<login> {
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Container(
-                  height: 48,
-                  width: 400,
-                  decoration: BoxDecoration(
-                      color: buttoncolor,
-                      borderRadius: BorderRadius.all(Radius.circular(10))),
-                  child: Center(
-                    child: Text("Login",style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,color: white),),
-                  ),
-
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Container(
+                      height: 48,
+                      width: 400,
+                      decoration: BoxDecoration(
+                        color: buttoncolor,
+                        borderRadius: BorderRadius.all(Radius.circular(10)),
+                      ),
+                      child: Center(
+                        child: Text(
+                          "Login",
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: white,
+                          ),
+                        ),
+                      ),
+                    ),
+                    // Circular progress indicator
+                    if (isLoading)
+                      CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(white),
+                      ),
+                  ],
                 ),
               ),
             ),
+
 
             SizedBox(height: 40,),
 

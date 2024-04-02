@@ -490,7 +490,7 @@ class _registrationState extends State<registration> {
                     isLoading = true;
                   });
 
-                  // Perform your asynchronous operation, for example, createleave()
+                  // Perform your asynchronous operation, for example, userRegistration()
                   userRegistration().then((result) {
                     // After the operation is complete, set isLoading to false
                     setState(() {
@@ -506,18 +506,36 @@ class _registrationState extends State<registration> {
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Container(
-                  height:48,
-                  width: 400,
-                  decoration: BoxDecoration(
-                      color: buttoncolor,
-                      borderRadius: BorderRadius.all(Radius.circular(10))),
-
-                  child: Center(child: Text("Sign Up",style: TextStyle(fontSize: 12,color: white),)),
-
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Container(
+                      height: 48,
+                      width: 400,
+                      decoration: BoxDecoration(
+                        color: buttoncolor,
+                        borderRadius: BorderRadius.all(Radius.circular(10)),
+                      ),
+                      child: Center(
+                        child: Text(
+                          "Sign Up",
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: white,
+                          ),
+                        ),
+                      ),
+                    ),
+                    // Circular progress indicator
+                    if (isLoading)
+                      CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(white),
+                      ),
+                  ],
                 ),
               ),
             ),
+
 
             SizedBox(height: 70,)
 

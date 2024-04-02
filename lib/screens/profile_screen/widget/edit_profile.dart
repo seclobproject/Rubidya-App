@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../navigation/bottom_navigation.dart';
 import '../../../resources/color.dart';
 import '../../../services/profile_service.dart';
 import '../../../support/logger.dart';
@@ -10,6 +11,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:dio/dio.dart';
 import 'dart:io';
+import 'package:image_cropper/image_cropper.dart';
+
+
 
 
 class editprofile extends StatefulWidget {
@@ -74,7 +78,7 @@ class _editprofileState extends State<editprofile> {
 
   var userid;
   String? imageUrl;
-
+  bool _isLoading = false;
   bool isLoading = false;
   @override
   void initState() {
@@ -142,6 +146,11 @@ class _editprofileState extends State<editprofile> {
           district: districtController.text,
         )),
       );
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => Bottomnav()),
+      );
+
     } catch (error) {
       print('Error editing work report: $error');
     } finally {
@@ -187,10 +196,33 @@ class _editprofileState extends State<editprofile> {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
-      setState(() {
-        imageUrl = pickedFile.path;
-      });
+      File? croppedFile = await _cropImage(pickedFile.path);
+      if (croppedFile != null) {
+        setState(() {
+          imageUrl = croppedFile.path;
+        });
+      }
     }
+  }
+
+
+  Future<File?> _cropImage(String imagePath) async {
+    final imageCropper = ImageCropper();
+    File? croppedFile = await imageCropper.cropImage(
+      sourcePath: imagePath,
+      aspectRatio: CropAspectRatio(ratioX: 1.0, ratioY: 1.0),
+      compressQuality: 100,
+      maxHeight: 800,
+      maxWidth: 800,
+      compressFormat: ImageCompressFormat.jpg,
+      androidUiSettings: AndroidUiSettings(
+        toolbarTitle: 'Crop Image',
+        toolbarColor: Colors.blue,
+        toolbarWidgetColor: Colors.white,
+        hideBottomControls: true,
+      ),
+    );
+    return croppedFile;
   }
 
 
@@ -622,23 +654,51 @@ class _editprofileState extends State<editprofile> {
 
             SizedBox(height: 40,),
 
-
             InkWell(
               onTap: () {
-                editWorkReport();
-                uploadImage();
+                setState(() {
+                  _isLoading = true;
+                });
+                editWorkReport().then((_) {
+                  // After editWorkReport() completes, uploadImage() will start
+                  uploadImage().then((_) {
+                    setState(() {
+                      _isLoading = false;
+                    });
+                  });
+                });
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Container(
-                  height:40,
-                  width: 400,
-                  decoration: BoxDecoration(
-                      color: bluetext,
-                      borderRadius: BorderRadius.all(Radius.circular(10))),
-
-                  child: Center(child: Text("Update",style: TextStyle(fontSize: 12,color: white),)),
-
+                child: Stack(
+                  children: [
+                    Container(
+                      height: 40,
+                      width: 400,
+                      decoration: BoxDecoration(
+                        color: bluetext,
+                        borderRadius: BorderRadius.all(Radius.circular(10)),
+                      ),
+                      child: Center(
+                        child: Text(
+                          "Update",
+                          style: TextStyle(fontSize: 12, color: white),
+                        ),
+                      ),
+                    ),
+                    Visibility(
+                      visible: _isLoading,
+                      child: Container(
+                        height: 40,
+                        width: 400,
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(white),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),

@@ -468,7 +468,10 @@ class _homepageState extends State<homepage> {
                                     Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Text("Samuel", style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),),
+                                        Text(
+                                          profilelist['media'][index]['userId']['firstName'] ?? '', // Use empty string if value is null
+                                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+                                        ),
                                         Text("5h ago", style: TextStyle(fontSize: 9, color: Colors.grey)),
                                       ],
                                     ),

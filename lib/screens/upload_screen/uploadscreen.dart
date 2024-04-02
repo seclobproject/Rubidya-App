@@ -144,52 +144,38 @@
 //
 //
 
-
-
-
+import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../../resources/color.dart';
-import '../../services/profile_service.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dio/dio.dart';
-
-
-import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import '../../services/upload_image.dart';
 import '../../../navigation/bottom_navigation.dart';
 import '../../../resources/color.dart';
-import 'dart:convert';
-import 'dart:io';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:image_picker/image_picker.dart';
-
-import '../../services/upload_image.dart';
-
 
 class uploadscreen extends StatefulWidget {
-  const uploadscreen({super.key});
+  const uploadscreen({Key? key}) : super(key: key);
 
   @override
   State<uploadscreen> createState() => _uploadscreenState();
 }
 
 class _uploadscreenState extends State<uploadscreen> {
-
-
   var userid;
   String? imageUrl;
-
+  bool uploading = false; // Flag to track if upload is in progress
 
   Future<void> uploadImage() async {
+    setState(() {
+      uploading = true; // Set uploading flag to true when upload starts
+    });
+
     SharedPreferences prefs = await SharedPreferences.getInstance();
     userid = (prefs.getString('userid') ?? "");
     try {
+      // Your existing upload logic...
       if (imageUrl == null) {
         print("Please pick an image first");
         return;
@@ -217,22 +203,20 @@ class _uploadscreenState extends State<uploadscreen> {
       }
     } catch (e) {
       print("Exception during image upload: $e");
+    } finally {
+      setState(() {
+        uploading = false; // Set uploading flag to false when upload completes or encounters an error
+      });
     }
   }
-
-
-
 
   Future<void> pickImages() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
-      File? croppedFile = await _cropImage(pickedFile.path);
-      if (croppedFile != null) {
-        setState(() {
-          imageUrl = croppedFile.path;
-        });
-      }
+      setState(() {
+        imageUrl = pickedFile.path;
+      });
     }
   }
 
@@ -240,12 +224,9 @@ class _uploadscreenState extends State<uploadscreen> {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.camera);
     if (pickedFile != null) {
-      File? croppedFile = await _cropImage(pickedFile.path);
-      if (croppedFile != null) {
-        setState(() {
-          imageUrl = croppedFile.path;
-        });
-      }
+      setState(() {
+        imageUrl = pickedFile.path;
+      });
     }
   }
 
@@ -268,55 +249,49 @@ class _uploadscreenState extends State<uploadscreen> {
     return croppedFile;
   }
 
-
   @override
   Widget build(BuildContext context) {
-    return  Scaffold(
-
+    return Scaffold(
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-
-
         children: [
-
-          SizedBox(height: 100,),
-
+          SizedBox(
+            height: 100,
+          ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               InkWell(
-                onTap: (){
+                onTap: () {
                   pickImages();
                 },
                 child: Align(
                   alignment: Alignment.center,
-                  child: Icon(Icons.image,
+                  child: Icon(
+                    Icons.image,
                     size: 60,
                     color: bluetext,
-
                   ),
                 ),
               ),
-
-              SizedBox(width: 30,),
-
+              SizedBox(
+                width: 30,
+              ),
               InkWell(
-                onTap: (){
+                onTap: () {
                   pickImageFromCamera();
                 },
                 child: Align(
                   alignment: Alignment.center,
-                  child: Icon(Icons.camera_alt_rounded,
+                  child: Icon(
+                    Icons.camera_alt_rounded,
                     size: 60,
                     color: bluetext,
-
                   ),
                 ),
               ),
             ],
           ),
-
-
           Container(
             height: 150,
             width: 300,
@@ -327,27 +302,47 @@ class _uploadscreenState extends State<uploadscreen> {
             )
                 : Container(), // This will render an empty container if imageUrl is null
           ),
-
         ],
-
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: SizedBox(
-          height: 40,
-          width: 400,
+      floatingActionButton: SizedBox(
+        height: 45,
+        width: 400,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
           child: FloatingActionButton.extended(
             backgroundColor: bluetext,
-            onPressed: (){
-
+            onPressed: !uploading
+                ? () {
               uploadImage();
-            },
-            label: Text('Upload',style: TextStyle(fontSize: 10,color: white),),
+            }
+                : null,
+            label: Stack(
+              alignment: Alignment.center,
+              children: [
+                uploading
+                    ? SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    color: Colors.white,
+                    strokeWidth: 2,
+                  ),
+                )
+                    : SizedBox(),
+                Text(
+                  'Upload',
+                  style: TextStyle(fontSize: 10,color: white),
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 }
+
+
+
 
