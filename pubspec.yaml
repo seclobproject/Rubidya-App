@@ -41,8 +41,8 @@ dev_dependencies:
   flutter_image_filters: ^0.0.17
   camera: ^0.9.4+5
   image_cropper: ^1.4.0
-
-
+  upgrader: ^10.0.1
+  easy_debounce: ^2.0.3
 
 flutter_icons:
   android: "launcher_icon"

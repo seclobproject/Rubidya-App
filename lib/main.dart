@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:upgrader/upgrader.dart';
 import 'authentication_page/splash.dart';
 
 void main() {
@@ -18,8 +18,12 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home:  MyHomePage(),
-
+      // home:  MyHomePage(),
+      home: UpgradeAlert(
+          child: Scaffold(
+            appBar: AppBar(title: Text('Upgrader')),
+            body: Center(child: Text('Checking...')),
+          )),
     );
   }
 }

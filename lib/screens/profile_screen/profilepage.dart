@@ -664,7 +664,7 @@ class _profilepageState extends State<profilepage>
                                                     Radius.circular(20))),
                                             child: Center(
                                                 child: Text(
-                                              "Premium",
+                                              "Subscription",
                                               style: TextStyle(
                                                   color: white, fontSize: 12),
                                             )),
@@ -686,7 +686,7 @@ class _profilepageState extends State<profilepage>
                                                           Radius.circular(20))),
                                               child: Center(
                                                   child: Text(
-                                                "Premium",
+                                                "Subscription",
                                                 style: TextStyle(
                                                     color: white, fontSize: 12),
                                               )),

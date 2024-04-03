@@ -1,200 +1,81 @@
-
-
-
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../../resources/color.dart';
-import '../../services/profile_service.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:image_cropper/image_cropper.dart';
-import 'package:dio/dio.dart';
+import 'package:easy_debounce/easy_debounce.dart'; // Import the necessary package for debouncing
 
-
-import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import '../../../navigation/bottom_navigation.dart';
-import '../../../resources/color.dart';
-import 'dart:convert';
-import 'dart:io';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:image_picker/image_picker.dart';
-
-
-class uploadscreens extends StatefulWidget {
-  const uploadscreens({super.key});
-
+class MyWidget extends StatefulWidget {
   @override
-  State<uploadscreens> createState() => _uploadscreenState();
+  _MyWidgetState createState() => _MyWidgetState();
 }
 
-class _uploadscreenState extends State<uploadscreens> {
+class _MyWidgetState extends State<MyWidget> {
+  bool isLoading = false;
 
-
-  var userid;
-  String? imageUrl;
-
-
-  Future<void> uploadImage() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    userid = (prefs.getString('userid') ?? "");
-    try {
-      if (imageUrl == null) {
-        print("Please pick an image first");
-        return;
-      }
-      FormData formData = FormData.fromMap({
-        'media': await MultipartFile.fromFile(imageUrl!),
-      });
-      var response = await ProfileService.verificationimage(formData);
-      if (response.statusCode == 201) {
-        print("Image uploaded successfully");
-        print(response.data);
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => Bottomnav()),
-        );
-      } else {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => Bottomnav()),
-        );
-        print(response.statusCode);
-        print(response.data);
-      }
-    } catch (e) {
-      print("Exception during image upload: $e");
-    }
+  void deductbalance() {
+    // Your deductbalance logic goes here
+    // This is just a placeholder function
+    print('Deducting balance...');
   }
 
+  void _handleTap() {
+    setState(() {
+      isLoading = true; // Show loading indicator
+    });
 
-  Future<void> pickImages() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      File? croppedFile = await _cropImage(pickedFile.path);
-      if (croppedFile != null) {
-        setState(() {
-          imageUrl = croppedFile.path;
-        });
-      }
-    }
-  }
-
-  Future<void> pickImageFromCamera() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.camera);
-    if (pickedFile != null) {
-      File? croppedFile = await _cropImage(pickedFile.path);
-      if (croppedFile != null) {
-        setState(() {
-          imageUrl = croppedFile.path;
-        });
-      }
-    }
-  }
-
-  Future<File?> _cropImage(String imagePath) async {
-    final imageCropper = ImageCropper();
-    File? croppedFile = await imageCropper.cropImage(
-      sourcePath: imagePath,
-      aspectRatio: CropAspectRatio(ratioX: 1.0, ratioY: 1.0),
-      compressQuality: 100,
-      maxHeight: 800,
-      maxWidth: 800,
-      compressFormat: ImageCompressFormat.jpg,
-      androidUiSettings: AndroidUiSettings(
-        toolbarTitle: 'Crop Image',
-        toolbarColor: Colors.blue,
-        toolbarWidgetColor: Colors.white,
-        hideBottomControls: true,
-      ),
+    // Debounce the deductbalance function with a delay of 2000 milliseconds (2 seconds)
+    EasyDebounce.debounce(
+      'deductbalance', // unique ID for debounce
+      Duration(milliseconds: 2000),
+      deductbalance,
     );
-    return croppedFile;
-  }
 
+    // After 3 seconds, hide the loading indicator
+    Future.delayed(Duration(seconds: 3), () {
+      setState(() {
+        isLoading = false;
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return  Scaffold(
+    return Scaffold(
 
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-
-
         children: [
-
           SizedBox(height: 100,),
 
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              InkWell(
-                onTap: (){
-                  pickImages();
-                },
-                child: Align(
-                  alignment: Alignment.center,
-                  child: Icon(Icons.image,
-                    size: 60,
-                    color: bluetext,
-
+      Center(
+        child: InkWell(
+        onTap: isLoading ? null : _handleTap, // Prevent tapping when loading
+          child: Container(
+            height: 36,
+            width: 150,
+            decoration: BoxDecoration(
+              color: Colors.blue, // Change to your desired color
+              border: Border.all(color: Colors.white, width: .3),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Center(
+              child: isLoading
+                  ? CircularProgressIndicator() // Show loading indicator
+                  : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    "Pay from wallet",
+                    style: TextStyle(color: Colors.white, fontSize: 12),
                   ),
-                ),
+                ],
               ),
-
-              SizedBox(width: 30,),
-
-              InkWell(
-                onTap: (){
-                  pickImageFromCamera();
-                },
-                child: Align(
-                  alignment: Alignment.center,
-                  child: Icon(Icons.camera_alt_rounded,
-                    size: 60,
-                    color: bluetext,
-
-                  ),
-                ),
-              ),
-            ],
-          ),
-
-
-          Container(
-            height: 150,
-            width: 300,
-            child: imageUrl != null
-                ? Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              child: Image.file(File(imageUrl!)),
-            )
-                : Container(), // This will render an empty container if imageUrl is null
-          ),
-
-        ],
-
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: SizedBox(
-          height: 40,
-          width: 400,
-          child: FloatingActionButton.extended(
-            backgroundColor: bluetext,
-            onPressed: (){
-
-              uploadImage();
-            },
-            label: Text('Upload',style: TextStyle(fontSize: 10,color: white),),
+            ),
           ),
         ),
       ),
+        ],
+      ),
+
     );
+
   }
 }
 
