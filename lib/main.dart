@@ -19,11 +19,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       // home:  MyHomePage(),
-      home: UpgradeAlert(
-          child: Scaffold(
-            appBar: AppBar(title: Text('Upgrader')),
-            body: Center(child: Text('Checking...')),
-          )),
+      home: MyHomePage(),
     );
   }
 }

@@ -562,7 +562,6 @@ class _premiuminnerpageState extends State<premiuminnerpage> {
         // ),
 
 
-
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: InkWell(
@@ -600,5 +599,4 @@ class _premiuminnerpageState extends State<premiuminnerpage> {
       ),
     );
   }
-
 }

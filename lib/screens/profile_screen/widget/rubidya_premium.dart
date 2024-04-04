@@ -34,127 +34,6 @@ class _premiumpageState extends State<premiumpage> {
   String deductedmsg = '';
   late Map<String, dynamic> profileDetails;
 
-  // Future deductbalance() async {
-  //   setState(() {});
-  //   try {
-  //     setState(() {});
-  //     SharedPreferences prefs = await SharedPreferences.getInstance();
-  //     userid = prefs.getString('userid');
-  //     var reqData = {'amount': '500'};
-  //
-  //     var response = await ProfileService.deductrubideum(reqData);
-  //     log.i('Done deducting.... . $response');
-  //
-  //     if (response['sts'] == '01') {
-  //       setState(() {
-  //         deductedAmount = response['rubideumToPass'].toString();
-  //         deductedmsg = response['msg'].toString();
-  //       });
-  //     }
-  //   } catch (error) {
-  //     // Handle specific error cases
-  //     if (error.toString().contains("Erorr deducting")) {
-  //       // Show a SnackBar to inform the user
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(
-  //           content: Text('Erorr deducting'),
-  //           duration: Duration(seconds: 3),
-  //         ),
-  //       );
-  //     }
-  //   }
-  // }
-
-  // Future addData(String payId, String uniqueId) async {
-  //   setState(() {});
-  //   try {
-  //     setState(() {});
-  //     SharedPreferences prefs = await SharedPreferences.getInstance();
-  //     userid = prefs.getString('userid');
-  //     var reqData = {
-  //       'payId': payId,
-  //       'uniqueId': uniqueId,
-  //       'currency': 'RBD',
-  //       'amount': '5',
-  //
-  //     };
-  //     SnackBar(
-  //       content: Text('Rubidya Successfully'),
-  //       duration: Duration(seconds: 3),
-  //     );
-  //
-  //     var response = await ProfileService.deductbalance(reqData);
-  //     log.i('add member create . $response');
-  //     verifyuser();
-  //
-  //     // Check for success in the response and show a success SnackBar
-  //     if (response['msg'] == 'PayId added successfully') {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(
-  //           content: Text('Pay Id Added Successfully'),
-  //           duration: Duration(seconds: 3),
-  //         ),
-  //       );
-  //     }
-  //
-  //   }
-  //   catch (error) {
-  //     // Handle specific error cases
-  //     if (error.toString().contains("User Already Exist")) {
-  //       // Show a SnackBar to inform the user
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(
-  //           content: Text('User already exists!'),
-  //           duration: Duration(seconds: 3),
-  //         ),
-  //       );
-  //     }
-  //   }
-  // }
-
-  // Future verifyuser() async {
-  //   setState(() {});
-  //   try {
-  //     setState(() {});
-  //     SharedPreferences prefs = await SharedPreferences.getInstance();
-  //     userid = prefs.getString('userid');
-  //     var reqData = {'amount': deductedAmount};
-  //
-  //     SnackBar(
-  //       content: Text('verify user create'),
-  //       duration: Duration(seconds: 3),
-  //     );
-  //     var response = await ProfileService.verifyuser(reqData);
-  //
-  //     log.i('verify user create . $response');
-  //     Navigator.push(
-  //       context,
-  //       MaterialPageRoute(builder: (context) => Bottomnav()),
-  //     );
-  //
-  //     // Check for success in the response and show a success SnackBar
-  //     if (response['sts'] == 1) {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(
-  //           content: Text('verify user create'),
-  //           duration: Duration(seconds: 3),
-  //         ),
-  //       );
-  //     }
-  //   } catch (error) {
-  //     // Handle specific error cases
-  //     if (error.toString().contains("User Already Exist")) {
-  //       // Show a SnackBar to inform the user
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(
-  //           content: Text('verify already exists!'),
-  //           duration: Duration(seconds: 3),
-  //         ),
-  //       );
-  //     }
-  //   }
-  // }
-
   Future _profiledetailsapi() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     userid = prefs.getString('userid');
@@ -207,129 +86,113 @@ class _premiumpageState extends State<premiumpage> {
       ),
       body: _isLoading
           ? Center(
-        child: CircularProgressIndicator(
-          strokeWidth: 6.0,
-          valueColor : AlwaysStoppedAnimation(yellow),
-        ),
-      )
-          : // Text(
-      //   (profiledetails?['user']?['payId'] ?? 'loading...'),
-      //   style: TextStyle(fontSize: 14),
-      // ),
-      //
-      // Text(
-      //   (profiledetails?['user']?['uniqueId'] ?? 'loading...'),
-      //   style: TextStyle(fontSize: 14),
-      // ),
-      // Column(
-      //   crossAxisAlignment: CrossAxisAlignment.center,
-      //   mainAxisAlignment: MainAxisAlignment.center,
-      //   children: [
-      //     Text("Rubideum to be deducted:"),
-      //     Text(
-      //       ' ${deductedAmount.isEmpty ? "N/A" : deductedAmount}',
-      //       style: TextStyle(color: appBlueColor),
-      //     ),
-      //   ],
-      SingleChildScrollView(
-    child: Column(
-    crossAxisAlignment: CrossAxisAlignment.center, // Added this line
-      children: [
-        Text(
-          "Get premium today",
-          style: TextStyle(
-              fontSize: 20, fontWeight: FontWeight.w600, color: white),
-        ),
-
-        SizedBox(
-          height: 30,
-        ),
-
-        Container(
-          height: 46,
-          width: 157,
-          decoration: BoxDecoration(
-              color: gradnew,
-              border: Border.all(color: white, width: .3),
-              borderRadius: BorderRadius.circular(10)),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              SvgPicture.asset(
-                'assets/svg/whitelogorubidia.svg',
-                fit: BoxFit.scaleDown,
+              child: CircularProgressIndicator(
+                strokeWidth: 6.0,
+                valueColor: AlwaysStoppedAnimation(yellow),
               ),
-              SvgPicture.asset(
-                'assets/svg/logoyellowrubidia.svg',
-                fit: BoxFit.scaleDown,
+            )
+          : SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center, // Added this line
+                children: [
+                  Text(
+                    "Get premium today",
+                    style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                        color: white),
+                  ),
+
+                  SizedBox(
+                    height: 30,
+                  ),
+
+                  Container(
+                    height: 46,
+                    width: 157,
+                    decoration: BoxDecoration(
+                        color: gradnew,
+                        border: Border.all(color: white, width: .3),
+                        borderRadius: BorderRadius.circular(10)),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        SvgPicture.asset(
+                          'assets/svg/whitelogorubidia.svg',
+                          fit: BoxFit.scaleDown,
+                        ),
+                        SvgPicture.asset(
+                          'assets/svg/logoyellowrubidia.svg',
+                          fit: BoxFit.scaleDown,
+                        ),
+                        SvgPicture.asset(
+                          'assets/svg/logogoldrubidia.svg',
+                          fit: BoxFit.scaleDown,
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  SizedBox(
+                    height: 20,
+                  ),
+
+                  Text(
+                    "Rubideum Premium Account Activation",
+                    style: TextStyle(fontSize: 16, color: white),
+                  ),
+
+                  SizedBox(
+                    height: 10,
+                  ),
+
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Text(
+                      "If you debit coins from Rubideum account after verified you\nwill be credited back within 48 hours.",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: white,
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  // Other widgets...
+                  packages != null && packages['packages'] != null
+                      ? ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: packages['packages'].length,
+                          itemBuilder: (BuildContext context, int index) {
+                            final packageName =
+                                packages['packages'][index]['packageName'];
+                            final amount = packages['packages'][index]['amount']
+                                .toString();
+                            final List<String> benefits = List<String>.from(
+                                packages['packages'][index]['benefits']);
+                            final slug =
+                                packages['packages'][index]['packageSlug'];
+
+                            return PremiumListing(
+                              id: packages['packages'][index]['_id'],
+                              amount: amount,
+                              packageName: packageName,
+                              benefits: benefits,
+                              slug: slug,
+                              profileDetails: profileDetails,
+                            );
+                          },
+                        )
+                      : Container(),
+                  SizedBox(
+                    height: 10,
+                  ),
+                ],
               ),
-              SvgPicture.asset(
-                'assets/svg/logogoldrubidia.svg',
-                fit: BoxFit.scaleDown,
-              ),
-            ],
-          ),
-        ),
-
-        SizedBox(
-          height: 20,
-        ),
-
-        Text(
-          "Rubideum Premium Account Activation",
-          style: TextStyle(fontSize: 16, color: white),
-        ),
-
-        SizedBox(
-          height: 10,
-        ),
-
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Text(
-            "If you debit coins from Rubideum account after verified you\nwill be credited back within 48 hours.",
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 12,
-              color: white,
             ),
-          ),
-        ),
-        SizedBox(
-          height: 10,
-        ),
-        // Other widgets...
-        packages != null && packages['packages'] != null
-            ? ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: packages['packages'].length,
-          itemBuilder: (BuildContext context, int index) {
-            final packageName =
-            packages['packages'][index]['packageName'];
-            final amount =
-            packages['packages'][index]['amount'].toString();
-            final List<String> benefits =
-            List<String>.from(packages['packages'][index]['benefits']);
-            final slug = packages['packages'][index]['packageSlug'];
-
-            return PremiumListing(
-              id: packages['packages'][index]['_id'],
-              amount: amount,
-              packageName: packageName,
-              benefits: benefits,
-              slug: slug,
-              profileDetails: profileDetails,
-            );
-          },
-        )
-            : Container(),
-        SizedBox(
-          height: 10,
-        ),
-      ],
-    ),
-    ),
     );
   }
 }
@@ -360,11 +223,19 @@ class PremiumListing extends StatelessWidget {
       child: IgnorePointer(
         ignoring: hasSlug,
         child: InkWell(
-          onTap: !hasSlug ? (){
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => premiuminnerpage(id: id,packageName: packageName,amount: amount,)),);
-          } : null,
+          onTap: !hasSlug
+              ? () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => premiuminnerpage(
+                              id: id,
+                              packageName: packageName,
+                              amount: amount,
+                            )),
+                  );
+                }
+              : null,
           child: Stack(
             children: [
               Container(
@@ -386,7 +257,8 @@ class PremiumListing extends StatelessWidget {
                     Row(
                       children: [
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 10),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 10),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -398,7 +270,6 @@ class PremiumListing extends StatelessWidget {
                                   color: _getMembershipColor(packageName),
                                 ),
                               ),
-
                               Text(
                                 amount,
                                 style: TextStyle(
@@ -414,7 +285,8 @@ class PremiumListing extends StatelessWidget {
 
                     Padding(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 20, ),
+                        horizontal: 20,
+                      ),
                       child: Row(
                         children: [
                           SizedBox(
@@ -436,7 +308,8 @@ class PremiumListing extends StatelessWidget {
                     //   height: 10,
                     // ),
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 20),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 20),
                       child: Container(
                         height: 35,
                         width: 400,
@@ -456,7 +329,6 @@ class PremiumListing extends StatelessWidget {
                         ),
                       ),
                     ),
-
                   ],
                 ),
               ),
@@ -488,8 +360,7 @@ class PremiumListing extends StatelessWidget {
     if (profileDetails['packageName'].contains(slug)) {
       return [white1, greybg]; // Gradient for premium package
     } else {
-      return [premiumcard1,
-        premiumcard2]; // Default gradient
+      return [premiumcard1, premiumcard2]; // Default gradient
     }
   }
 
