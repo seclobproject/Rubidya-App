@@ -43,6 +43,7 @@ dev_dependencies:
   image_cropper: ^1.4.0
   upgrader: ^10.0.1
   easy_debounce: ^2.0.3
+  favorite_button: ^0.0.4
 
 flutter_icons:
   android: "launcher_icon"

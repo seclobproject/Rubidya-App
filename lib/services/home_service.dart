@@ -28,6 +28,26 @@ class HomeService {
   }
 
 
+  static Future follow(data) async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.post('$baseURL/api/users/follow',data: data);
+      return response.data;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  static Future unfollow(data) async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.post('$baseURL/api/users/unfollow',data: data);
+      return response.data;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
 
 
 }
