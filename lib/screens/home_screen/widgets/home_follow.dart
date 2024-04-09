@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../networking/constant.dart';
@@ -6,73 +7,18 @@ import '../../../services/home_service.dart';
 import '../../../support/logger.dart';
 import 'package:favorite_button/favorite_button.dart';
 
-class homefollow extends StatefulWidget {
-  const homefollow({super.key});
+class HomeFollow extends StatefulWidget {
+  const HomeFollow({Key? key}) : super(key: key);
 
   @override
-  State<homefollow> createState() => _homefollowState();
+  State<HomeFollow> createState() => _HomeFollowState();
 }
 
-class _homefollowState extends State<homefollow> {
-  bool isFollowing = false;
-  var suggestfollow;
+class _HomeFollowState extends State<HomeFollow> {
   bool isLoading = false;
-  var userid;
-  bool _isLoading = true;
-  late final String id;
+  late SharedPreferences prefs;
 
-  bool wishListCount = false;
-
-  void toggleFollow() {
-    setState(() {
-      if (isFollowing) {
-        isFollowing = false;
-        follow();
-        print("follow");
-      } else {
-        isFollowing = true;
-        print("unfollow");
-      }
-    });
-  }
-
-  Future follow() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    userid = prefs.getString('userid');
-    var reqData = {
-      'followerId': id,
-    };
-    var response = await HomeService.follow(reqData);
-    log.i('add to follow. $response');
-  }
-
-  Future unfollowfollow() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    userid = prefs.getString('userid');
-    var reqData = {
-      'followerId': id,
-    };
-    var response = await HomeService.unfollow(reqData);
-    log.i('add to follow. $response');
-  }
-
-  Future _suggestfollowlist() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    userid = prefs.getString('userid');
-    print(userid);
-    var response = await HomeService.usersuggetionlistfollow();
-    log.i('refferal details show.. $response');
-    setState(() {
-      suggestfollow = response;
-    });
-  }
-
-  Future _initLoad() async {
-    await Future.wait([
-      _suggestfollowlist(),
-    ]);
-    _isLoading = false;
-  }
+  late List<Map<String, dynamic>> suggestFollow = [];
 
   @override
   void initState() {
@@ -80,137 +26,148 @@ class _homefollowState extends State<homefollow> {
     super.initState();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return ListView.builder(
-      scrollDirection: Axis.horizontal,
-      itemCount: suggestfollow != null ? suggestfollow['result'].length : 0,
-      itemBuilder: (BuildContext context, int index) {
-        return membersLiting(
-          id: suggestfollow != null ? suggestfollow['result'][index]['_id'] : '',
-          name: suggestfollow != null ? suggestfollow['result'][index]['firstName'] : '',
-          status: suggestfollow != null ? suggestfollow['result'][index]['isFollowing'] : false,
-          img: suggestfollow != null && suggestfollow['result'][index]['profilePic'] != null
-              ? '${baseURL}/${suggestfollow['result'][index]['profilePic']['filePath']}'
-              : '',
-        );
-      },
-    );
-
+  Future<void> _initLoad() async {
+    prefs = await SharedPreferences.getInstance();
+    await _suggestFollowList();
   }
-}
 
-class membersLiting extends StatelessWidget {
-  const membersLiting({
-    required this.name,
-    required this.img,
-    required this.status,
-    required this.id,
-    super.key,
-  });
+  Future<void> _suggestFollowList() async {
+    var response = await HomeService.usersuggetionlistfollow();
+    log.i('refferal details show.. $response');
+    setState(() {
+      suggestFollow = List<Map<String, dynamic>>.from(response['result']);
+    });
+  }
 
-  final String name;
-  final String img;
-  final String id;
-  final bool status;
+  Future<void> toggleFollow(int index) async {
+    setState(() {
+      suggestFollow[index]['isFollowing'] = !suggestFollow[index]['isFollowing'];
+    });
 
+    var followerId = suggestFollow[index]['_id'];
+    if (suggestFollow[index]['isFollowing']) {
+      await follow(followerId);
+    } else {
+      await unfollow(followerId);
+    }
+  }
 
-
-  Future follow() async {
+  Future<void> follow(String followerId) async {
     var reqData = {
-      'followerId': id,
-    };
+      'followerId': followerId};
     var response = await HomeService.follow(reqData);
     log.i('add to follow. $response');
   }
 
-
-  Future unfollowfollow() async {
-    var reqData = {
-      'followerId': id,
-    };
+  Future<void> unfollow(String followerId) async {
+    var reqData = {'followerId': followerId};
     var response = await HomeService.unfollow(reqData);
-    log.i('add to follow. $response');
+    log.i('removed from follow. $response');
   }
 
   @override
   Widget build(BuildContext context) {
-
-    return InkWell(
-      onTap: () {
-
-
+    return ListView.builder(
+      scrollDirection: Axis.horizontal,
+      itemCount: suggestFollow.length,
+      itemBuilder: (BuildContext context, int index) {
+        return MembersListing(
+          name: suggestFollow[index]['firstName'],
+          status: suggestFollow[index]['isFollowing'],
+          img: suggestFollow[index]['profilePic'] != null
+              ? '${baseURL}/${suggestFollow[index]['profilePic']['filePath']}'
+              : '',
+          onFollowToggled: () => toggleFollow(index),
+        );
       },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
-        child: Container(
-          height: 300,
-          width: 100,
-          decoration: BoxDecoration(
-            color: white,
-            borderRadius: BorderRadius.all(Radius.circular(10)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.5),
-                spreadRadius: 0.1,
-                blurRadius: 5,
-                offset: Offset(0, 1),
+    );
+  }
+}
+
+class MembersListing extends StatelessWidget {
+  const MembersListing({
+    required this.name,
+    required this.img,
+    required this.status,
+    required this.onFollowToggled,
+    Key? key,
+  }) : super(key: key);
+
+  final String name;
+  final String img;
+  final bool status;
+  final VoidCallback onFollowToggled;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
+      child: Container(
+        height: 300,
+        width: 100,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.all(Radius.circular(10)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.5),
+              spreadRadius: 0.1,
+              blurRadius: 5,
+              offset: Offset(0, 1),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            SizedBox(height: 10,),
+            ClipRRect(
+              borderRadius: BorderRadius.all(Radius.circular(100)),
+              child: img.isNotEmpty
+                  ? Image.network(
+                img,
+                height: 65,
+                fit: BoxFit.cover,
+              )
+                  : Container(
+                width: 65,
+                height: 65,
+                child: Image.network(
+                  'https://static.vecteezy.com/system/resources/thumbnails/002/318/271/small/user-profile-icon-free-vector.jpg',
+                ),
               ),
-            ],
-          ),
-          child: Column(
-            children: [
-              SizedBox(height: 10,),
-              ClipRRect(
-                borderRadius: BorderRadius.all(Radius.circular(100)),
-                child: img.isNotEmpty
-                    ? Image.network(
-                  img,
-                  height: 65,
-                  fit: BoxFit.cover,
-                )
-                    : Container(
-                  width: 65,
-                  height: 65,
-                  child: Image.network(
-                    'https://static.vecteezy.com/system/resources/thumbnails/002/318/271/small/user-profile-icon-free-vector.jpg',
+            ),
+            SizedBox(height: 5,),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 5),
+              child: Text(
+                name,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(fontSize: 11),
+              ),
+            ),
+            SizedBox(height: 10,),
+
+            GestureDetector(
+              onTap: onFollowToggled,
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(5),
+                  color: status ? bluetext : buttoncolor,
+                ),
+                child: Text(
+                  status ? 'Unfollow' : 'Follow',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
                 ),
               ),
-              SizedBox(height: 5,),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 5),
-                child: Text(
-                  name,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 11),
-                ),
-              ),
-              SizedBox(height: 10,),
-
-              FavoriteButton(
-                iconSize: 32,
-                isFavorite: status,
-                iconDisabledColor: Colors.black26,
-                valueChanged: (_isFavorite) {
-                  print('Is Favorite : $_isFavorite');
-                  if (_isFavorite == true) {
-                    follow();
-                  } else {
-                    unfollowfollow();
-                  }
-                },
-              ),
-
-
-
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
-
-
-

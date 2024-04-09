@@ -48,6 +48,26 @@ class HomeService {
     }
   }
 
+  static Future followingList() async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.get('$baseURL/api/users/get-following');
+      return response.data;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  static Future followersList() async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.get('$baseURL/api/users/get-following');
+      return response.data;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
 
 
 }

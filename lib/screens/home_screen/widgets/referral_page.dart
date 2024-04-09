@@ -208,7 +208,7 @@ class _referralpageState extends State<referralpage> {
 
 
             Container(
-              width: 400,
+              width: 600,
                 height: MediaQuery.of(context).size.height,
               decoration: BoxDecoration(
                   color: white,
