@@ -1,15 +1,238 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../../networking/constant.dart';
+import '../../../resources/color.dart';
+import '../../../services/home_service.dart';
+import '../../../support/logger.dart';
+import 'package:favorite_button/favorite_button.dart';
+
+import '../../services/search_service.dart';
 
 class searchpage extends StatefulWidget {
-  const searchpage({super.key});
+  const searchpage({Key? key}) : super(key: key);
 
   @override
   State<searchpage> createState() => _searchpageState();
 }
 
 class _searchpageState extends State<searchpage> {
+  bool isLoading = false;
+  late SharedPreferences prefs;
+  late List<Map<String, dynamic>> searchlist = [];
+  late TextEditingController _searchController;
+
+  @override
+  void initState() {
+    _initLoad();
+    _searchController = TextEditingController(); // Initialize the TextEditingController
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose(); // Dispose of the TextEditingController
+    super.dispose();
+  }
+
+  Future<void> _initLoad() async {
+    prefs = await SharedPreferences.getInstance();
+    await _searchFollowList();
+  }
+
+  Future<void> _searchFollowList() async {
+    var response = await SearchService.searchpage();
+    log.i('search list show.. $response');
+    setState(() {
+      searchlist = List<Map<String, dynamic>>.from(response['result']);
+    });
+  }
+
+  Future<void> toggleFollow(int index) async {
+    setState(() {
+      searchlist[index]['isFollowing'] = !searchlist[index]['isFollowing'];
+    });
+
+    var followerId = searchlist[index]['_id'];
+    if (searchlist[index]['isFollowing']) {
+      await follow(followerId);
+    } else {
+      await unfollow(followerId);
+    }
+  }
+
+  Future<void> follow(String followerId) async {
+    var reqData = {
+      'followerId': followerId};
+    var response = await HomeService.follow(reqData);
+    log.i('add to follow. $response');
+  }
+
+  Future<void> unfollow(String followerId) async {
+    var reqData = {'followerId': followerId};
+    var response = await HomeService.unfollow(reqData);
+    log.i('removed from follow. $response');
+  }
+
+  // Function to handle text field changes
+  void _onSearchTextChanged(String text) {
+    // Filter the search results based on the entered text
+    setState(() {
+      searchlist = _filterSearchResults(text);
+    });
+  }
+
+  List<Map<String, dynamic>> _filterSearchResults(String query) {
+    // Logic to filter the search results based on the query
+    // You can modify this logic according to your requirements
+    return searchlist.where((result) =>
+        result['firstName'].toLowerCase().contains(query.toLowerCase())).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return  Scaffold();
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("search", style: TextStyle(fontSize: 14)),
+        actions: [
+
+        ],
+      ),
+      body: Column(
+        children: [
+
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10.0),
+            child: SizedBox(
+              width: 400,
+              height: 40,
+              child: TextFormField(
+                controller: _searchController,
+                onChanged: _onSearchTextChanged,
+                decoration: InputDecoration(
+                  hintText: 'Search',
+                  hintStyle: TextStyle(
+                    color: Colors.grey, // You can adjust the hint text color
+                    fontSize: 14, // You can adjust the font size of the hint text
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10), // Adjust the border radius
+                  ),
+                  contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+                  suffixIcon: Icon(Icons.search),
+                ),
+                textAlign: TextAlign.start, // Center align the text field
+              ),
+            ),
+          ),
+
+          SizedBox(height: 20,),
+
+
+          Expanded(
+            child: ListView.builder(
+              itemCount: searchlist.length,
+              itemBuilder: (BuildContext context, int index) {
+                return MembersListing(
+                  name: searchlist[index]['firstName'],
+                  status: searchlist[index]['isFollowing'],
+                  img: searchlist[index]['profilePic'] != null
+                      ? '${baseURL}/${searchlist[index]['profilePic']['filePath']}'
+                      : '',
+                  onFollowToggled: () => toggleFollow(index),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class MembersListing extends StatelessWidget {
+  const MembersListing({
+    required this.name,
+    required this.img,
+    required this.status,
+    required this.onFollowToggled,
+    Key? key,
+  }) : super(key: key);
+
+  final String name;
+  final String img;
+  final bool status;
+  final VoidCallback onFollowToggled;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 5,),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              SizedBox(height: 10,),
+              ClipRRect(
+                borderRadius: BorderRadius.all(Radius.circular(100)),
+                child: img.isNotEmpty
+                    ? Image.network(
+                  img,
+                  width: 65,
+                  height: 65,
+                  fit: BoxFit.cover,
+                )
+                    : Image.network(
+                  'https://static.vecteezy.com/system/resources/thumbnails/002/318/271/small/user-profile-icon-free-vector.jpg',
+                  width: 65,
+                  height: 65,
+                  fit: BoxFit.cover,
+                ),
+              ),
+
+              SizedBox(width: 20,),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 5),
+                child: Text(
+                  name,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 11),
+                ),
+              ),
+
+              Expanded(child: SizedBox()),
+
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: GestureDetector(
+                  onTap: onFollowToggled,
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(5),
+                      color: status ? bluetext : buttoncolor,
+                    ),
+                    child: Text(
+                      status ? 'Unfollow' : 'Follow',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: Divider(color: Colors.black,thickness: .1,),
+          )
+        ],
+      ),
+    );
   }
 }

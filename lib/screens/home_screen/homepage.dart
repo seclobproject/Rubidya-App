@@ -230,6 +230,7 @@
 // }
 
 
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -247,6 +248,8 @@ import '../../services/home_service.dart';
 import '../../services/profile_service.dart';
 import '../../support/logger.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+
+import '../profile_screen/inner_page/profile_inner_page.dart';
 
 class homepage extends StatefulWidget {
   const homepage({Key? key}) : super(key: key);
@@ -266,10 +269,7 @@ class _homepageState extends State<homepage> {
   late YoutubePlayerController _controller;
 
 
-
-
   bool isFollowing = false;
-
   void toggleFollow() {
     setState(() {
       if (isFollowing) {
@@ -304,6 +304,16 @@ class _homepageState extends State<homepage> {
     });
   }
 
+  Future _homefeed() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    userid = prefs.getString('userid');
+    var response = await HomeService.getFeed();
+    log.i('homefeed data Show.. $response');
+    setState(() {
+      profilelist = response; // This line is causing the error
+    });
+  }
+
 
   Future _suggestfollowlist() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -327,8 +337,8 @@ class _homepageState extends State<homepage> {
       [
         _profiledetailsapi(),
         _profileapi(),
-        _suggestfollowlist()
-
+        _suggestfollowlist(),
+        _homefeed()
       ],
     );
     _isLoading = false;
@@ -390,32 +400,14 @@ class _homepageState extends State<homepage> {
                         ),
                         Expanded(child: SizedBox()),
 
-                        InkWell(
-                          onTap: (){
-                            // Share.share("https://rubidya.com/register/$userid");
 
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) =>  referralpage()),
-                            );
-
-                            // Navigator.push(
-                            //   context,
-                            //   MaterialPageRoute(builder: (context) =>  myapps()),
-                            // );
-
-                          },
-                          child: SvgPicture.asset(
-                            "assets/svg/reffer.svg",
-                          ),
-                        ),
                         SizedBox(width: 20,),
 
                         InkWell(
                           onTap: (){
                             // Navigator.push(
                             //   context,
-                            //   MaterialPageRoute(builder: (context) =>  YoutubePlayerScreen()),
+                            //   MaterialPageRoute(builder: (context) =>  profileinnerpage()),
                             // );
                           },
                           child: SvgPicture.asset(
@@ -481,7 +473,7 @@ class _homepageState extends State<homepage> {
 
                   SizedBox(height: 15,),
 
-                  homefeed()
+                  HomeFeed()
                 ],
               ),
             ),

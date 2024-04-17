@@ -145,7 +145,7 @@
 //
 
 import 'dart:io';
-
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:flutter/material.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
@@ -165,6 +165,8 @@ class uploadscreen extends StatefulWidget {
 class _uploadscreenState extends State<uploadscreen> {
   var userid;
   String? imageUrl;
+  String? description;
+  bool showIndicator = false;
   bool uploading = false; // Flag to track if upload is in progress
 
   Future<void> uploadImage() async {
@@ -182,6 +184,8 @@ class _uploadscreenState extends State<uploadscreen> {
       }
       FormData formData = FormData.fromMap({
         'media': await MultipartFile.fromFile(imageUrl!),
+        'description': description,
+
       });
       var response = await UploadService.uploadimage(formData);
 
@@ -252,96 +256,221 @@ class _uploadscreenState extends State<uploadscreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(),
       body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+
         children: [
           SizedBox(
-            height: 100,
+            height: 50,
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              InkWell(
-                onTap: () {
-                  pickImages();
-                },
-                child: Align(
-                  alignment: Alignment.center,
-                  child: Icon(
-                    Icons.image,
-                    size: 60,
-                    color: bluetext,
+          // Row(
+          //   mainAxisAlignment: MainAxisAlignment.center,
+          //   children: [
+          //     InkWell(
+          //       onTap: () {
+          //         pickImages();
+          //       },
+          //       child: Align(
+          //         alignment: Alignment.center,
+          //         child: Icon(
+          //           Icons.image,
+          //           size: 60,
+          //           color: bluetext,
+          //         ),
+          //       ),
+          //     ),
+          //     SizedBox(
+          //       width: 30,
+          //     ),
+          //     InkWell(
+          //       onTap: () {
+          //         pickImageFromCamera();
+          //       },
+          //       child: Align(
+          //         alignment: Alignment.center,
+          //         child: Icon(
+          //           Icons.camera_alt_rounded,
+          //           size: 60,
+          //           color: bluetext,
+          //         ),
+          //       ),
+          //     ),
+          //   ],
+          // ),
+          Center(
+            child: Container(
+              color: white,
+              height: 450,
+              width: 600,
+              child: Stack(
+                children: [
+                  imageUrl != null
+                      ? Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 50),
+                    child: Image.file(File(imageUrl!)),
+                  )
+                      : Container(), // This will render an empty container if imageUrl is null
+                  if (imageUrl != null)
+                    Positioned(
+                      left: 0,
+                      right: 0,
+                      bottom: 20, // Adjust this value as needed
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              showIndicator = !showIndicator;
+                              uploadImage();
+                            });
+                          },
+                          child: Stack(
+                            children: [
+                              Container(
+                                height: 40,
+                                width: 400,
+                                decoration: BoxDecoration(
+                                  color: bluetext, // Assuming bluetext is defined as a color
+                                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    "Upload",
+                                    style: TextStyle(fontSize: 12, color: Colors.white), // Assuming white is defined as a color
+                                  ),
+                                ),
+                              ),
+                              if (showIndicator)
+                                Positioned.fill(
+                                  child: Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      )
+                    ),
+
+                  SizedBox(height: 10,),
+                  if (imageUrl != null)
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Container(
+                      alignment: Alignment.center,
+                      padding: EdgeInsets.fromLTRB(30, 3, 20, 0),
+                      margin: EdgeInsets.only(left: 10, right: 10),
+                      height: 70,
+                      decoration: BoxDecoration(
+                        // border: Border.all(color: Colors.black),
+                          color: conainer220,
+                          borderRadius: BorderRadius.circular(10)),
+                      child: TextField(
+                        keyboardType: TextInputType.emailAddress,
+                        cursorColor: Colors.black,
+                        // controller: description,
+                        textInputAction: TextInputAction.search,
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          hintText: 'Description...',
+                          hintStyle: TextStyle(color: Colors.black,fontSize: 10),
+                        ),
+                        style: TextStyle(color: Colors.black),
+
+                        onChanged: (text) {
+                          setState(() {
+                            description=text;
+                          });
+                        },
+                      ),),
                   ),
-                ),
+                ],
               ),
-              SizedBox(
-                width: 30,
-              ),
-              InkWell(
-                onTap: () {
-                  pickImageFromCamera();
-                },
-                child: Align(
-                  alignment: Alignment.center,
-                  child: Icon(
-                    Icons.camera_alt_rounded,
-                    size: 60,
-                    color: bluetext,
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
-          Container(
-            height: 150,
-            width: 300,
-            child: imageUrl != null
-                ? Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              child: Image.file(File(imageUrl!)),
-            )
-                : Container(), // This will render an empty container if imageUrl is null
-          ),
+
         ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: SizedBox(
-        height: 45,
-        width: 400,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: FloatingActionButton.extended(
-            backgroundColor: bluetext,
-            onPressed: !uploading
-                ? () {
-              uploadImage();
-            }
-                : null,
-            label: Stack(
-              alignment: Alignment.center,
-              children: [
-                uploading
-                    ? SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    color: Colors.white,
-                    strokeWidth: 2,
-                  ),
-                )
-                    : SizedBox(),
-                Text(
-                  'Upload',
-                  style: TextStyle(fontSize: 10,color: white),
-                ),
-              ],
+
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 25),
+        child: SpeedDial(
+          animatedIcon: AnimatedIcons.add_event,
+          animatedIconTheme: IconThemeData(size: 20.0),
+          backgroundColor: bluetext,
+          visible: true,
+          curve: Curves.bounceIn,
+          children: [
+
+            SpeedDialChild(
+              child: Icon(Icons.photo_camera_back_rounded,color: Colors.black),
+              backgroundColor: Colors.white,
+              onTap: () {
+                pickImages();
+              },
+              label: 'Gallery',
+
+              labelStyle: TextStyle(fontWeight: FontWeight.w500),
+              labelBackgroundColor: Colors.white,
             ),
-          ),
+
+
+            SpeedDialChild(
+              child: Icon(Icons.camera,color: Colors.black,),
+              backgroundColor: Colors.white,
+              onTap: () {
+                pickImageFromCamera();
+              },
+              label: 'Camera',
+              labelStyle: TextStyle(fontWeight: FontWeight.w500),
+              labelBackgroundColor: Colors.white,
+            ),
+            // Add more SpeedDialChild widgets for additional menu items
+          ],
         ),
       ),
+
+
+      // floatingActionButton: SizedBox(
+      //   height: 45,
+      //   width: 400,
+      //   child: Padding(
+      //     padding: const EdgeInsets.symmetric(horizontal: 20),
+      //     child: FloatingActionButton.extended(
+      //       backgroundColor: bluetext,
+      //       onPressed: !uploading
+      //           ? () {
+      //         uploadImage();
+      //       }
+      //           : null,
+      //       label: Stack(
+      //         alignment: Alignment.center,
+      //         children: [
+      //           uploading
+      //               ? SizedBox(
+      //             width: 20,
+      //             height: 20,
+      //             child: CircularProgressIndicator(
+      //               color: Colors.white,
+      //               strokeWidth: 2,
+      //             ),
+      //           )
+      //               : SizedBox(),
+      //           Text(
+      //             'Upload',
+      //             style: TextStyle(fontSize: 10,color: white),
+      //           ),
+      //         ],
+      //       ),
+      //     ),
+      //   ),
+      // ),
     );
   }
 }
+
 
 
 

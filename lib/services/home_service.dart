@@ -5,15 +5,29 @@ import '../support/dio_helper.dart';
 class HomeService {
 
 
-  static Future refferalhistory() async {
+  // static Future refferalhistory() async {
+  //   try {
+  //     var dio = await DioHelper.getInstance();
+  //     var response = await dio.get('$baseURL/api/users/get-direct-refferals');
+  //     return response.data;
+  //   } catch (e) {
+  //     rethrow;
+  //   }
+  // }
+  //
+
+  static Future<Map<String, dynamic>> getDirectReferrals({int page = 1, int limit = 10}) async {
     try {
       var dio = await DioHelper.getInstance();
-      var response = await dio.get('$baseURL/api/users/get-direct-refferals');
+      var response = await dio.get('$baseURL/api/users/get-direct-refferals?page=$page&limit=$limit');
       return response.data;
     } catch (e) {
-      rethrow;
+      // Handle error appropriately, e.g., log the error or throw it further
+      throw e;
     }
   }
+
+
 
 
 
@@ -61,7 +75,29 @@ class HomeService {
   static Future followersList() async {
     try {
       var dio = await DioHelper.getInstance();
-      var response = await dio.get('$baseURL/api/users/get-following');
+      var response = await dio.get('$baseURL/api/users/get-followers');
+      return response.data;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+
+  static Future getFeed() async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.get('$baseURL/api/posts/get-latest-posts');
+      return response.data;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+
+  static Future like(data) async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.post('$baseURL/api/posts/like',data: data);
       return response.data;
     } catch (e) {
       rethrow;

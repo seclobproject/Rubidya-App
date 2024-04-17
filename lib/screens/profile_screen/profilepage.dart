@@ -20,6 +20,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:dio/dio.dart';
 import 'dart:io';
 
+import '../home_screen/widgets/referral_page.dart';
+
 class profilepage extends StatefulWidget {
   const profilepage({super.key});
 
@@ -35,6 +37,7 @@ class _profilepageState extends State<profilepage>
   var profiledetails;
   var profilepagestatus;
   var profileimgshow;
+  var postcount;
   bool isLoading = false;
   bool _isLoading = true;
   String? imageUrl;
@@ -46,6 +49,16 @@ class _profilepageState extends State<profilepage>
     log.i('profile details show.. $response');
     setState(() {
       profiledetails = response;
+    });
+  }
+
+  Future _postcount() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    userid = prefs.getString('userid');
+    var response = await ProfileService.getProfileimage();
+    log.i('post count data Show.. $response');
+    setState(() {
+      postcount = response; // This line is causing the error
     });
   }
 
@@ -130,6 +143,7 @@ class _profilepageState extends State<profilepage>
   void initState() {
     _tabController = TabController(length: 2, vsync: this);
     _initLoad();
+    _postcount();
     super.initState();
   }
 
@@ -150,6 +164,28 @@ class _profilepageState extends State<profilepage>
           style: TextStyle(fontSize: 14),
         ),
         actions: <Widget>[
+
+          InkWell(
+            onTap: (){
+              // Share.share("https://rubidya.com/register/$userid");
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) =>  referralpage()),
+              );
+              //
+              // Navigator.push(
+              //   context,
+              //   MaterialPageRoute(builder: (context) =>  MyApp()),
+              // );
+
+            },
+            child: SvgPicture.asset(
+              "assets/svg/reffer.svg",
+            ),
+          ),
+
+
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: InkWell(
@@ -772,11 +808,14 @@ class _profilepageState extends State<profilepage>
                                       height: 10,
                                     ),
                                     Text(
-                                      "0",
+                                      postcount != null && postcount['postCount'] != null
+                                          ? postcount['postCount'].toString()
+                                          : '0', // Default value if postcount or postCount is null
                                       style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w500,
-                                          color: bluetext),
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w500,
+                                        color: bluetext,
+                                      ),
                                     ),
                                     Text("Post",
                                         style: TextStyle(
@@ -789,7 +828,7 @@ class _profilepageState extends State<profilepage>
                                     Navigator.of(context).push(
                                         MaterialPageRoute(
                                             builder: (context) =>
-                                                followerslist()));
+                                                FollowersList()));
                                   },
                                   child: Column(
                                     children: [
@@ -813,7 +852,7 @@ class _profilepageState extends State<profilepage>
                                     Navigator.of(context).push(
                                         MaterialPageRoute(
                                             builder: (context) =>
-                                                followinglist()));
+                                                FollowingList()));
                                   },
                                   child: Column(
                                     children: [
@@ -1071,10 +1110,13 @@ class _profilepageState extends State<profilepage>
               ),
             ),
             SizedBox(
-              height: 600,
+              height: 1000,
               child: TabBarView(
                 controller: _tabController,
-                children: [phototab(), vediotab()],
+                children: [
+                  phototab(),
+                  vediotab()
+                ],
               ),
             ),
           ],

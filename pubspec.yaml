@@ -44,6 +44,10 @@ dev_dependencies:
   upgrader: ^10.0.1
   easy_debounce: ^2.0.3
   favorite_button: ^0.0.4
+#  floating_action_row: ^1.0.2
+  flutter_speed_dial: ^3.0.5
+  in_app_update: ^4.2.0
+
 
 flutter_icons:
   android: "launcher_icon"

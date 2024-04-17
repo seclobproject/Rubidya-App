@@ -90,7 +90,7 @@ class _phototabState extends State<phototab> {
                       height: 18,
                     ),
                     Text(
-                      "1.5k",
+                      profilelist['media'][index]['likeCount'].toString(),
                       style: TextStyle(fontSize: 10, color: Colors.white),
                     )
                   ],

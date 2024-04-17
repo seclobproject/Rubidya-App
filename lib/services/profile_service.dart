@@ -162,5 +162,15 @@ class ProfileService {
     }
   }
 
+  static Future Profileinnerpage(id) async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.get('$baseURL/api/users/get-user/$id');
+      return response.data;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
 
 }

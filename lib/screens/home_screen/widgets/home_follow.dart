@@ -7,6 +7,8 @@ import '../../../services/home_service.dart';
 import '../../../support/logger.dart';
 import 'package:favorite_button/favorite_button.dart';
 
+import '../../profile_screen/inner_page/profile_inner_page.dart';
+
 class HomeFollow extends StatefulWidget {
   const HomeFollow({Key? key}) : super(key: key);
 
@@ -73,6 +75,7 @@ class _HomeFollowState extends State<HomeFollow> {
       itemBuilder: (BuildContext context, int index) {
         return MembersListing(
           name: suggestFollow[index]['firstName'],
+          id: suggestFollow[index]['_id'],
           status: suggestFollow[index]['isFollowing'],
           img: suggestFollow[index]['profilePic'] != null
               ? '${baseURL}/${suggestFollow[index]['profilePic']['filePath']}'
@@ -89,6 +92,7 @@ class MembersListing extends StatelessWidget {
     required this.name,
     required this.img,
     required this.status,
+    required this.id,
     required this.onFollowToggled,
     Key? key,
   }) : super(key: key);
@@ -96,76 +100,90 @@ class MembersListing extends StatelessWidget {
   final String name;
   final String img;
   final bool status;
+  final String id;
   final VoidCallback onFollowToggled;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
-      child: Container(
-        height: 300,
-        width: 100,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.all(Radius.circular(10)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.5),
-              spreadRadius: 0.1,
-              blurRadius: 5,
-              offset: Offset(0, 1),
-            ),
-          ],
-        ),
-        child: Column(
-          children: [
-            SizedBox(height: 10,),
-            ClipRRect(
-              borderRadius: BorderRadius.all(Radius.circular(100)),
-              child: img.isNotEmpty
-                  ? Image.network(
-                img,
-                height: 65,
-                fit: BoxFit.cover,
-              )
-                  : Container(
-                width: 65,
-                height: 65,
-                child: Image.network(
-                  'https://static.vecteezy.com/system/resources/thumbnails/002/318/271/small/user-profile-icon-free-vector.jpg',
-                ),
-              ),
-            ),
-            SizedBox(height: 5,),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 5),
-              child: Text(
-                name,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontSize: 11),
-              ),
-            ),
-            SizedBox(height: 10,),
+    return InkWell(
+      onTap: (){
 
-            GestureDetector(
-              onTap: onFollowToggled,
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(5),
-                  color: status ? bluetext : buttoncolor,
-                ),
-                child: Text(
-                  status ? 'Unfollow' : 'Follow',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) =>  profileinnerpage(
+            id: id,
+          )),
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
+        child: Container(
+          height: 300,
+          width: 100,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.all(Radius.circular(10)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.5),
+                spreadRadius: 0.1,
+                blurRadius: 5,
+                offset: Offset(0, 1),
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              SizedBox(height: 10,),
+              ClipRRect(
+                borderRadius: BorderRadius.all(Radius.circular(100)),
+                child: img.isNotEmpty
+                    ? Image.network(
+                  img,
+                  height: 65,
+                  fit: BoxFit.cover,
+                )
+                    : Container(
+                  width: 65,
+                  height: 65,
+                  child: Image.network(
+                    'https://www.pngall.com/wp-content/uploads/5/User-Profile-PNG-Image.png',
                   ),
                 ),
               ),
-            ),
-          ],
+              SizedBox(height: 5,),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 5),
+                child: Text(
+                  name,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 11),
+                ),
+              ),
+              SizedBox(height: 10,),
+
+              GestureDetector(
+                onTap: onFollowToggled,
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(5),
+                    color: status ? bluetext : buttoncolor,
+                  ),
+                  child: Text(
+                    status ? 'Unfollow' : 'Follow',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+
+
+            ],
+          ),
         ),
       ),
     );
