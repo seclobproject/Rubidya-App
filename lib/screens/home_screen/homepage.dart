@@ -395,8 +395,9 @@ class _homepageState extends State<homepage> {
 
                       children: [
                         Image.asset(
-                          'assets/logo/logo2.png',
+                          'assets/logo/logo4.png',
                           fit: BoxFit.cover,
+                          width: 150,
                         ),
                         Expanded(child: SizedBox()),
 
@@ -407,7 +408,7 @@ class _homepageState extends State<homepage> {
                           onTap: (){
                             // Navigator.push(
                             //   context,
-                            //   MaterialPageRoute(builder: (context) =>  profileinnerpage()),
+                            //   MaterialPageRoute(builder: (context) =>  MyHomePages()),
                             // );
                           },
                           child: SvgPicture.asset(

@@ -7,6 +7,7 @@ import '../../../resources/color.dart';
 import '../../../services/home_service.dart';
 import '../../../services/profile_service.dart';
 import '../../../support/logger.dart';
+import '../../profile_screen/inner_page/profile_inner_page.dart';
 
 class HomeFeed extends StatefulWidget {
   const HomeFeed({Key? key}) : super(key: key);
@@ -97,8 +98,12 @@ class _HomeFeedState extends State<HomeFeed> {
           likes: homeList['posts'][index]['likeCount'] != null ? homeList['posts'][index]['likeCount'].toString() : '',
           img: homeList['posts'][index]['filePath'] != null ? '$baseURL/${homeList['posts'][index]['filePath']}' : '',
           id: homeList['posts'][index]['_id'] != null ? homeList['posts'][index]['_id'] : '',
+          userId: homeList['posts'][index]['userId'] != null ? homeList['posts'][index]['userId'] : '',
           likeCount: homeList['posts'][index]['isLiked'] != null ? homeList['posts'][index]['isLiked'] : false,
           onLikePressed: () {
+            _toggleLikePost(homeList['posts'][index]['_id']);
+          },
+          onDoubleTapLike: () {
             _toggleLikePost(homeList['posts'][index]['_id']);
           },
         );
@@ -115,160 +120,179 @@ class ProductCard extends StatelessWidget {
     required this.likes,
     required this.createdTime,
     required this.id,
+    required this.userId,
     required this.likeCount,
     required this.description,
     required this.onLikePressed,
+    required this.onDoubleTapLike,
   }) : super(key: key);
 
   final String img;
   final String name;
   final String createdTime;
   final String id;
+  final String userId;
   final String likes;
   final String description;
   final bool likeCount;
+
   final VoidCallback onLikePressed;
+  final VoidCallback onDoubleTapLike;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      child: Container(
-        width: 345,
-        // height: 550,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.5),
-              spreadRadius: 0.1,
-              blurRadius: 5,
-              offset: Offset(0, 1),
+    return InkWell(
+      onTap: (){
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) =>  profileinnerpage(
+            id: userId,
+          )),
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        child: GestureDetector(
+          onDoubleTap: onDoubleTapLike, // Handle double tap here
+          child: Container(
+            width: 345,
+            // height: 550,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.5),
+                  spreadRadius: 0.1,
+                  blurRadius: 5,
+                  offset: Offset(0, 1),
+                ),
+              ],
+              borderRadius: BorderRadius.all(Radius.circular(10)),
             ),
-          ],
-          borderRadius: BorderRadius.all(Radius.circular(10)),
-        ),
-        child: Column(
-          children: [
-            Stack(
+            child: Column(
               children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                  child: Row(
-                    children: [
-                      SizedBox(width: 50),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                Stack(
+                  children: [
+                    InkWell(
+                      onDoubleTap: (){},
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                        child: Row(
+                          children: [
+                            SizedBox(width: 50),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  name,
+                                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                                ),
+                                Text(
+                                  createdTime,
+                                  style: TextStyle(fontSize: 11, color: Colors.grey),
+                                ),
+                              ],
+                            ),
+                            Expanded(child: SizedBox()),
+                            Icon(Icons.more_vert, color: Colors.grey),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      top: 10,
+                      left: 10,
+                      child: Stack(
                         children: [
-                          Text(
-                            name,
-                            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                          Container(
+                            height: 40,
+                            width: 40,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.all(Radius.circular(100)),
+                              child: Image.network(
+                                'https://www.pngall.com/wp-content/uploads/5/User-Profile-PNG-Image.png',
+                                height: 51,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
                           ),
-                          Text(
-                            createdTime,
-                            style: TextStyle(fontSize: 11, color: Colors.grey),
+                          Positioned(
+                            top: 28,
+                            left: 28,
+                            child: Image.asset('assets/image/verificationlogo.png'),
                           ),
                         ],
                       ),
-                      Expanded(child: SizedBox()),
-                      Icon(Icons.more_vert, color: Colors.grey),
-                    ],
+                    ),
+                  ],
+                ),
+                SizedBox(height: 10),
+                Container(
+                  decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(10))),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.all(Radius.circular(10)),
+                      child: Image.network(
+                        img,
+                        fit: BoxFit.cover,
+                        height: 400,
+                      ),
+                    ),
                   ),
                 ),
-                Positioned(
-                  top: 10,
-                  left: 10,
-                  child: Stack(
+                Padding(
+                  padding: const EdgeInsets.only(right: 23, top: 10, left: 15),
+                  child: Row(
                     children: [
-                      Container(
-                        height: 40,
-                        width: 40,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.all(Radius.circular(100)),
-                          child: Image.network(
-                            'https://www.pngall.com/wp-content/uploads/5/User-Profile-PNG-Image.png',
-                            height: 51,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
+                      FavoriteButton(
+                        iconSize: 32,
+                        isFavorite: likeCount,
+                        iconDisabledColor: Colors.black26,
+                        valueChanged: (_) {
+                          onLikePressed(); // Call the callback function when like button is pressed
+                        },
                       ),
-                      Positioned(
-                        top: 28,
-                        left: 28,
-                        child: Image.asset('assets/image/verificationlogo.png'),
+                      SizedBox(width: 10),
+                      Text("Likes", style: TextStyle(color: Colors.blue, fontSize: 10)),
+                      SizedBox(width: 2),
+                      Text(likes, style: TextStyle(color: Colors.blue, fontSize: 13, fontWeight: FontWeight.w700)),
+                      SizedBox(width: 2),
+                      Expanded(child: SizedBox()),
+                      SvgPicture.asset(
+                        "assets/svg/comment.svg",
+                        height: 20,
+                      ),
+                      SizedBox(width: 20),
+                      SvgPicture.asset(
+                        "assets/svg/share.svg",
+                        height: 20,
+                      ),
+                      SizedBox(width: 20),
+                      SvgPicture.asset(
+                        "assets/svg/save.svg",
+                        height: 20,
                       ),
                     ],
                   ),
                 ),
+
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Container(
+                    height: 30,
+                    child: Text(description,
+                      maxLines: 3,
+                      style: TextStyle(
+                          fontSize: 11,
+                          overflow: TextOverflow.ellipsis
+                      ),
+                    ),
+                  ),
+                )
               ],
             ),
-            SizedBox(height: 10),
-            Container(
-              decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(10))),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.all(Radius.circular(10)),
-                  child: Image.network(
-                    img,
-                    fit: BoxFit.fill,
-                    height: 400,
-                  ),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(right: 23, top: 10, left: 15),
-              child: Row(
-                children: [
-                  FavoriteButton(
-                    iconSize: 32,
-                    isFavorite: likeCount,
-                    iconDisabledColor: Colors.black26,
-                    valueChanged: (_) {
-                      onLikePressed(); // Call the callback function when like button is pressed
-                    },
-                  ),
-                  SizedBox(width: 10),
-                  Text("Likes", style: TextStyle(color: Colors.blue, fontSize: 10)),
-                  SizedBox(width: 2),
-                  Text(likes, style: TextStyle(color: Colors.blue, fontSize: 13, fontWeight: FontWeight.w700)),
-                  SizedBox(width: 2),
-                  Expanded(child: SizedBox()),
-                  SvgPicture.asset(
-                    "assets/svg/comment.svg",
-                    height: 20,
-                  ),
-                  SizedBox(width: 20),
-                  SvgPicture.asset(
-                    "assets/svg/share.svg",
-                    height: 20,
-                  ),
-                  SizedBox(width: 20),
-                  SvgPicture.asset(
-                    "assets/svg/save.svg",
-                    height: 20,
-                  ),
-                ],
-              ),
-            ),
-            
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Container(
-                height: 30,
-
-                child: Text(description,
-                  maxLines: 3,
-                  style: TextStyle(
-                    fontSize: 11,
-                    overflow: TextOverflow.ellipsis
-                  ),
-
-                ),
-              ),
-            )
-          ],
+          ),
         ),
       ),
     );

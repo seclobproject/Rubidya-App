@@ -49,6 +49,7 @@ dev_dependencies:
   in_app_update: ^4.2.0
 
 
+
 flutter_icons:
   android: "launcher_icon"
   ios: true
@@ -61,5 +62,6 @@ flutter:
     - assets/
     - assets/logo/
     - assets/image/
+    - assets/images/
     - assets/svg/
 

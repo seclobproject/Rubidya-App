@@ -7,6 +7,8 @@ import '../../../services/home_service.dart';
 import '../../../support/logger.dart';
 import 'package:favorite_button/favorite_button.dart';
 
+import '../inner_page/profile_inner_page.dart';
+
 class FollowingList extends StatefulWidget {
   const FollowingList({Key? key}) : super(key: key);
 
@@ -15,6 +17,7 @@ class FollowingList extends StatefulWidget {
 }
 
 class _FollowingListState extends State<FollowingList> {
+  TextEditingController _searchController = TextEditingController();
   bool _isLoading = true;
   late SharedPreferences prefs;
 
@@ -42,11 +45,13 @@ class _FollowingListState extends State<FollowingList> {
 
   Future<void> toggleFollow(int index) async {
     setState(() {
-      followingList[index]['isFollowing'] = !followingList[index]['isFollowing'];
+      if (followingList[index]['isFollowing'] != null) {
+        followingList[index]['isFollowing'] = !followingList[index]['isFollowing'];
+      }
     });
 
     var followerId = followingList[index]['_id'];
-    if (followingList[index]['isFollowing']) {
+    if (followingList[index]['isFollowing'] != null && followingList[index]['isFollowing']) {
       await follow(followerId);
     } else {
       await unfollow(followerId);
@@ -70,6 +75,9 @@ class _FollowingListState extends State<FollowingList> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Following List", style: TextStyle(fontSize: 14)),
+        actions: [
+
+        ],
       ),
       body: _isLoading
           ? Center(
@@ -77,10 +85,49 @@ class _FollowingListState extends State<FollowingList> {
       )
           : Column(
         children: [
+
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: Container(
+              width: 400,
+              height: 40,
+              decoration: BoxDecoration(
+                color: blackshade,
+                borderRadius: BorderRadius.all(Radius.circular(10))
+              ),
+              child: TextFormField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  hintText: 'Search',
+                  hintStyle: TextStyle(
+                    color: Colors.grey, // You can adjust the hint text color
+                    fontSize: 14, // You can adjust the font size of the hint text
+                  ),
+                  border: InputBorder.none, // Remove the border
+                  contentPadding: EdgeInsets.symmetric(vertical: 4, horizontal: 10),
+                  suffixIcon: Icon(Icons.search),
+                  // Center align the hint text
+                ),
+                onChanged: (value) {
+                  setState(() {}); // Trigger rebuild to update the filtered list
+                },
+              ),
+            ),
+          ),
+
+
           Expanded(
             child: ListView.builder(
               itemCount: followingList.length,
               itemBuilder: (BuildContext context, int index) {
+                // Check if the name contains the search query
+                bool matchesSearch = followingList[index]['firstName']
+                    .toLowerCase()
+                    .contains(_searchController.text.toLowerCase());
+
+                // Only display the item if it matches the search query
+                if (!matchesSearch) return SizedBox.shrink();
+
                 return MembersListing(
                   name: followingList[index]['firstName'],
                   id: followingList[index]['_id'], // assuming _id is a String
@@ -98,7 +145,7 @@ class _FollowingListState extends State<FollowingList> {
   }
 }
 
-class MembersListing extends StatelessWidget {
+class MembersListing extends StatefulWidget {
   const MembersListing({
     required this.name,
     required this.img,
@@ -112,81 +159,115 @@ class MembersListing extends StatelessWidget {
   final String id; // changed type to String
   final VoidCallback onFollowToggled;
 
-  Future<void> _addToWishlist() async {
-    var reqData = {
-      'product_id': id,
-    };
-    var response = await HomeService.unfollow(reqData);
-    log.i('Unfollowed Done...... $response');
+  @override
+  _MembersListingState createState() => _MembersListingState();
+}
+
+class _MembersListingState extends State<MembersListing> {
+  bool isFollowing = false;
+
+  Future<void> _toggleFollowStatus() async {
+    if (widget.id != null) {
+      if (isFollowing) {
+        // Unfollow logic
+        var reqData = {
+          'followerId': widget.id!,
+        };
+        var response = await HomeService.unfollow(reqData);
+        log.i('Unfollowed Done...... $response');
+      } else {
+        // Follow logic
+        // Add your follow logic here
+      }
+      setState(() {
+        isFollowing = !isFollowing; // Toggle follow status
+      });
+      widget.onFollowToggled(); // Notify parent widget about follow status change
+    } else {
+      print("Error: widget.id is null");
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 5,),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              SizedBox(height: 10,),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.all(Radius.circular(100)),
-                  child: img.isNotEmpty
-                      ? Image.network(
-                    img,
-                    height: 65,
-                    fit: BoxFit.cover,
-                  )
-                      : Container(
-                    width: 65,
-                    height: 65,
-                    child: Image.network(
-                      'https://static.vecteezy.com/system/resources/thumbnails/002/318/271/small/user-profile-icon-free-vector.jpg',
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(width: 5,),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 5),
-                child: Text(
-                  name,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 11),
-                ),
-              ),
-              Expanded(child: SizedBox()),
-
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: GestureDetector(
-                  onTap: _addToWishlist,
-                  child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(5),
-                      color: buttoncolor,
-                    ),
-                    child: Text(
-                      "follow",
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+    print('...............${widget.id}');
+    return InkWell(
+      onTap: (){
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) =>  profileinnerpage(
+            id: widget.id,
+          )),
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 5),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                SizedBox(height: 10),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.all(Radius.circular(100)),
+                    child: widget.img.isNotEmpty
+                        ? Image.network(
+                      widget.img,
+                      height: 65,
+                      fit: BoxFit.cover,
+                    )
+                        : Container(
+                      width: 65,
+                      height: 65,
+                      child: Image.network(
+                        'https://static.vecteezy.com/system/resources/thumbnails/002/318/271/small/user-profile-icon-free-vector.jpg',
                       ),
                     ),
                   ),
                 ),
+                SizedBox(width: 5),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 5),
+                  child: Text(
+                    widget.name,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontSize: 11),
+                  ),
+                ),
+                Expanded(child: SizedBox()),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: GestureDetector(
+                    onTap: _toggleFollowStatus,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(5),
+                        color: buttoncolor,
+                      ),
+                      child: Text(
+                        isFollowing ? "unfollow" : "follow", // Toggle text based on follow status
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: Divider(
+                color: Colors.black,
+                thickness: .1,
               ),
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: Divider(color: Colors.black,thickness: .1,),
-          )
-        ],
+            )
+          ],
+        ),
       ),
     );
   }

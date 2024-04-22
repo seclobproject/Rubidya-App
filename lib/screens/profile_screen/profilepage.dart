@@ -12,6 +12,8 @@ import 'package:rubidya/screens/profile_screen/widget/wallet.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../authentication_page/login_page.dart';
+import '../../authentication_page/splash.dart';
+import '../../commonpage/test.dart';
 import '../../networking/constant.dart';
 import '../../resources/color.dart';
 import '../../services/profile_service.dart';
@@ -173,10 +175,12 @@ class _profilepageState extends State<profilepage>
                 context,
                 MaterialPageRoute(builder: (context) =>  referralpage()),
               );
-              //
+
+
+
               // Navigator.push(
               //   context,
-              //   MaterialPageRoute(builder: (context) =>  MyApp()),
+              //   MaterialPageRoute(builder: (context) =>  MyHomePages()),
               // );
 
             },

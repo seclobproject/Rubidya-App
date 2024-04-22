@@ -24,13 +24,13 @@ class _homestoryState extends State<homestory> {
                     Radius.circular(100)
                 ),
                 child: Image.network(
-                  'https://assets.vogue.in/photos/5d288836e2f0130008fa5d30/1:1/w_1080,h_1080,c_limit/model%20nidhi%20sunil.jpg',
+                  'https://t4.ftcdn.net/jpg/04/75/01/23/360_F_475012363_aNqXx8CrsoTfJP5KCf1rERd6G50K0hXw.jpg',
                   height: 65,
                   fit: BoxFit.cover,
                 ),
               ),
               SizedBox(height: 10,),
-              Text("Samuel", style: TextStyle(fontSize:10),)
+              Text("Processing", style: TextStyle(fontSize:10),)
             ],
           ),
         );

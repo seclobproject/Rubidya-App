@@ -48,3 +48,4 @@ const premiuminner1 = Color.fromRGBO(63, 86, 150, 0.2);
 const premiuminner2 = Color.fromRGBO(60, 76, 106, 1);
 const pink = Color.fromRGBO(223, 122, 122, 0.87);
 const lightblue = Color.fromRGBO(191, 199, 242, 1);
+const blackshade = Color.fromRGBO(167, 172, 208, 0.23);

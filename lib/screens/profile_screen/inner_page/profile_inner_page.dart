@@ -14,6 +14,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../authentication_page/login_page.dart';
 import '../../../networking/constant.dart';
 import '../../../resources/color.dart';
+import '../../../services/home_service.dart';
 import '../../../services/profile_service.dart';
 import '../../../support/logger.dart';
 
@@ -45,32 +46,85 @@ class _profileinnerpageState extends State<profileinnerpage>
   bool isLoading = false;
   bool _isLoading = true;
   String? imageUrl;
+  var followCount;
+  bool isFollowing = false;
 
 
 
 
-  Future _profileimgget() async {
+
+
+  // void _toggleFollow() {
+  //   setState(() {
+  //     isFollowing = !isFollowing;
+  //   });
+  //   if (isFollowing) {
+  //     _Follow();
+  //   } else {
+  //     _UnFollow();
+  //   }
+  // }
+  void _toggleFollow() {
+    setState(() {
+      // Toggle the follow status based on the followCount variable
+      isFollowing = !followCount;
+    });
+    if (isFollowing) {
+      _Follow();
+    } else {
+      _UnFollow();
+    }
+  }
+
+
+  Future _profileInner() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     userid = prefs.getString('userid');
     var response = await ProfileService.Profileinnerpage(widget.id);
-    log.i('profile statsus show.. $response');
-    setState(() {
-      profileinnerpageshow = response;
-    });
+    // Check if response is not null and contains 'result' property
+    if (response != null && response['result'] != null) {
+      // Accessing 'firstName' from the first item of the 'result' array
+      followCount = response['result'][0]['isFollowing'];
+      print('............$followCount');
+      log.i('profile statsus show.. $response');
+      setState(() {
+        isFollowing = true;
+        profileinnerpageshow = response;
+      });
+    }
   }
+
+
+  Future _Follow() async {
+    var reqData = {
+      'followerId': widget.id,
+    };
+    var response = await HomeService.follow(reqData);
+    log.i('add to Follow. $response');
+
+  }
+
+  Future _UnFollow() async {
+    var reqData = {
+      'followerId': widget.id,
+    };
+    var response = await HomeService.unfollow(reqData);
+    log.i('add to UnFollow. $response');
+
+  }
+
+
+
 
   Future _initLoad() async {
     await Future.wait(
       [
-        _profileimgget()
+        _profileInner(),
 
       ],
     );
     _isLoading = false;
   }
-
-
-
 
 
   @override
@@ -142,7 +196,11 @@ class _profileinnerpageState extends State<profileinnerpage>
         // ),
       ),
       backgroundColor: white,
-      body: SingleChildScrollView(
+      body:  _isLoading
+          ? Center(
+        child: CircularProgressIndicator(), // Display circular indicator while loading
+      )
+          :SingleChildScrollView(
         child: Column(
           children: [
             SizedBox(
@@ -277,20 +335,24 @@ class _profileinnerpageState extends State<profileinnerpage>
 
                           Row(
                             children: [
-                              Container(
-                                height: 40,
-                                width: 110,
-                                decoration: BoxDecoration(
+                              InkWell(
+                                onTap: _toggleFollow,
+                                child: Container(
+                                  height: 40,
+                                  width: 110,
+                                  decoration: BoxDecoration(
                                     color: gradnew,
-                                    borderRadius: BorderRadius.all(
-                                        Radius.circular(20))),
-                                child: Center(
+                                    borderRadius: BorderRadius.all(Radius.circular(20)),
+                                  ),
+                                  child: Center(
                                     child: Text(
-                                      "Follow",
-                                      style: TextStyle(
-                                          color: white, fontSize: 12),
-                                    )),
+                                      followCount ? "Unfollow" : "Follow",
+                                      style: TextStyle(color: white, fontSize: 12),
+                                    ),
+                                  ),
+                                ),
                               ),
+
 
                               SizedBox(width: 20,),
 
@@ -303,7 +365,7 @@ class _profileinnerpageState extends State<profileinnerpage>
                                         Radius.circular(20))),
                                 child: Center(
                                     child: Text(
-                                      "Follow",
+                                      "Message",
                                       style: TextStyle(
                                           color: g2button, fontSize: 12),
                                     )),
@@ -354,10 +416,10 @@ class _profileinnerpageState extends State<profileinnerpage>
                                 InkWell(
                                   onTap: () {
 
-                                    Navigator.of(context).push(
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                FollowersList()));
+                                    // Navigator.of(context).push(
+                                    //     MaterialPageRoute(
+                                    //         builder: (context) =>
+                                    //             FollowersList()));
                                   },
                                   child: Column(
                                     children: [
@@ -378,10 +440,10 @@ class _profileinnerpageState extends State<profileinnerpage>
                                 ),
                                 InkWell(
                                   onTap: () {
-                                    Navigator.of(context).push(
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                FollowingList()));
+                                    // Navigator.of(context).push(
+                                    //     MaterialPageRoute(
+                                    //         builder: (context) =>
+                                    //             FollowingList()));
                                   },
                                   child: Column(
                                     children: [
@@ -465,7 +527,7 @@ class _profileinnerpageState extends State<profileinnerpage>
                   crossAxisSpacing: 8.0,
                   mainAxisSpacing: 8.0,
                 ),
-                itemCount: 5,
+                itemCount: profileinnerpageshow != null && profileinnerpageshow['result'] != null ? profileinnerpageshow['result'][0]['media'].length : 0,
                 itemBuilder: (BuildContext context, int index) {
                   return Stack(
                     children: [
@@ -475,7 +537,7 @@ class _profileinnerpageState extends State<profileinnerpage>
                           width: 112,
                           height: 200,
                           child: Image.network(
-                            '$baseURL/' + profileinnerpageshow['result'][index]['media'] [index]['filePath'],
+                            '$baseURL/' + profileinnerpageshow['result'][0]['media'][index]['filePath'],
                             fit: BoxFit.cover,
                           ),
                         ),
@@ -527,3 +589,5 @@ class _profileinnerpageState extends State<profileinnerpage>
     );
   }
 }
+
+

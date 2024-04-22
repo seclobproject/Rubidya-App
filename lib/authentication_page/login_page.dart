@@ -50,8 +50,6 @@ class _loginState extends State<login> {
 
         print('isOTPVerified: ${response['false']}');
 
-
-
         // _saveAndRedirectToHome(response['access_token'], response['name']);
         _saveAndRedirectToHome(response['access_token'], response['_id']);
 

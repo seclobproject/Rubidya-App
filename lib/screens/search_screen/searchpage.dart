@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../networking/constant.dart';
 import '../../../resources/color.dart';
@@ -9,6 +8,7 @@ import '../../../support/logger.dart';
 import 'package:favorite_button/favorite_button.dart';
 
 import '../../services/search_service.dart';
+import '../profile_screen/inner_page/profile_inner_page.dart';
 
 class searchpage extends StatefulWidget {
   const searchpage({Key? key}) : super(key: key);
@@ -84,10 +84,14 @@ class _searchpageState extends State<searchpage> {
   }
 
   List<Map<String, dynamic>> _filterSearchResults(String query) {
-    // Logic to filter the search results based on the query
-    // You can modify this logic according to your requirements
-    return searchlist.where((result) =>
-        result['firstName'].toLowerCase().contains(query.toLowerCase())).toList();
+    if (query.isEmpty) {
+      // If the query is empty, return an empty list
+      return [];
+    } else {
+      // Filter the search results based on the query
+      return searchlist.where((result) =>
+          result['firstName'].toLowerCase().contains(query.toLowerCase())).toList();
+    }
   }
 
   @override
@@ -95,18 +99,19 @@ class _searchpageState extends State<searchpage> {
     return Scaffold(
       appBar: AppBar(
         title: Text("search", style: TextStyle(fontSize: 14)),
-        actions: [
-
-        ],
+        actions: [],
       ),
       body: Column(
         children: [
-
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10.0),
-            child: SizedBox(
+            child: Container(
               width: 400,
               height: 40,
+              decoration: BoxDecoration(
+                color: blackshade,
+                borderRadius: BorderRadius.all(Radius.circular(10)),
+              ),
               child: TextFormField(
                 controller: _searchController,
                 onChanged: _onSearchTextChanged,
@@ -116,26 +121,23 @@ class _searchpageState extends State<searchpage> {
                     color: Colors.grey, // You can adjust the hint text color
                     fontSize: 14, // You can adjust the font size of the hint text
                   ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10), // Adjust the border radius
-                  ),
-                  contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+                  border: InputBorder.none, // Remove the border
+                  contentPadding: EdgeInsets.symmetric(vertical: 4, horizontal: 10),
                   suffixIcon: Icon(Icons.search),
+                  // Center align the hint text
                 ),
                 textAlign: TextAlign.start, // Center align the text field
               ),
             ),
           ),
-
           SizedBox(height: 20,),
-
-
           Expanded(
             child: ListView.builder(
-              itemCount: searchlist.length,
+              itemCount: _searchController.text.isEmpty ? 0 : searchlist.length,
               itemBuilder: (BuildContext context, int index) {
                 return MembersListing(
                   name: searchlist[index]['firstName'],
+                  id: searchlist[index]['_id'],
                   status: searchlist[index]['isFollowing'],
                   img: searchlist[index]['profilePic'] != null
                       ? '${baseURL}/${searchlist[index]['profilePic']['filePath']}'
@@ -156,82 +158,90 @@ class MembersListing extends StatelessWidget {
     required this.name,
     required this.img,
     required this.status,
+    required this.id,
     required this.onFollowToggled,
     Key? key,
   }) : super(key: key);
 
   final String name;
   final String img;
+  final String id;
   final bool status;
   final VoidCallback onFollowToggled;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 5,),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              SizedBox(height: 10,),
-              ClipRRect(
-                borderRadius: BorderRadius.all(Radius.circular(100)),
-                child: img.isNotEmpty
-                    ? Image.network(
-                  img,
-                  width: 65,
-                  height: 65,
-                  fit: BoxFit.cover,
-                )
-                    : Image.network(
-                  'https://static.vecteezy.com/system/resources/thumbnails/002/318/271/small/user-profile-icon-free-vector.jpg',
-                  width: 65,
-                  height: 65,
-                  fit: BoxFit.cover,
+    return InkWell(
+      onTap: (){
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) =>  profileinnerpage(
+            id: id,
+          )),
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 5,),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                SizedBox(height: 10,),
+                ClipRRect(
+                  borderRadius: BorderRadius.all(Radius.circular(100)),
+                  child: img.isNotEmpty
+                      ? Image.network(
+                    img,
+                    width: 65,
+                    height: 65,
+                    fit: BoxFit.cover,
+                  )
+                      : Image.network(
+                    'https://static.vecteezy.com/system/resources/thumbnails/002/318/271/small/user-profile-icon-free-vector.jpg',
+                    width: 65,
+                    height: 65,
+                    fit: BoxFit.cover,
+                  ),
                 ),
-              ),
-
-              SizedBox(width: 20,),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 5),
-                child: Text(
-                  name,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 11),
+                SizedBox(width: 20,),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 5),
+                  child: Text(
+                    name,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontSize: 11),
+                  ),
                 ),
-              ),
-
-              Expanded(child: SizedBox()),
-
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: GestureDetector(
-                  onTap: onFollowToggled,
-                  child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(5),
-                      color: status ? bluetext : buttoncolor,
-                    ),
-                    child: Text(
-                      status ? 'Unfollow' : 'Follow',
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                Expanded(child: SizedBox()),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: GestureDetector(
+                    onTap: onFollowToggled,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(5),
+                        color: status ? bluetext : buttoncolor,
+                      ),
+                      child: Text(
+                        status ? 'Unfollow' : 'Follow',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: Divider(color: Colors.black,thickness: .1,),
-          )
-        ],
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: Divider(color: Colors.black,thickness: .1,),
+            )
+          ],
+        ),
       ),
     );
   }
