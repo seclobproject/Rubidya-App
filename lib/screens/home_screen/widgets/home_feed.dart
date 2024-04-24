@@ -82,9 +82,7 @@ class _HomeFeedState extends State<HomeFeed> {
 
   @override
   Widget build(BuildContext context) {
-    return _isLoading
-        ? CircularProgressIndicator() // Add your loading indicator here
-        : ListView.builder(
+    return  ListView.builder(
       shrinkWrap: true,
       physics: NeverScrollableScrollPhysics(),
       itemCount: homeList != null && homeList['posts'] != null ? homeList['posts'].length : 0,
@@ -96,7 +94,7 @@ class _HomeFeedState extends State<HomeFeed> {
           name: homeList['posts'][index]['username'] != null ? homeList['posts'][index]['username'] : '',
           description: homeList['posts'][index]['description'] != null ? homeList['posts'][index]['description'] : '',
           likes: homeList['posts'][index]['likeCount'] != null ? homeList['posts'][index]['likeCount'].toString() : '',
-          img: homeList['posts'][index]['filePath'] != null ? '$baseURL/${homeList['posts'][index]['filePath']}' : '',
+          img: homeList['posts'][index]['filePath'] != null ? homeList['posts'][index]['filePath'] : '',
           id: homeList['posts'][index]['_id'] != null ? homeList['posts'][index]['_id'] : '',
           userId: homeList['posts'][index]['userId'] != null ? homeList['posts'][index]['userId'] : '',
           likeCount: homeList['posts'][index]['isLiked'] != null ? homeList['posts'][index]['isLiked'] : false,
@@ -141,65 +139,68 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: (){
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) =>  profileinnerpage(
-            id: userId,
-          )),
-        );
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        child: GestureDetector(
-          onDoubleTap: onDoubleTapLike, // Handle double tap here
-          child: Container(
-            width: 345,
-            // height: 550,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.5),
-                  spreadRadius: 0.1,
-                  blurRadius: 5,
-                  offset: Offset(0, 1),
-                ),
-              ],
-              borderRadius: BorderRadius.all(Radius.circular(10)),
-            ),
-            child: Column(
-              children: [
-                Stack(
-                  children: [
-                    InkWell(
-                      onDoubleTap: (){},
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                        child: Row(
-                          children: [
-                            SizedBox(width: 50),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  name,
-                                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
-                                ),
-                                Text(
-                                  createdTime,
-                                  style: TextStyle(fontSize: 11, color: Colors.grey),
-                                ),
-                              ],
-                            ),
-                            Expanded(child: SizedBox()),
-                            Icon(Icons.more_vert, color: Colors.grey),
-                          ],
-                        ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      child: GestureDetector(
+        onDoubleTap: onDoubleTapLike, // Handle double tap here
+        child: Container(
+          width: 345,
+          // height: 550,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.5),
+                spreadRadius: 0.1,
+                blurRadius: 5,
+                offset: Offset(0, 1),
+              ),
+            ],
+            borderRadius: BorderRadius.all(Radius.circular(10)),
+          ),
+          child: Column(
+            children: [
+              Stack(
+                children: [
+                  InkWell(
+                    onDoubleTap: (){
+
+
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                      child: Row(
+                        children: [
+                          SizedBox(width: 50),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                name,
+                                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                              ),
+                              Text(
+                                createdTime,
+                                style: TextStyle(fontSize: 11, color: Colors.grey),
+                              ),
+                            ],
+                          ),
+                          Expanded(child: SizedBox()),
+                          Icon(Icons.more_vert, color: Colors.grey),
+                        ],
                       ),
                     ),
-                    Positioned(
+                  ),
+                  InkWell(
+                    onTap: (){
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) =>  profileinnerpage(
+                          id: userId,
+                        )),
+                      );
+                    },
+                    child: Positioned(
                       top: 10,
                       left: 10,
                       child: Stack(
@@ -224,74 +225,76 @@ class ProductCard extends StatelessWidget {
                         ],
                       ),
                     ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 10),
+              Container(
+                decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(10))),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                    child: Image.network(
+                      img,
+                      fit: BoxFit.cover,
+                      height: 400,
+                    ),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(right: 23, top: 10, left: 15),
+                child: Row(
+                  children: [
+                    FavoriteButton(
+                      iconSize: 32,
+                      isFavorite: likeCount,
+                      iconDisabledColor: Colors.black26,
+                      valueChanged: (_) {
+                        onLikePressed(); // Call the callback function when like button is pressed
+                      },
+                    ),
+                    SizedBox(width: 10),
+                    Text("Likes", style: TextStyle(color: Colors.blue, fontSize: 10)),
+                    SizedBox(width: 2),
+                    Text(likes, style: TextStyle(color: Colors.blue, fontSize: 13, fontWeight: FontWeight.w700)),
+                    SizedBox(width: 2),
+                    Expanded(child: SizedBox()),
+                    SvgPicture.asset(
+                      "assets/svg/comment.svg",
+                      height: 20,
+                    ),
+                    SizedBox(width: 20),
+                    SvgPicture.asset(
+                      "assets/svg/share.svg",
+                      height: 20,
+                    ),
+                    SizedBox(width: 20),
+                    SvgPicture.asset(
+                      "assets/svg/save.svg",
+                      height: 20,
+                    ),
                   ],
                 ),
-                SizedBox(height: 10),
-                Container(
-                  decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(10))),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.all(Radius.circular(10)),
-                      child: Image.network(
-                        img,
-                        fit: BoxFit.cover,
-                        height: 400,
-                      ),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(right: 23, top: 10, left: 15),
-                  child: Row(
-                    children: [
-                      FavoriteButton(
-                        iconSize: 32,
-                        isFavorite: likeCount,
-                        iconDisabledColor: Colors.black26,
-                        valueChanged: (_) {
-                          onLikePressed(); // Call the callback function when like button is pressed
-                        },
-                      ),
-                      SizedBox(width: 10),
-                      Text("Likes", style: TextStyle(color: Colors.blue, fontSize: 10)),
-                      SizedBox(width: 2),
-                      Text(likes, style: TextStyle(color: Colors.blue, fontSize: 13, fontWeight: FontWeight.w700)),
-                      SizedBox(width: 2),
-                      Expanded(child: SizedBox()),
-                      SvgPicture.asset(
-                        "assets/svg/comment.svg",
-                        height: 20,
-                      ),
-                      SizedBox(width: 20),
-                      SvgPicture.asset(
-                        "assets/svg/share.svg",
-                        height: 20,
-                      ),
-                      SizedBox(width: 20),
-                      SvgPicture.asset(
-                        "assets/svg/save.svg",
-                        height: 20,
-                      ),
-                    ],
-                  ),
-                ),
+              ),
 
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Container(
-                    height: 30,
-                    child: Text(description,
-                      maxLines: 3,
-                      style: TextStyle(
-                          fontSize: 11,
-                          overflow: TextOverflow.ellipsis
-                      ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Container(
+                  height: 40,
+                  child: Text(description,
+                    maxLines: 3,
+                    style: TextStyle(
+                        fontSize: 11,
+                        overflow: TextOverflow.ellipsis
                     ),
                   ),
-                )
-              ],
-            ),
+                ),
+              ),
+
+              SizedBox(height: 15,)
+            ],
           ),
         ),
       ),

@@ -78,7 +78,7 @@ class _HomeFollowState extends State<HomeFollow> {
           id: suggestFollow[index]['_id'],
           status: suggestFollow[index]['isFollowing'],
           img: suggestFollow[index]['profilePic'] != null
-              ? '${baseURL}/${suggestFollow[index]['profilePic']['filePath']}'
+              ? suggestFollow[index]['profilePic']['filePath']
               : '',
           onFollowToggled: () => toggleFollow(index),
         );

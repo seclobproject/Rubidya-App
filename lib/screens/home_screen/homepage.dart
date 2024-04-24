@@ -408,7 +408,7 @@ class _homepageState extends State<homepage> {
                           onTap: (){
                             // Navigator.push(
                             //   context,
-                            //   MaterialPageRoute(builder: (context) =>  MyHomePages()),
+                            //   MaterialPageRoute(builder: (context) =>  HomeFeeds()),
                             // );
                           },
                           child: SvgPicture.asset(

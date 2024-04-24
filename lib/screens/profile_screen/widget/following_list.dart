@@ -1,13 +1,15 @@
+import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../../networking/constant.dart';
+
 import '../../../resources/color.dart';
 import '../../../services/home_service.dart';
-import '../../../support/logger.dart';
-import 'package:favorite_button/favorite_button.dart';
 
+import '../../../support/logger.dart';
 import '../inner_page/profile_inner_page.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class FollowingList extends StatefulWidget {
   const FollowingList({Key? key}) : super(key: key);
@@ -22,6 +24,9 @@ class _FollowingListState extends State<FollowingList> {
   late SharedPreferences prefs;
 
   late List<Map<String, dynamic>> followingList = [];
+  int _pageNumber = 1;
+  bool _hasMore = true;
+  bool _isLoadingMore = false;
 
   @override
   void initState() {
@@ -35,12 +40,39 @@ class _FollowingListState extends State<FollowingList> {
   }
 
   Future<void> _followingFollowList() async {
-    var response = await HomeService.followingList();
+    var response = await HomeService.followingList(page: _pageNumber);
     log.i('Following list details show.. $response');
     setState(() {
-      followingList = List<Map<String, dynamic>>.from(response['following']);
+      followingList.addAll(List<Map<String, dynamic>>.from(response['following']));
       _isLoading = false; // Set loading state to false once data is loaded
     });
+  }
+
+  Future<void> _loadMoreData() async {
+    if (_isLoadingMore || !_hasMore) return;
+
+    setState(() {
+      _isLoadingMore = true;
+    });
+
+    try {
+      final response = await HomeService.followingList(page: _pageNumber + 1);
+      final List<Map<String, dynamic>> newFollowingList = List<Map<String, dynamic>>.from(response['following']);
+      setState(() {
+        _pageNumber++;
+        _isLoadingMore = false;
+        followingList.addAll(newFollowingList);
+
+        if (newFollowingList.isEmpty) {
+          _hasMore = false;
+        }
+      });
+    } catch (e) {
+      // Handle error
+      setState(() {
+        _isLoadingMore = false;
+      });
+    }
   }
 
   Future<void> toggleFollow(int index) async {
@@ -75,9 +107,7 @@ class _FollowingListState extends State<FollowingList> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Following List", style: TextStyle(fontSize: 14)),
-        actions: [
-
-        ],
+        actions: [],
       ),
       body: _isLoading
           ? Center(
@@ -85,7 +115,6 @@ class _FollowingListState extends State<FollowingList> {
       )
           : Column(
         children: [
-
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10),
             child: Container(
@@ -93,7 +122,7 @@ class _FollowingListState extends State<FollowingList> {
               height: 40,
               decoration: BoxDecoration(
                 color: blackshade,
-                borderRadius: BorderRadius.all(Radius.circular(10))
+                borderRadius: BorderRadius.all(Radius.circular(10)),
               ),
               child: TextFormField(
                 controller: _searchController,
@@ -114,31 +143,44 @@ class _FollowingListState extends State<FollowingList> {
               ),
             ),
           ),
-
-
           Expanded(
-            child: ListView.builder(
-              itemCount: followingList.length,
-              itemBuilder: (BuildContext context, int index) {
-                // Check if the name contains the search query
-                bool matchesSearch = followingList[index]['firstName']
-                    .toLowerCase()
-                    .contains(_searchController.text.toLowerCase());
-
-                // Only display the item if it matches the search query
-                if (!matchesSearch) return SizedBox.shrink();
-
-                return MembersListing(
-                  name: followingList[index]['firstName'],
-                  id: followingList[index]['_id'], // assuming _id is a String
-                  img: followingList[index]['profilePic'] != null
-                      ? '${baseURL}/${followingList[index]['profilePic']['filePath']}'
-                      : '',
-                  onFollowToggled: () => toggleFollow(index),
-                );
+            child: NotificationListener<ScrollNotification>(
+              onNotification: (ScrollNotification scrollInfo) {
+                if (!_isLoadingMore &&
+                    scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent &&
+                    _hasMore) {
+                  _loadMoreData();
+                }
+                return true;
               },
+              child: ListView.builder(
+                itemCount: followingList.length,
+                itemBuilder: (BuildContext context, int index) {
+                  // Check if the name contains the search query
+                  bool matchesSearch = followingList[index]['firstName']
+                      .toLowerCase()
+                      .contains(_searchController.text.toLowerCase());
+
+                  // Only display the item if it matches the search query
+                  if (!matchesSearch) return SizedBox.shrink();
+
+                  return MembersListing(
+                    name: followingList[index]['firstName'],
+                    id: followingList[index]['_id'], // assuming _id is a String
+                    img: followingList[index]['profilePic'] != null
+                        ? followingList[index]['profilePic']['filePath']
+                        : '',
+                    onFollowToggled: () => toggleFollow(index),
+                  );
+                },
+              ),
             ),
           ),
+          _isLoadingMore
+              ? Center(
+            child: CircularProgressIndicator(),
+          )
+              : SizedBox(),
         ],
       ),
     );
@@ -190,14 +232,15 @@ class _MembersListingState extends State<MembersListing> {
 
   @override
   Widget build(BuildContext context) {
-    print('...............${widget.id}');
     return InkWell(
-      onTap: (){
+      onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) =>  profileinnerpage(
-            id: widget.id,
-          )),
+          MaterialPageRoute(
+            builder: (context) => profileinnerpage(
+              id: widget.id,
+            ),
+          ),
         );
       },
       child: Padding(
@@ -247,7 +290,7 @@ class _MembersListingState extends State<MembersListing> {
                         color: buttoncolor,
                       ),
                       child: Text(
-                        isFollowing ? "unfollow" : "follow", // Toggle text based on follow status
+                        isFollowing ? "unfollow" : "following", // Toggle text based on follow status
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.bold,

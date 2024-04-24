@@ -51,7 +51,26 @@ class _profileinnerpageState extends State<profileinnerpage>
 
 
 
+  void _toggleFollow() async {
+    // Toggle the follow status
+    setState(() {
+      isFollowing = !isFollowing;
+    });
 
+    if (isFollowing) {
+      await _Follow();
+      // Update followCount if follow is successful
+      setState(() {
+        followCount = true;
+      });
+    } else {
+      await _UnFollow();
+      // Update followCount if unfollow is successful
+      setState(() {
+        followCount = false;
+      });
+    }
+  }
 
 
   // void _toggleFollow() {
@@ -64,35 +83,36 @@ class _profileinnerpageState extends State<profileinnerpage>
   //     _UnFollow();
   //   }
   // }
-  void _toggleFollow() {
-    setState(() {
-      // Toggle the follow status based on the followCount variable
-      isFollowing = !followCount;
-    });
-    if (isFollowing) {
-      _Follow();
-    } else {
-      _UnFollow();
-    }
-  }
+  // void _toggleFollow() {
+  //   setState(() {
+  //     // Toggle the follow status based on the followCount variable
+  //     isFollowing = !followCount;
+  //   });
+  //   if (isFollowing) {
+  //     _Follow();
+  //   } else {
+  //     _UnFollow();
+  //   }
+  // }
 
 
   Future _profileInner() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     userid = prefs.getString('userid');
     var response = await ProfileService.Profileinnerpage(widget.id);
-    // Check if response is not null and contains 'result' property
+
     if (response != null && response['result'] != null) {
-      // Accessing 'firstName' from the first item of the 'result' array
-      followCount = response['result'][0]['isFollowing'];
-      print('............$followCount');
-      log.i('profile statsus show.. $response');
+      // Accessing 'isFollowing' directly from the response
+      bool initialFollowStatus = response['result'][0]['isFollowing'];
+
+      // Set the initial follow status
       setState(() {
-        isFollowing = true;
+        isFollowing = initialFollowStatus;
         profileinnerpageshow = response;
       });
     }
   }
+
 
 
   Future _Follow() async {
@@ -336,7 +356,7 @@ class _profileinnerpageState extends State<profileinnerpage>
                           Row(
                             children: [
                               InkWell(
-                                onTap: _toggleFollow,
+                                onTap: _toggleFollow, // This triggers the toggle follow method
                                 child: Container(
                                   height: 40,
                                   width: 110,
@@ -346,23 +366,19 @@ class _profileinnerpageState extends State<profileinnerpage>
                                   ),
                                   child: Center(
                                     child: Text(
-                                      followCount ? "Unfollow" : "Follow",
+                                      isFollowing ? "Unfollow" : "Follow", // Show "Unfollow" if following, otherwise show "Follow"
                                       style: TextStyle(color: white, fontSize: 12),
                                     ),
                                   ),
                                 ),
                               ),
-
-
                               SizedBox(width: 20,),
-
                               Container(
                                 height: 40,
                                 width: 110,
                                 decoration: BoxDecoration(
                                     color: lightblue,
-                                    borderRadius: BorderRadius.all(
-                                        Radius.circular(20))),
+                                    borderRadius: BorderRadius.all(Radius.circular(20))),
                                 child: Center(
                                     child: Text(
                                       "Message",
@@ -370,9 +386,9 @@ class _profileinnerpageState extends State<profileinnerpage>
                                           color: g2button, fontSize: 12),
                                     )),
                               )
-
                             ],
                           ),
+
 
                           SizedBox(
                             height: 20,

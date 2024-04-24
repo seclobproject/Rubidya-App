@@ -47,6 +47,7 @@ dev_dependencies:
 #  floating_action_row: ^1.0.2
   flutter_speed_dial: ^3.0.5
   in_app_update: ^4.2.0
+  widgets_to_image: ^0.0.2
 
 
 

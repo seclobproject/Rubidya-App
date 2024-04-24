@@ -1,26 +1,29 @@
+import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../../networking/constant.dart';
 import '../../../resources/color.dart';
 import '../../../services/home_service.dart';
 import '../../../support/logger.dart';
-import 'package:favorite_button/favorite_button.dart';
-
 import '../inner_page/profile_inner_page.dart';
+
 
 class FollowersList extends StatefulWidget {
   const FollowersList({Key? key}) : super(key: key);
 
   @override
-  State<FollowersList> createState() => _FollowersListState();
+  State<FollowersList> createState() => _FollowingListState();
 }
 
-class _FollowersListState extends State<FollowersList> {
+class _FollowingListState extends State<FollowersList> {
+  TextEditingController _searchController = TextEditingController();
   bool _isLoading = true;
   late SharedPreferences prefs;
-  late List<Map<String, dynamic>> followerList = [];
-  late List<Map<String, dynamic>> filteredList = [];
+
+  late List<Map<String, dynamic>> followingList = [];
+  int _pageNumber = 1;
+  bool _hasMore = true;
+  bool _isLoadingMore = false;
 
   @override
   void initState() {
@@ -34,31 +37,50 @@ class _FollowersListState extends State<FollowersList> {
   }
 
   Future<void> _followingFollowList() async {
-    var response = await HomeService.followersList();
+    var response = await HomeService.followersList(page: _pageNumber);
     log.i('Following list details show.. $response');
     setState(() {
-      followerList = List<Map<String, dynamic>>.from(response['followers']);
-      filteredList = followerList; // Initialize filtered list with all followers initially
+      followingList.addAll(List<Map<String, dynamic>>.from(response['followers']));
       _isLoading = false; // Set loading state to false once data is loaded
     });
   }
 
-  void _filterList(String searchText) {
+  Future<void> _loadMoreData() async {
+    if (_isLoadingMore || !_hasMore) return;
+
     setState(() {
-      filteredList = followerList.where((follower) {
-        final name = follower['firstName'].toString().toLowerCase();
-        return name.contains(searchText.toLowerCase());
-      }).toList();
+      _isLoadingMore = true;
     });
+
+    try {
+      final response = await HomeService.followersList(page: _pageNumber + 1);
+      final List<Map<String, dynamic>> newFollowingList = List<Map<String, dynamic>>.from(response['following']);
+      setState(() {
+        _pageNumber++;
+        _isLoadingMore = false;
+        followingList.addAll(newFollowingList);
+
+        if (newFollowingList.isEmpty) {
+          _hasMore = false;
+        }
+      });
+    } catch (e) {
+      // Handle error
+      setState(() {
+        _isLoadingMore = false;
+      });
+    }
   }
 
   Future<void> toggleFollow(int index) async {
     setState(() {
-      filteredList[index]['isFollowing'] = !filteredList[index]['isFollowing'];
+      if (followingList[index]['isFollowing'] != null) {
+        followingList[index]['isFollowing'] = !followingList[index]['isFollowing'];
+      }
     });
 
-    var followerId = filteredList[index]['_id'];
-    if (filteredList[index]['isFollowing']) {
+    var followerId = followingList[index]['_id'];
+    if (followingList[index]['isFollowing'] != null && followingList[index]['isFollowing']) {
       await follow(followerId);
     } else {
       await unfollow(followerId);
@@ -82,21 +104,25 @@ class _FollowersListState extends State<FollowersList> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Followers List", style: TextStyle(fontSize: 14)),
+        actions: [],
       ),
       body: _isLoading
-          ? Center(child: CircularProgressIndicator()) // Show circular loading indicator if data is still loading
+          ? Center(
+        child: CircularProgressIndicator(), // Display circular indicator while loading
+      )
           : Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.symmetric(horizontal: 10),
             child: Container(
               width: 400,
               height: 40,
               decoration: BoxDecoration(
-                  color: blackshade,
-                  borderRadius: BorderRadius.all(Radius.circular(10))
+                color: blackshade,
+                borderRadius: BorderRadius.all(Radius.circular(10)),
               ),
-              child: TextField(
+              child: TextFormField(
+                controller: _searchController,
                 decoration: InputDecoration(
                   hintText: 'Search',
                   hintStyle: TextStyle(
@@ -108,88 +134,143 @@ class _FollowersListState extends State<FollowersList> {
                   suffixIcon: Icon(Icons.search),
                   // Center align the hint text
                 ),
-                onChanged: _filterList,
+                onChanged: (value) {
+                  setState(() {}); // Trigger rebuild to update the filtered list
+                },
               ),
             ),
           ),
-          SizedBox(height: 10,),
-          Expanded(
-            child: ListView.builder(
-              itemCount: filteredList.length,
-              itemBuilder: (BuildContext context, int index) {
-                return MembersListing(
-                  name: filteredList[index]['firstName'],
-                  id: filteredList[index]['_id'],
-                  status: filteredList[index]['isFollowing'],
-                  img: filteredList[index]['profilePic'] != null
-                      ? '${baseURL}/${filteredList[index]['profilePic']['filePath']}'
-                      : '',
-                  onFollowToggled: () => toggleFollow(index),
-                );
-              },
+          NotificationListener<ScrollNotification>(
+            onNotification: (ScrollNotification scrollInfo) {
+              if (!_isLoadingMore &&
+                  scrollInfo.metrics.pixels == 0 &&
+                  _hasMore) {
+                _loadMoreData();
+              }
+              return true;
+            },
+            child: Expanded(
+              child: ListView.builder(
+                itemCount: followingList.length,
+                itemBuilder: (BuildContext context, int index) {
+                  // Check if the name contains the search query
+                  bool matchesSearch = followingList[index]['firstName']
+                      .toLowerCase()
+                      .contains(_searchController.text.toLowerCase());
+
+                  // Only display the item if it matches the search query
+                  if (!matchesSearch) return SizedBox.shrink();
+
+                  return MembersListing(
+                    name: followingList[index]['firstName'],
+                    id: followingList[index]['_id'], // assuming _id is a String
+                    img: followingList[index]['profilePic'] != null
+                        ? followingList[index]['profilePic']['filePath']
+                        : '',
+                    onFollowToggled: () => toggleFollow(index),
+                  );
+                },
+              ),
             ),
           ),
+          _isLoadingMore
+              ? Center(
+            child: CircularProgressIndicator(),
+          )
+              : SizedBox(),
         ],
       ),
     );
   }
 }
 
-class MembersListing extends StatelessWidget {
+class MembersListing extends StatefulWidget {
   const MembersListing({
     required this.name,
     required this.img,
-    required this.status,
-    required this.id,
+    required this.id, // changed type to String
     required this.onFollowToggled,
     Key? key,
   }) : super(key: key);
 
   final String name;
   final String img;
-  final bool status;
-  final String id;
+  final String id; // changed type to String
   final VoidCallback onFollowToggled;
+
+  @override
+  _MembersListingState createState() => _MembersListingState();
+}
+
+class _MembersListingState extends State<MembersListing> {
+  bool isFollowing = false;
+
+  Future<void> _toggleFollowStatus() async {
+    if (widget.id != null) {
+      if (isFollowing) {
+        // Unfollow logic
+        var reqData = {
+          'followerId': widget.id!,
+        };
+        var response = await HomeService.unfollow(reqData);
+        log.i('Unfollowed Done...... $response');
+      } else {
+        // Follow logic
+        // Add your follow logic here
+      }
+      setState(() {
+        isFollowing = !isFollowing; // Toggle follow status
+      });
+      widget.onFollowToggled(); // Notify parent widget about follow status change
+    } else {
+      print("Error: widget.id is null");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: (){
+      onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) =>  profileinnerpage(
-            id: id,
-          )),
+          MaterialPageRoute(
+            builder: (context) => profileinnerpage(
+              id: widget.id,
+            ),
+          ),
         );
       },
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 5),
         child: Column(
           children: [
             Row(
               children: [
                 SizedBox(height: 10),
-                ClipRRect(
-                  borderRadius: BorderRadius.all(Radius.circular(100)),
-                  child: img.isNotEmpty
-                      ? Image.network(
-                    img,
-                    height: 65,
-                    fit: BoxFit.cover,
-                  )
-                      : Container(
-                    width: 65,
-                    height: 65,
-                    child: Image.network(
-                      'https://static.vecteezy.com/system/resources/thumbnails/002/318/271/small/user-profile-icon-free-vector.jpg',
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.all(Radius.circular(100)),
+                    child: widget.img.isNotEmpty
+                        ? Image.network(
+                      widget.img,
+                      height: 65,
+                      fit: BoxFit.cover,
+                    )
+                        : Container(
+                      width: 65,
+                      height: 65,
+                      child: Image.network(
+                        'https://static.vecteezy.com/system/resources/thumbnails/002/318/271/small/user-profile-icon-free-vector.jpg',
+                      ),
                     ),
                   ),
                 ),
-                SizedBox(width: 20),
+                SizedBox(width: 5),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 5),
                   child: Text(
-                    name,
+                    widget.name,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(fontSize: 11),
                   ),
@@ -198,15 +279,15 @@ class MembersListing extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: GestureDetector(
-                    onTap: onFollowToggled,
+                    onTap: _toggleFollowStatus,
                     child: Container(
                       padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(5),
-                        color: status ? bluetext : buttoncolor,
+                        color: buttoncolor,
                       ),
                       child: Text(
-                        status ? 'Following' : 'Follow Back',
+                        isFollowing ? "unfollow" : "following", // Toggle text based on follow status
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
@@ -220,7 +301,10 @@ class MembersListing extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: Divider(color: Colors.black, thickness: .1),
+              child: Divider(
+                color: Colors.black,
+                thickness: .1,
+              ),
             )
           ],
         ),

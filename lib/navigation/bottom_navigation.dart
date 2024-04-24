@@ -34,7 +34,7 @@ class _BottomnavState extends State<Bottomnav> {
   final List<Map<String, Object>> _pages = [
     {'page': homepage(), 'title': 'Home'},
     {'page': searchpage(), 'title': 'Search'},
-    {'page': uploadscreen(), 'title': 'Upload'},
+    {'page': UploadScreen(), 'title': 'Upload'},
     {'page': chatpage(), 'title': 'Chat pgae'},
     {'page': profilepage(), 'title': 'Profile'},
   ];
