@@ -380,7 +380,7 @@ class _profilepageState extends State<profilepage>
               ),
               Container(
                 height: 300,
-                // width: 400,
+
                 decoration: BoxDecoration(
                     color: profilebg,
                     borderRadius: BorderRadius.only(

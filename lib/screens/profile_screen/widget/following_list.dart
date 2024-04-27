@@ -244,7 +244,7 @@ class _MembersListingState extends State<MembersListing> {
         );
       },
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 5),
+        padding: const EdgeInsets.symmetric(horizontal: 5,vertical: 5),
         child: Column(
           children: [
             Row(
@@ -261,10 +261,12 @@ class _MembersListingState extends State<MembersListing> {
                       fit: BoxFit.cover,
                     )
                         : Container(
-                      width: 65,
-                      height: 65,
+                      width: 60,
+                      height: 60,
                       child: Image.network(
-                        'https://static.vecteezy.com/system/resources/thumbnails/002/318/271/small/user-profile-icon-free-vector.jpg',
+
+                        height: 60,
+                        'https://play-lh.googleusercontent.com/4HZhLFCcIjgfbXoVj3mgZdQoKO2A_z-uX2gheF5yNCkb71wzGqwobr9muj8I05Nc8u8',
                       ),
                     ),
                   ),
@@ -275,7 +277,7 @@ class _MembersListingState extends State<MembersListing> {
                   child: Text(
                     widget.name,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 11),
+                    style: TextStyle(fontSize: 12,fontWeight: FontWeight.w600),
                   ),
                 ),
                 Expanded(child: SizedBox()),

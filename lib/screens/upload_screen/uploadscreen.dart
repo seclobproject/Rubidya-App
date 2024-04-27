@@ -140,21 +140,32 @@ class _UploadScreenState extends State<UploadScreen> {
   Future<File?> _cropImage(String imagePath) async {
     final imageCropper = ImageCropper();
     File? croppedFile = await imageCropper.cropImage(
+      aspectRatioPresets: [
+        CropAspectRatioPreset.square,
+        CropAspectRatioPreset.ratio3x2,
+        CropAspectRatioPreset.original,
+        CropAspectRatioPreset.ratio4x3,
+        CropAspectRatioPreset.ratio16x9
+      ],
       sourcePath: imagePath,
       aspectRatio: CropAspectRatio(ratioX: 1.0, ratioY: 1.0),
       compressQuality: 100,
-      maxHeight: 800,
-      maxWidth: 800,
+      maxHeight: 1000,
+      maxWidth: 1000,
       compressFormat: ImageCompressFormat.jpg,
       androidUiSettings: AndroidUiSettings(
-        toolbarTitle: 'Crop Image',
-        toolbarColor: Colors.blue,
-        toolbarWidgetColor: Colors.white,
-        hideBottomControls: true,
-      ),
+          toolbarTitle: 'Cropper',
+          toolbarColor: Colors.blue,
+          toolbarWidgetColor: Colors.white,
+          initAspectRatio: CropAspectRatioPreset.original,
+          hideBottomControls: false,
+          lockAspectRatio: true),
     );
     return croppedFile;
   }
+
+
+
 
   Widget filteredImage() {
     if (imageUrl != null) {
@@ -232,7 +243,7 @@ class _UploadScreenState extends State<UploadScreen> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 10),
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(10), // Adjust the radius as per your preference
+                      borderRadius: BorderRadius.circular(5), // Adjust the radius as per your preference
                       child: filteredImage(),
                     ),
                   ),
@@ -259,11 +270,13 @@ class _UploadScreenState extends State<UploadScreen> {
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                       child: ClipRRect(
-                        borderRadius: BorderRadius.circular(10), // Adjust the radius as per your preference
+                        borderRadius: BorderRadius.circular(5), // Adjust the radius as per your preference
                         child: ColorFiltered(
                           colorFilter: ColorFilter.matrix(filters[index]),
                           child: Image.network(
                             'https://cdn.britannica.com/45/5645-050-B9EC0205/head-treasure-flower-disk-flowers-inflorescence-ray.jpg',
+                            fit: BoxFit.cover,
+
                           ),
                         ),
                       ),
@@ -370,7 +383,7 @@ class _UploadScreenState extends State<UploadScreen> {
               },
             );
           },
-          backgroundColor: Colors.blue,
+          backgroundColor: bluetext,
           child: Icon(Icons.add, color: Colors.white),
         ),
       ),

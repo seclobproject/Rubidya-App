@@ -144,10 +144,10 @@ class MembersListing extends StatelessWidget {
                   fit: BoxFit.cover,
                 )
                     : Container(
-                  width: 65,
-                  height: 65,
+                  width: 60,
+                  height: 60,
                   child: Image.network(
-                    'https://www.pngall.com/wp-content/uploads/5/User-Profile-PNG-Image.png',
+                    'https://play-lh.googleusercontent.com/4HZhLFCcIjgfbXoVj3mgZdQoKO2A_z-uX2gheF5yNCkb71wzGqwobr9muj8I05Nc8u8',
                   ),
                 ),
               ),

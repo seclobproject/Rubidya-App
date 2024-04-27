@@ -284,7 +284,6 @@ class _profileinnerpageState extends State<profileinnerpage>
                                     ['filePath'] !=
                                         null
                                     ? Image.network(
-                                  '$baseURL/' +
                                       profileinnerpageshow?['result'][0]['profilePic']['filePath'],
                                   fit: BoxFit.cover,
                                 )
@@ -553,7 +552,7 @@ class _profileinnerpageState extends State<profileinnerpage>
                           width: 112,
                           height: 200,
                           child: Image.network(
-                            '$baseURL/' + profileinnerpageshow['result'][0]['media'][index]['filePath'],
+                            profileinnerpageshow['result'][0]['media'][index]['filePath'],
                             fit: BoxFit.cover,
                           ),
                         ),

@@ -16,7 +16,7 @@ import 'package:flutter/rendering.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dio/dio.dart';
 import '../../services/upload_image.dart';
-
+import 'package:easy_debounce/easy_debounce.dart';
 class uploadedetails extends StatefulWidget {
   final Widget imageUrl;
 
@@ -33,6 +33,7 @@ class _uploadedetailsState extends State<uploadedetails> {
   String? description;
   bool showIndicator = false;
   bool uploading = false; // Flag to track if upload is in progress
+  bool isLoading = false;
 
   // Define selectedFilterIndex variable
   int selectedFilterIndex = 0;
@@ -78,10 +79,9 @@ class _uploadedetailsState extends State<uploadedetails> {
       var response = await UploadService.uploadimage(formData);
       if (response['sts'] == "01") {
         print("Image uploaded successfully");
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => Bottomnav()),
-        );
+        Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => Bottomnav()),
+                (route) => false);
         print(response['msg']);
         // Handle success
       } else {
@@ -97,6 +97,27 @@ class _uploadedetailsState extends State<uploadedetails> {
         uploading = false; // Set uploading flag to false when upload completes or encounters an error
       });
     }
+  }
+
+
+  void _handleTap() {
+    setState(() {
+      isLoading = true; // Show loading indicator
+    });
+
+    // Debounce the deductbalance function with a delay of 2000 milliseconds (2 seconds)
+    EasyDebounce.debounce(
+      'deductbalance', // unique ID for debounce
+      Duration(milliseconds: 2000),
+        uploadImage
+    );
+
+    // After 3 seconds, hide the loading indicator
+    Future.delayed(Duration(seconds: 3), () {
+      setState(() {
+        isLoading = false;
+      });
+    });
   }
 
 
@@ -118,7 +139,7 @@ class _uploadedetailsState extends State<uploadedetails> {
                 alignment: Alignment.center,
                 padding: EdgeInsets.fromLTRB(30, 3, 20, 0),
                 margin: EdgeInsets.only(left: 10, right: 10),
-                height: 80,
+                height: 120,
                 width: 400,
                 decoration: BoxDecoration(
                   color: white,
@@ -127,7 +148,7 @@ class _uploadedetailsState extends State<uploadedetails> {
                 child: TextField(
                   keyboardType: TextInputType.multiline,
                   minLines: 1,
-                  maxLines: 3,
+                  maxLines: 5,
                   cursorColor: Colors.black,
                   textInputAction: TextInputAction.search,
                   maxLength: 150, // Set max length to 150 characters
@@ -239,39 +260,68 @@ class _uploadedetailsState extends State<uploadedetails> {
             SizedBox(height: 20,),
 
 
+            // Padding(
+            //   padding: const EdgeInsets.symmetric(horizontal: 10),
+            //   child: GestureDetector(
+            //     onTap: () {
+            //       setState(() {
+            //         showIndicator = !showIndicator;
+            //         uploadImage(); // Call uploadImage function
+            //
+            //       });
+            //     },
+            //     child: Stack(
+            //       children: [
+            //         Container(
+            //           height: 40,
+            //           width: 400,
+            //           decoration: BoxDecoration(
+            //             color: bluetext,
+            //             borderRadius: BorderRadius.all(Radius.circular(10)),
+            //           ),
+            //           child: Center(
+            //             child: Text(
+            //               "Share Post",
+            //               style: TextStyle(fontSize: 12, color: Colors.white),
+            //             ),
+            //           ),
+            //         ),
+            //         if (showIndicator)
+            //           Positioned.fill(
+            //             child: Center(
+            //               child: CircularProgressIndicator(),
+            //             ),
+            //           ),
+            //       ],
+            //     ),
+            //   ),
+            // ),
+
+
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: GestureDetector(
-                onTap: () {
-                  setState(() {
-                    showIndicator = !showIndicator;
-                    uploadImage(); // Call uploadImage function
-
-                  });
-                },
-                child: Stack(
-                  children: [
-                    Container(
-                      height: 40,
-                      width: 400,
-                      decoration: BoxDecoration(
-                        color: Colors.blue,
-                        borderRadius: BorderRadius.all(Radius.circular(10)),
-                      ),
-                      child: Center(
-                        child: Text(
-                          "Upload",
-                          style: TextStyle(fontSize: 12, color: Colors.white),
+              child: InkWell(
+                onTap: isLoading ? null : _handleTap, // Prevent tapping when loading
+                child: Container(
+                  height: 36,
+                  width: 400,
+                  decoration: BoxDecoration(
+                    color: bluetext,// Change to your desired color
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Center(
+                    child: isLoading
+                        ? CircularProgressIndicator() // Show loading indicator
+                        : Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Share Post",
+                          style: TextStyle(color:white, fontSize: 12,fontWeight: FontWeight.w600),
                         ),
-                      ),
+                      ],
                     ),
-                    if (showIndicator)
-                      Positioned.fill(
-                        child: Center(
-                          child: CircularProgressIndicator(),
-                        ),
-                      ),
-                  ],
+                  ),
                 ),
               ),
             ),

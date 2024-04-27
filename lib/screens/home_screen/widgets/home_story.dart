@@ -24,13 +24,13 @@ class _homestoryState extends State<homestory> {
                     Radius.circular(100)
                 ),
                 child: Image.network(
-                  'https://t4.ftcdn.net/jpg/04/75/01/23/360_F_475012363_aNqXx8CrsoTfJP5KCf1rERd6G50K0hXw.jpg',
-                  height: 65,
+                  'https://play-lh.googleusercontent.com/4HZhLFCcIjgfbXoVj3mgZdQoKO2A_z-uX2gheF5yNCkb71wzGqwobr9muj8I05Nc8u8',
+                  height: 60,
                   fit: BoxFit.cover,
                 ),
               ),
               SizedBox(height: 10,),
-              Text("Processing", style: TextStyle(fontSize:10),)
+              Text("Loading...", style: TextStyle(fontSize:10),)
             ],
           ),
         );
