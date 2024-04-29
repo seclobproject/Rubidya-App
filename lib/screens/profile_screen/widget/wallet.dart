@@ -222,10 +222,6 @@ class _walletState extends State<wallet> {
         children: [
 
 
-
-
-
-
           SizedBox(height: 20,),
 
           // InkWell(

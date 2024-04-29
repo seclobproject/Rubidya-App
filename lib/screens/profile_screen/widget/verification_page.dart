@@ -18,15 +18,17 @@ class Verification extends StatefulWidget {
 }
 
 class _VerificationState extends State<Verification> {
+
   TextEditingController payid=TextEditingController();
+
   var uniqueid;
   bool isLoading = false;
   var userid;
+  String? authcode;
 
   late http.Response response; // Initialize as http.Response
   String uid = '';
   String pid = '';
-
 
   // Future<void> fetchBalance() async {
   //   final url = 'https://pwyfklahtrh.rubideum.net/basic/checkPayIdExist';
@@ -84,6 +86,7 @@ class _VerificationState extends State<Verification> {
       userid = prefs.getString('userid');
       var reqData = {
         'payId': payid.text.trim(),
+        "authCode": authcode,
       };
 
       var response = await ProfileService.verifyaccountrubidia(reqData);
@@ -286,6 +289,41 @@ class _VerificationState extends State<Verification> {
                 ),
 
                 style: TextStyle(color: textblack, fontSize: 14),
+              ),
+            ),
+
+            SizedBox(height: 5,),
+
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: TextField(
+                decoration: InputDecoration(
+                  hintText: 'Google authenticator code from exchange account',
+                  hintStyle: TextStyle(color: textblack,fontSize: 12),
+                  contentPadding: EdgeInsets.symmetric(vertical: 10,horizontal: 10),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                    borderSide: BorderSide(color: bordercolor, width: 1),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                    borderSide: BorderSide(color: bordercolor),
+                  ),
+
+                  prefixIcon: Icon(
+                    Icons.person,
+                    size: 15,// You can replace 'Icons.email' with the icon you want
+                    color: bordercolor,
+                  ),
+
+                ),
+
+                onChanged: (text) {
+                  setState(() {
+                    authcode=text;
+                  });
+                },
+                style: TextStyle(color: textblack,fontSize: 14),
               ),
             ),
 

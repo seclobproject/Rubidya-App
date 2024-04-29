@@ -282,23 +282,26 @@ class _ProductCardState extends State<ProductCard> {
             ),
           ),
 
-          GestureDetector(
-            onTap: () {
-              setState(() {
-                isExpanded = !isExpanded; // Toggle the isExpanded state
-              });
-            },
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: Align(
-                alignment: Alignment.bottomRight,
-                child: Text(
-                  isExpanded ? 'See Less' : 'See More',
-                  style: TextStyle(color: bluetext, fontSize: 8),
+          if (widget.description.split('\n').length > 2) // Check for multiline
+            GestureDetector(
+              onTap: () {
+                setState(() {
+                  isExpanded = !isExpanded; // Toggle the isExpanded state
+                });
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: Align(
+                  alignment: Alignment.bottomRight,
+                  child: Text(
+                    isExpanded ? 'See Less' : 'See More',
+                    style: TextStyle(color: bluetext, fontSize: 8),
+                  ),
                 ),
               ),
             ),
-          ),
+
+
 
 
           SizedBox(height: 15,)
