@@ -2,8 +2,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:rubidya/screens/profile_screen/widget/rubidya_exchange.dart';
 import 'package:rubidya/screens/profile_screen/widget/rubidya_premium.dart';
 import 'package:rubidya/screens/profile_screen/widget/wallet.dart';
+import '../../../navigation/bottom_navigation.dart';
 import '../../../resources/color.dart'; // Assuming this is your custom color file
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -24,6 +26,21 @@ class _MyWalletState extends State<MyWallet> {
   var profilepagestatus;
   var userid;
   bool _isLoading = true;
+  var profiledata;
+
+
+
+
+
+  Future _profiledetails() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    userid = prefs.getString('userid');
+    var response = await ProfileService.getProfile();
+    log.i('profile Details show...... $response');
+    setState(() {
+      profiledata = response;
+    });
+  }
 
 
   Future _profilestatussapi() async {
@@ -41,11 +58,13 @@ class _MyWalletState extends State<MyWallet> {
     await Future.wait(
       [
         _profilestatussapi(),
+        _profiledetails(),
 
       ],
     );
     _isLoading = false;
   }
+
 
 
   @override
@@ -60,9 +79,19 @@ class _MyWalletState extends State<MyWallet> {
       backgroundColor: bluetext,
       appBar: AppBar(
         backgroundColor: bluetext,
-        title: Text("My Wallet", style: TextStyle(fontSize: 15, color: Colors.white)),
+        title: Text(
+          "My Wallet",
+          style: TextStyle(fontSize: 15, color: Colors.white),
+        ),
         automaticallyImplyLeading: true,
         iconTheme: IconThemeData(color: Colors.white),
+        leading: CupertinoNavigationBarBackButton(
+          color: white,
+          previousPageTitle: "", // Optional: Specify the previous page title
+          onPressed: () {
+            Navigator.of(context).push(MaterialPageRoute(builder: (context) => Bottomnav()));
+          },
+        ),
       ),
       body: SingleChildScrollView(
         child: _isLoading
@@ -147,7 +176,7 @@ class _MyWalletState extends State<MyWallet> {
                           Align(
                             alignment: Alignment.topLeft,
                             child: Text(
-                              "21.3",
+                                profiledata?['user']?['walletAmount']?.toString() ?? 'Loading...',
                               style: TextStyle(fontSize: 36, color: Colors.white, fontWeight: FontWeight.w700),
                             ),
                           ),
@@ -180,33 +209,39 @@ class _MyWalletState extends State<MyWallet> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Container(
-                                height: 36,
-                                width: 130,
-                                decoration: BoxDecoration(
-                                  border: Border.all(color: Colors.white, width: 0.2),
-                                  gradient: LinearGradient(
-                                    colors: [gradnew, gradnew1],
-                                    begin: Alignment.topCenter,
-                                    end: Alignment.bottomCenter,
-                                  ),
-                                  borderRadius: BorderRadius.all(Radius.circular(10)),
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text("Rubidya exchange", style: TextStyle(fontSize: 10, color: Colors.white)),
-                                    SizedBox(width: 10),
-                                    SvgPicture.asset(
-                                      "assets/svg/arrowtop.svg",
-                                      height: 12,
+                              InkWell(
+                                onTap: () {
+                                  Navigator.push(context,
+                                      MaterialPageRoute(builder: (context) => RubidyaExchange()));
+                                },
+                                child: Container(
+                                  height: 36,
+                                  width: 130,
+                                  decoration: BoxDecoration(
+                                    border: Border.all(color: Colors.white, width: 0.2),
+                                    gradient: LinearGradient(
+                                      colors: [gradnew, gradnew1],
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter,
                                     ),
-                                  ],
+                                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text("Rubidya exchange", style: TextStyle(fontSize: 10, color: Colors.white)),
+                                      SizedBox(width: 10),
+                                      SvgPicture.asset(
+                                        "assets/svg/arrowtop.svg",
+                                        height: 12,
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
-        
+
                               SizedBox(width: 10,),
-        
+
                               Container(
                                 height: 36,
                                 width: 130,
@@ -265,7 +300,7 @@ class _MyWalletState extends State<MyWallet> {
                     children: [
                       Align(
                           alignment: Alignment.topLeft,
-                          child: Text("Available balance", style: TextStyle(fontSize: 12, color: Colors.white))),
+                          child: Text("ARS Available balance", style: TextStyle(fontSize: 12, color: Colors.white))),
                       SizedBox(height: 8),
         
         
@@ -281,7 +316,7 @@ class _MyWalletState extends State<MyWallet> {
                           Align(
                             alignment: Alignment.topLeft,
                             child: Text(
-                              "21.3",
+                              "00.0",
                               style: TextStyle(fontSize: 36, color: Colors.white, fontWeight: FontWeight.w700),
                             ),
                           ),

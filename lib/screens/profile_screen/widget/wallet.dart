@@ -144,11 +144,11 @@ class _walletState extends State<wallet> {
     await Future.wait(
       [
         // _syncvalue(),
-      fetchamountsync(
-      balance,
-      profiledetails?['user']?['payId'] ?? '',
-      profiledetails?['user']?['uniqueId'] ?? '',
-      ),
+      // fetchamountsync(
+      // balance,
+      // profiledetails?['user']?['payId'] ?? '',
+      // profiledetails?['user']?['uniqueId'] ?? '',
+      // ),
         _marketvalueapi(),
         _profiledetailsapi(),
         fetchBalance(),
@@ -172,7 +172,7 @@ class _walletState extends State<wallet> {
       );
 
       fetchBalance();
-      _syncvalue();
+      // _syncvalue();
       _profiledetailsapi();
 
 

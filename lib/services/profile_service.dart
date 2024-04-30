@@ -55,6 +55,18 @@ class ProfileService {
     }
   }
 
+  static Future addAmountTopUP(data) async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.post('$baseURL/api/wallet/credit-wallet',data: data);
+      return response.data;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+
+
   static Future syncwallet() async {
     try {
       var dio = await DioHelper.getInstance();
