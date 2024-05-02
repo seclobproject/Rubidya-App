@@ -68,23 +68,25 @@ class _premiuminnerpageState extends State<premiuminnerpage> {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       userid = prefs.getString('userid');
-      String packageamount = widget.amount ?? ''; // Initialize 'amount' here
+      String packageamount = widget.amount ?? '';
+      String packageid = widget.id ?? '';// Initialize 'amount' here
       var reqData = {
         'amount': packageamount,
+        'packageId': packageid,
       };
-      var response = await ProfileService.deductrubideum(reqData);
-      log.i('Done deducting.... . $response');
+      var response = await ProfileService.addSubscription(reqData);
+      log.i('add-subscription.... . $response');
       verifyuser();
       if (response['sts'] == '01') {
         setState(() {
-          deductedAmount = response['rubideumToPass'].toString();
+          deductedAmount = response['deductedAmount'].toString();
           deductedmsg = response['msg'].toString();
         });
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content:
-                Text('Deducting Rubideum failed. Check your Rubideum balance'),
+                Text('Sorry,you dont have enough wallet amount to purchase the package'),
             duration: Duration(seconds: 3),
           ),
         );
@@ -123,9 +125,12 @@ class _premiuminnerpageState extends State<premiuminnerpage> {
       userid = prefs.getString('userid');
       String packageid = widget.id ?? '';
       var reqData = {
+        // 'amount': deductedAmount,
         'amount': deductedAmount,
         'packageId': packageid,
       };
+      print('.....................test1$deductedAmount');
+      print('............................test2$packageid');
       SnackBar(
         content: Text('verify user create'),
         duration: Duration(seconds: 3),
@@ -160,6 +165,8 @@ class _premiuminnerpageState extends State<premiuminnerpage> {
       }
     }
   }
+
+  
 
   Future convertinr() async {
     setState(() {});
@@ -222,7 +229,12 @@ class _premiuminnerpageState extends State<premiuminnerpage> {
 
   Future _initLoad() async {
     await Future.wait(
-      [convertinr()],
+      [
+        convertinr(),
+
+
+
+      ],
     );
     isLoading = false;
   }

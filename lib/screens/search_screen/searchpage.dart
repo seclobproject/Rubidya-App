@@ -140,8 +140,10 @@ class _searchpageState extends State<searchpage> {
                   id: searchlist[index]['_id'],
                   status: searchlist[index]['isFollowing'],
                   img: searchlist[index]['profilePic'] != null
-                      ? '${baseURL}/${searchlist[index]['profilePic']['filePath']}'
+                      ? searchlist[index]['profilePic']['filePath']
                       : '',
+
+
                   onFollowToggled: () => toggleFollow(index),
                 );
               },

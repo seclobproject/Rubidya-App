@@ -155,7 +155,7 @@ class _uploadedetailsState extends State<uploadedetails> {
                   decoration: InputDecoration(
                     border: InputBorder.none,
                     hintText: 'Description...',
-                    hintStyle: TextStyle(color: Colors.black, fontSize: 10),
+                    hintStyle: TextStyle(color: Colors.black, fontSize: 12),
                   ),
                   style: TextStyle(color: Colors.black),
                   onChanged: (text) {

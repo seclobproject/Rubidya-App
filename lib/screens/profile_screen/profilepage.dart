@@ -87,7 +87,12 @@ class _profilepageState extends State<profilepage>
 
   Future _initLoad() async {
     await Future.wait(
-      [_profiledetailsapi(), _profileimgget(), _profilestatussapi()],
+      [
+        _profiledetailsapi(),
+        _profileimgget(),
+        _profilestatussapi(),
+        _postcount()
+      ],
     );
     _isLoading = false;
   }
@@ -100,37 +105,37 @@ class _profilepageState extends State<profilepage>
         MaterialPageRoute(builder: (context) => login()), (route) => false);
   }
 
-  Future<void> uploadImage() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    userid = (prefs.getString('userid') ?? "");
-    try {
-      if (imageUrl == null) {
-        print("Please pick an image first");
-        return;
-      }
-      FormData formData = FormData.fromMap({
-        'media': await MultipartFile.fromFile(imageUrl!),
-      });
-      var response = await ProfileService.verificationimage(formData);
-      if (response.statusCode == 201) {
-        print("Image uploaded successfully");
-        print(response.data);
-        // Navigator.push(
-        //   context,
-        //   MaterialPageRoute(builder: (context) => Bottomnav()),
-        // );
-      } else {
-        // Navigator.push(
-        //   context,
-        //   MaterialPageRoute(builder: (context) => Bottomnav()),
-        // );
-        print(response.statusCode);
-        print(response.data);
-      }
-    } catch (e) {
-      print("Exception during image upload: $e");
-    }
-  }
+  // Future<void> uploadImage() async {
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   userid = (prefs.getString('userid') ?? "");
+  //   try {
+  //     if (imageUrl == null) {
+  //       print("Please pick an image first");
+  //       return;
+  //     }
+  //     FormData formData = FormData.fromMap({
+  //       'media': await MultipartFile.fromFile(imageUrl!),
+  //     });
+  //     var response = await ProfileService.verificationimage(formData);
+  //     if (response.statusCode == 201) {
+  //       print("Image uploaded successfully");
+  //       print(response.data);
+  //       // Navigator.push(
+  //       //   context,
+  //       //   MaterialPageRoute(builder: (context) => Bottomnav()),
+  //       // );
+  //     } else {
+  //       // Navigator.push(
+  //       //   context,
+  //       //   MaterialPageRoute(builder: (context) => Bottomnav()),
+  //       // );
+  //       print(response.statusCode);
+  //       print(response.data);
+  //     }
+  //   } catch (e) {
+  //     print("Exception during image upload: $e");
+  //   }
+  // }
 
   Future<void> pickImages() async {
     final picker = ImagePicker();
@@ -154,7 +159,9 @@ class _profilepageState extends State<profilepage>
   void initState() {
     _tabController = TabController(length: 2, vsync: this);
     _initLoad();
-    _postcount();
+    // _postcount();
+    // _profiledetailsapi(); _profileimgget(); _profilestatussapi();
+
     super.initState();
   }
 

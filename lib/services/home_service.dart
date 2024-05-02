@@ -105,26 +105,26 @@ class HomeService {
   // }
 
 
-  static Future getFeed() async {
-    try {
-      var dio = await DioHelper.getInstance();
-      var response = await dio.get('$baseURL/api/posts/get-latest-posts');
-      return response.data;
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  // static Future<Map<String, dynamic>> getFeed({int page = 1, int limit = 10}) async {
+  // static Future getFeed() async {
   //   try {
   //     var dio = await DioHelper.getInstance();
-  //     var response = await dio.get('$baseURL/api/posts/get-latest-posts?page=$page&limit=$limit');
+  //     var response = await dio.get('$baseURL/api/posts/get-latest-posts');
   //     return response.data;
   //   } catch (e) {
-  //     // Handle error appropriately, e.g., log the error or throw it further
-  //     throw e;
+  //     rethrow;
   //   }
   // }
+
+  static Future<Map<String, dynamic>> getFeed({int page = 1, int limit = 5}) async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.get('$baseURL/api/posts/get-latest-posts?page=$page&limit=$limit');
+      return response.data;
+    } catch (e) {
+      // Handle error appropriately, e.g., log the error or throw it further
+      throw e;
+    }
+  }
 
 
   static Future like(data) async {

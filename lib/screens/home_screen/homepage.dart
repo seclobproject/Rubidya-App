@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:rubidya/resources/color.dart';
 import 'package:rubidya/screens/home_screen/widgets/home_feed.dart';
@@ -8,7 +9,7 @@ import 'package:rubidya/screens/home_screen/widgets/home_story.dart';
 import 'package:rubidya/screens/home_screen/widgets/referral_page.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:favorite_button/favorite_button.dart';
 import '../../commonpage/test.dart';
 import '../../networking/constant.dart';
 import '../../services/home_service.dart';
@@ -33,9 +34,19 @@ class _homepageState extends State<homepage> {
   var suggestfollow;
   bool isLoading = false;
   bool _isLoading = true;
-  late YoutubePlayerController _controller;
-
+  late List<Map<String, dynamic>> Homefeed = [];
+  var userId;
+  var profileDetails;
+  var homeList;
+  bool isExpanded = false;
   bool isFollowing = false;
+  int _pageNumber = 1;
+  late SharedPreferences prefs;
+  bool _hasMore = true;
+  bool _isLoadingMore = false;
+
+
+
   void toggleFollow() {
     setState(() {
       if (isFollowing) {
@@ -69,15 +80,15 @@ class _homepageState extends State<homepage> {
     });
   }
 
-  Future _homefeed() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    userid = prefs.getString('userid');
-    var response = await HomeService.getFeed();
-    log.i('homefeed data Show.. $response');
-    setState(() {
-      profilelist = response; // This line is causing the error
-    });
-  }
+  // Future _homefeed() async {
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   userid = prefs.getString('userid');
+  //   var response = await HomeService.getFeed();
+  //   log.i('homefeed data Show.. $response');
+  //   setState(() {
+  //     profilelist = response; // This line is causing the error
+  //   });
+  // }
 
   Future _suggestfollowlist() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -90,33 +101,78 @@ class _homepageState extends State<homepage> {
     });
   }
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
+  // Future<void> _homeFeedList() async {
+  //   var response = await HomeService.getFeed(page: _pageNumber);
+  //   log.i('Following list details show.. $response');
+  //   setState(() {
+  //     Homefeed.addAll(List<Map<String, dynamic>>.from(response['posts']));
+  //     _isLoading = false; // Set loading state to false once data is loaded
+  //   });
+  // }
+
+
+  // Future<void> _homeFeed() async {
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   userId = prefs.getString('userId');
+  //   var response = await HomeService.getFeed();
+  //   log.i('Home feed data: $response');
+  //   setState(() {
+  //     homeList = response;
+  //   });
+  // }
+  Future<void> _initLoad() async {
+    prefs = await SharedPreferences.getInstance();
+    await _homeFeed();
+    await _profiledetailsapi();
+    await _profileapi();
+    await _suggestfollowlist();
+    await _homeFeed();
   }
 
-  Future _initLoad() async {
-    await Future.wait([
-      _profiledetailsapi(),
-      _profileapi(),
-      _suggestfollowlist(),
-      _homefeed()
-    ]);
-    _isLoading = false;
+
+  Future<void> _loadMoreData() async {
+    if (_isLoadingMore || !_hasMore) return;
+
+    setState(() {
+      _isLoadingMore = true;
+    });
+
+    try {
+      final response = await HomeService.getFeed(page: _pageNumber + 1);
+      final List<Map<String, dynamic>> newFollowingList = List<Map<String, dynamic>>.from(response['posts']);
+      setState(() {
+        _pageNumber++;
+        _isLoadingMore = false;
+        Homefeed.addAll(newFollowingList);
+
+        if (newFollowingList.isEmpty) {
+          _hasMore = false;
+        }
+      });
+    } catch (e) {
+      // Handle error
+      setState(() {
+        _isLoadingMore = false;
+      });
+    }
   }
+
+  // Future _initLoad() async {
+  //   await Future.wait([
+  //     _profiledetailsapi(),
+  //     _profileapi(),
+  //     _suggestfollowlist(),
+  //     _homefeed()
+  //
+  //   ]);
+  //   _isLoading = false;
+  // }
 
   @override
   void initState() {
     _initLoad();
-    _controller = YoutubePlayerController(
-      initialVideoId: 'dpm2FUS8oWU', // Use only the video ID here
-      flags: YoutubePlayerFlags(
-        autoPlay: true,
-        mute: false,
-        forceHD: false,
-      ),
-    );
+    _homeFeed();
+    _scrollController.addListener(_scrollListener);
     super.initState();
   }
 
@@ -128,6 +184,100 @@ class _homepageState extends State<homepage> {
     });
   }
 
+  
+  ScrollController _scrollController = ScrollController();
+
+  // @override
+  // void initState() {
+  //   _initLoad();
+  //   _scrollController.addListener(_scrollListener);
+  //   super.initState();
+  // }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollListener() {
+    if (_scrollController.offset >= _scrollController.position.maxScrollExtent &&
+        !_scrollController.position.outOfRange) {
+      _loadMore();
+    }
+  }
+
+  Future<void> _homeFeed({int page = 1}) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    userId = prefs.getString('userId');
+    var response = await HomeService.getFeed(page: page);
+    log.i('Home feed data: $response');
+    setState(() {
+      if (homeList == null) {
+        homeList = response;
+      } else {
+        homeList['posts'].addAll(response['posts']);
+      }
+    });
+  }
+
+
+  // Future<void> _initLoad() async {
+  //   await _homeFeed();
+  //   setState(() {
+  //     _isLoading = false;
+  //   });
+  // }
+
+  Future<void> _loadMore() async {
+    setState(() {
+      _pageNumber++;
+      isLoading = true;
+    });
+    await _homeFeed(page: _pageNumber);
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  String _calculateTimeDifference(String createdAt) {
+    DateTime createdDateTime = DateTime.parse(createdAt);
+    Duration difference = DateTime.now().difference(createdDateTime);
+
+    if (difference.inDays > 0) {
+      return '${difference.inDays} days ago';
+    } else if (difference.inHours > 0) {
+      return '${difference.inHours} hours ago';
+    } else if (difference.inMinutes > 0) {
+      return '${difference.inMinutes} minutes ago';
+    } else {
+      return 'just now';
+    }
+  }
+
+  void _toggleLikePost(String postId) {
+    setState(() {
+      bool isLiked = !homeList['posts'].firstWhere((post) => post['_id'] == postId)['isLiked'];
+      homeList['posts'].firstWhere((post) => post['_id'] == postId)['isLiked'] = isLiked;
+      int likeCount = homeList['posts'].firstWhere((post) => post['_id'] == postId)['likeCount'];
+      homeList['posts'].firstWhere((post) => post['_id'] == postId)['likeCount'] = isLiked ? likeCount + 1 : likeCount - 1;
+    });
+    _addLike(postId, homeList['posts'].firstWhere((post) => post['_id'] == postId)['isLiked']);
+  }
+
+  Future<void> _addLike(String postId, bool isLiked) async {
+    var reqData = {
+      'postId': postId,
+      'isLiked': isLiked,
+    };
+    var response = await HomeService.like(reqData);
+    log.i('Add to Like: $response');
+  }
+
+
+
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -136,17 +286,12 @@ class _homepageState extends State<homepage> {
         toolbarHeight: 0.1,
         backgroundColor: Colors.white,
       ),
-      body: _isLoading
-          ? Center(
-        child: CircularProgressIndicator(
-          strokeWidth: 6.0,
-          valueColor: AlwaysStoppedAnimation(bluetext),
-        ),
-      )
-          : RefreshIndicator(
+      body: RefreshIndicator(
         onRefresh: _refresh,
         child: SingleChildScrollView(
+          controller: _scrollController,
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
                 padding: const EdgeInsets.only(right: 20),
@@ -157,14 +302,13 @@ class _homepageState extends State<homepage> {
                       fit: BoxFit.cover,
                       width: 150,
                     ),
-                    Expanded(child: SizedBox()),
-                    SizedBox(width: 20),
+                    Spacer(),
                     InkWell(
                       onTap: () {
-                        // Navigator.push(
-                        //   context,
-                        //   MaterialPageRoute(builder: (context) =>  ExpandableText()),
-                        // );
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => Homepages()),
+                        );
                       },
                       child: SvgPicture.asset(
                         "assets/svg/massage.svg",
@@ -193,40 +337,275 @@ class _homepageState extends State<homepage> {
                       ),
                     ],
                     borderRadius: BorderRadius.only(
-                      topRight: Radius.circular(0),
-                      bottomRight: Radius.circular(0),
                       bottomLeft: Radius.circular(10),
                       topLeft: Radius.circular(10),
                     ),
                   ),
-                  child: Container(
-                    child: homestory(),
-                  ),
+                  child: homestory(), // Assuming homestory is a custom widget
                 ),
               ),
               SizedBox(height: 20),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Align(
-                  alignment: Alignment.topLeft,
-                  child: Text(
-                    "New People",
-                    style: TextStyle(
-                      fontWeight: FontWeight.w500,
-                      color: bluetext,
-                    ),
+                child: Text(
+                  "New People",
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    color: Colors.blue, // Assuming bluetext is defined
                   ),
                 ),
               ),
+              SizedBox(height: 15),
+
+
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: SizedBox(height: 160, child: HomeFollow()),
               ),
               SizedBox(height: 15),
-              HomeFeed(),
+
+
+              ListView.builder(
+                physics: NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                itemCount: homeList != null && homeList['posts'] != null ? homeList['posts'].length : 0,
+                itemBuilder: (BuildContext context, int index) {
+                  return Column(
+                    children: [
+                      ProductCard(
+                        createdTime: _calculateTimeDifference(homeList['posts'][index]['createdAt']),
+                        name: homeList['posts'][index]['username'] ?? '',
+                        description: homeList['posts'][index]['description'] ?? '',
+                        likes: homeList['posts'][index]['likeCount']?.toString() ?? '',
+                        img: homeList['posts'][index]['filePath'] ?? '',
+                        profilepic: homeList['posts'][index]['profilePic']?['filePath'] ?? '',
+                        id: homeList['posts'][index]['_id'] ?? '',
+                        userId: homeList['posts'][index]['userId'] ?? '',
+                        likeCount: homeList['posts'][index]['isLiked'] ?? false,
+                        onLikePressed: () {
+                          _toggleLikePost(homeList['posts'][index]['_id']);
+                        },
+                        onDoubleTapLike: () {
+                          _toggleLikePost(homeList['posts'][index]['_id']);
+                        },
+                      ),
+                      if (isLoading && index == homeList['posts'].length - 1)
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: CircularProgressIndicator(),
+                        ),
+                    ],
+                  );
+                },
+              ),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+
+
+class ProductCard extends StatefulWidget {
+  const ProductCard({
+    Key? key,
+    required this.img,
+    required this.profilepic,
+    required this.name,
+    required this.likes,
+    required this.createdTime,
+    required this.id,
+    required this.userId,
+    required this.likeCount,
+    required this.description,
+    required this.onLikePressed,
+    required this.onDoubleTapLike,
+  }) : super(key: key);
+
+  final String img;
+  final String name;
+  final String createdTime;
+  final String id;
+  final String userId;
+  final String likes;
+  final String profilepic;
+  final String description;
+  final bool likeCount;
+
+  final VoidCallback onLikePressed;
+  final VoidCallback onDoubleTapLike;
+
+  @override
+  _ProductCardState createState() => _ProductCardState();
+}
+
+class _ProductCardState extends State<ProductCard> {
+  bool isExpanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onDoubleTap: widget.onDoubleTapLike, // Handle double tap here
+      child: Column(
+        children: [
+          Stack(
+            children: [
+              InkWell(
+                onDoubleTap: () {},
+                child: Row(
+                  children: [
+                    SizedBox(width: 60),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.name,
+                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                        ),
+                        Text(
+                          widget.createdTime,
+                          style: TextStyle(fontSize: 11, color: Colors.grey),
+                        ),
+                      ],
+                    ),
+                    Expanded(child: SizedBox()),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: Icon(Icons.more_vert, color: Colors.grey),
+                    ),
+                  ],
+                ),
+              ),
+
+              InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => profileinnerpage(
+                        id: widget.userId,
+                      ),
+                    ),
+                  );
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: Stack(
+                    children: [
+                      Container(
+                        height: 40,
+                        width: 40,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.transparent, // Set background color to transparent
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.all(Radius.circular(100)),
+                          child: Image.network(
+                            'https://play-lh.googleusercontent.com/4HZhLFCcIjgfbXoVj3mgZdQoKO2A_z-uX2gheF5yNCkb71wzGqwobr9muj8I05Nc8u8',
+                            height: 51,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        top: 28,
+                        left: 28,
+                        child: Image.asset('assets/image/verificationlogo.png'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 10),
+          Container(
+            decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(10))),
+            child: Image.network(
+              widget.img,
+              fit: BoxFit.fill,
+              // height: 400,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(right: 23, top: 10, left: 15),
+            child: Row(
+              children: [
+                FavoriteButton(
+                  iconSize: 40,
+                  isFavorite: widget.likeCount,
+                  iconDisabledColor: Colors.black26,
+                  valueChanged: (_) {
+                    widget.onLikePressed(); // Call the callback function when like button is pressed
+                  },
+                ),
+                SizedBox(width: 10),
+                Text("Likes", style: TextStyle(color: Colors.blue, fontSize: 10)),
+                SizedBox(width: 2),
+                Text(widget.likes, style: TextStyle(color: Colors.blue, fontSize: 13, fontWeight: FontWeight.w700)),
+                SizedBox(width: 2),
+                Expanded(child: SizedBox()),
+                SvgPicture.asset(
+                  "assets/svg/comment.svg",
+                  height: 20,
+                ),
+                SizedBox(width: 20),
+                SvgPicture.asset(
+                  "assets/svg/share.svg",
+                  height: 20,
+                ),
+                SizedBox(width: 20),
+                SvgPicture.asset(
+                  "assets/svg/save.svg",
+                  height: 20,
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: 10,),
+
+          Align(
+            alignment: Alignment.topLeft,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: Container(
+                height: isExpanded ? null : 40, // Adjust height when expanded
+                child: Text(
+                  widget.description,
+                  maxLines: isExpanded ? null : 2,
+                  style: TextStyle(fontSize: 11,fontWeight: FontWeight.w600),
+                ),
+              ),
+            ),
+          ),
+
+          if (widget.description.split('\n').length > 2) // Check for multiline
+            GestureDetector(
+              onTap: () {
+                setState(() {
+                  isExpanded = !isExpanded; // Toggle the isExpanded state
+                });
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: Align(
+                  alignment: Alignment.bottomRight,
+                  child: Text(
+                    isExpanded ? 'See Less' : 'See More',
+                    style: TextStyle(color: bluetext, fontSize: 8),
+                  ),
+                ),
+              ),
+            ),
+
+
+
+
+          SizedBox(height: 15,)
+        ],
       ),
     );
   }

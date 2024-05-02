@@ -108,9 +108,16 @@ class ProfileService {
     return response.data;
   }
 
-  static Future deductrubideum(data) async {
+  // static Future deductrubideum(data) async {
+  //   var dio = await DioHelper.getInstance();
+  //   var response = await dio.post('$baseURL/api/users/deduct-rubideum',data:data);
+  //   return response.data;
+  // }
+
+
+  static Future addSubscription(data) async {
     var dio = await DioHelper.getInstance();
-    var response = await dio.post('$baseURL/api/users/deduct-rubideum',data:data);
+    var response = await dio.post('$baseURL/api/wallet/add-subscription',data:data);
     return response.data;
   }
 
@@ -134,6 +141,8 @@ class ProfileService {
     var response = await dio.post('$baseURL/api/users/get-package-by-id',data:data);
     return response.data;
   }
+
+
 
   static Future profilestatus() async {
     var dio = await DioHelper.getInstance();

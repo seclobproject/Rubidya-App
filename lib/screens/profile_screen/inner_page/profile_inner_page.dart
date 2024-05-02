@@ -226,275 +226,244 @@ class _profileinnerpageState extends State<profileinnerpage>
             SizedBox(
               height: 70,
             ),
-            Container(
-              height: 300,
-              // width: 400,
-              decoration: BoxDecoration(
-                  color: profilebg,
-                  borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(84),
-                      topRight: Radius.circular(84))),
 
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Positioned(
-                      top: -40.0,
-                      right: 25,
-                      child: Column(
-                        children: [
-                          // Container(
-                          //   height: 86,
-                          //   width: 86,
-                          //   decoration: BoxDecoration(
-                          //     color: bluetext,
-                          //     borderRadius:
-                          //         BorderRadius.all(Radius.circular(100)),
-                          //   ),
-                          //   child: ClipOval(
-                          //     child: Image.asset(
-                          //       'assets/logo/logo3.png',
-                          //       fit: BoxFit.cover,
-                          //       width: 86,
-                          //       // Set the width to match the container's width
-                          //       height:
-                          //           86, // Set the height to match the container's height
-                          //     ),
-                          //   ),
-                          // ),
 
-                          Stack(children: [
-                            Container(
-                              margin: EdgeInsets.only(top: 20),
-                              height: 20, // Set a specific height
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(16.0),
-                                color: Colors.blue, // Example background color
-                              ),
-                            ),
-
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(100),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Align(
+                        alignment: Alignment.topLeft,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(100),
+                          child: Container(
+                            width: 90,
+                            height: 90,
+                            child: profileinnerpageshow != null &&
+                                profileinnerpageshow?['result'][0]['profilePic'] != null &&
+                                profileinnerpageshow?['result'][0]['profilePic']
+                                ['filePath'] !=
+                                    null
+                                ? Image.network(
+                              profileinnerpageshow?['result'][0]['profilePic']['filePath'],
+                              fit: BoxFit.cover,
+                            )
+                                : Center(
                               child: Container(
-                                width: 90,
                                 height: 90,
-                                child: profileinnerpageshow != null &&
-                                    profileinnerpageshow?['result'][0]['profilePic'] != null &&
-                                    profileinnerpageshow?['result'][0]['profilePic']
-                                    ['filePath'] !=
-                                        null
-                                    ? Image.network(
-                                      profileinnerpageshow?['result'][0]['profilePic']['filePath'],
-                                  fit: BoxFit.cover,
-                                )
-                                    : Center(
-                                  child: Container(
-                                    height: 90,
-                                    width: 90,
-                                    decoration: BoxDecoration(
-                                        color: grad2,
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(100))),
-                                    child: Center(
-                                        child: Text(
-                                          "No Img",
-                                          style: TextStyle(color: greybg),
-                                        )),
-                                  ),
-                                ),
-                              ),
-                            ),
-
-                            // Container(
-                            //   height: 150,
-                            //   width: 300,
-                            //   child: imageUrl != null
-                            //       ? Padding(
-                            //     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                            //     child: Image.file(File(imageUrl!)),
-                            //   )
-                            //       : Container(), // This will render an empty container if imageUrl is null
-                            // ),
-                          ]),
-
-                          SizedBox(
-                            height: 5,
-                          ),
-
-                          Text(
-                            (profileinnerpageshow?['result']?[0]['firstName'] ??
-                                'loading...'),
-                            style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                color: bluetext),
-                          ),
-
-                          // Text(
-                          //   (profiledetails?['user']?['lastName'] ?? 'loading...'),
-                          //   style: TextStyle(color: bluetext,fontSize: 10,
-                          //       fontWeight: FontWeight.w500),),
-                          SizedBox(
-                            height: 10,
-                          ),
-                      //    profileinnerpageshow?['user']?['bio'] ??
-                          Text(
-                            ('helloo'),
-                            style: TextStyle(
-                                color: bluetext,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w200),
-                            textAlign:
-                            TextAlign.center, // Center-align the text
-                          ),
-
-                          SizedBox(
-                            height: 10,
-                          ),
-
-                          Row(
-                            children: [
-                              InkWell(
-                                onTap: _toggleFollow, // This triggers the toggle follow method
-                                child: Container(
-                                  height: 40,
-                                  width: 110,
-                                  decoration: BoxDecoration(
-                                    color: gradnew,
-                                    borderRadius: BorderRadius.all(Radius.circular(20)),
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      isFollowing ? "Unfollow" : "Follow", // Show "Unfollow" if following, otherwise show "Follow"
-                                      style: TextStyle(color: white, fontSize: 12),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              SizedBox(width: 20,),
-                              Container(
-                                height: 40,
-                                width: 110,
+                                width: 90,
                                 decoration: BoxDecoration(
-                                    color: lightblue,
-                                    borderRadius: BorderRadius.all(Radius.circular(20))),
+                                    color: grad2,
+                                    borderRadius: BorderRadius.all(
+                                        Radius.circular(100))),
                                 child: Center(
                                     child: Text(
-                                      "Message",
-                                      style: TextStyle(
-                                          color: g2button, fontSize: 12),
+                                      "No Img",
+                                      style: TextStyle(color: greybg),
                                     )),
-                              )
-                            ],
-                          ),
-
-
-                          SizedBox(
-                            height: 20,
-                          ),
-
-                          Container(
-                            width: 345.0,
-                            height: 64.0,
-                            decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [grad1, grad2],
-                                  begin: Alignment.topCenter,
-                                  end: Alignment.bottomCenter,
-                                ),
-                                borderRadius:
-                                BorderRadius.all(Radius.circular(10))),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                              children: [
-                                Column(
-                                  children: [
-                                    SizedBox(
-                                      height: 10,
-                                    ),
-                                    Text(
-                                      (profileinnerpageshow?['result']?[0]['post'].toString() ??
-                                          'loading...'), // Default value if 'post' or its parent keys are null
-                                      style: TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w500,
-                                        color: bluetext,
-                                      ),
-                                    ),
-
-
-                                    Text("Post",
-                                        style: TextStyle(
-                                            fontSize: 10, color: bluetext))
-                                  ],
-                                ),
-                                InkWell(
-                                  onTap: () {
-
-                                    // Navigator.of(context).push(
-                                    //     MaterialPageRoute(
-                                    //         builder: (context) =>
-                                    //             FollowersList()));
-                                  },
-                                  child: Column(
-                                    children: [
-                                      SizedBox(
-                                        height: 10,
-                                      ),
-                                      Text((profileinnerpageshow?['result']?[0]['followers'].toString() ??
-                                          'loading...'),
-                                          style: TextStyle(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.w500,
-                                              color: bluetext)),
-                                      Text("Followers",
-                                          style: TextStyle(
-                                              fontSize: 10, color: bluetext))
-                                    ],
-                                  ),
-                                ),
-                                InkWell(
-                                  onTap: () {
-                                    // Navigator.of(context).push(
-                                    //     MaterialPageRoute(
-                                    //         builder: (context) =>
-                                    //             FollowingList()));
-                                  },
-                                  child: Column(
-                                    children: [
-                                      SizedBox(
-                                        height: 10,
-                                      ),
-                                      Text((profileinnerpageshow?['result']?[0]['following'].toString() ??
-                                          'loading...'),
-                                          style: TextStyle(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.w500,
-                                              color: bluetext)),
-                                      Text(
-                                        "Following",
-                                        style: TextStyle(
-                                            fontSize: 10, color: bluetext),
-                                      )
-                                    ],
-                                  ),
-                                ),
-                              ],
+                              ),
                             ),
                           ),
+                        ),
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment.topLeft,
+                      child: Text(
+                        (profileinnerpageshow?['result']?[0]['firstName'] ??
+                            'loading...'),
+                        style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: bluetext),
+                      ),
+                    ),
+                  ],
+                ),
 
+
+                Container(
+                  width: 250.0,
+                  height: 64.0,
+                  decoration: BoxDecoration(
+                      borderRadius:
+                      BorderRadius.all(Radius.circular(10))),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Column(
+                        children: [
                           SizedBox(
-                            height: 12,
+                            height: 10,
                           ),
-
-
+                          Text(
+                            postcount != null && postcount['postCount'] != null
+                                ? postcount['postCount'].toString()
+                                : '0', // Default value if postcount or postCount is null
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                              color: bluetext,
+                            ),
+                          ),
+                          Text("Post",
+                              style: TextStyle(
+                                  fontSize: 10, color: bluetext))
                         ],
-                      )),
+                      ),
+                      InkWell(
+                        onTap: () {
+
+                          Navigator.of(context).push(
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      FollowersList()));
+                        },
+                        child: Column(
+                          children: [
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Text((profileinnerpageshow?['result']?[0]['followers'].toString() ??
+                                'loading...'),
+                                style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w500,
+                                    color: bluetext)),
+                            Text("Followers",
+                                style: TextStyle(
+                                    fontSize: 10, color: bluetext))
+                          ],
+                        ),
+                      ),
+                      InkWell(
+                        onTap: () {
+                          Navigator.of(context).push(
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      FollowingList()));
+                        },
+                        child: Column(
+                          children: [
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Text((profileinnerpageshow?['result']?[0]['following'].toString() ??
+                                'loading...'),
+                                style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w500,
+                                    color: bluetext)),
+                            Text(
+                              "Following",
+                              style: TextStyle(
+                                  fontSize: 10, color: bluetext),
+                            )
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: Align(
+                alignment: Alignment.topLeft,
+                child: Text(
+                    (profileinnerpageshow?['result']?[0]['firstName'] ??
+                        'loading...'),
+                    style: TextStyle(
+                        color: bluetext,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w200),
+                    textAlign:
+                    TextAlign.center, // Center-align the text
+                    overflow: TextOverflow.ellipsis,
+                    maxLines:3
+                ),
+              ),
+            ),
+
+            SizedBox(height: 10,),
+
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  InkWell(
+                    onTap: _toggleFollow,
+                    child: Container(
+                      height: 31,
+                      width: 110,
+                      decoration: BoxDecoration(
+                          color: bluetext,
+                          borderRadius: BorderRadius.all(
+                              Radius.circular(10))),
+                      child: Center(
+                          child: Text(
+                              isFollowing ? "Unfollow" : "Follow",
+                            style: TextStyle(
+                                fontSize: 10, color: white),
+                          )),
+                    ),
+                  ),
+                  SizedBox(
+                    width: 10,
+                  ),
+
+
+                  Container(
+                    height: 31,
+                    width: 110,
+                    decoration: BoxDecoration(
+                        color: conainer220,
+                        borderRadius:
+                        BorderRadius.all(Radius.circular(10))),
+                    child: Center(
+                        child: Text(
+                          "Message",
+                          style:
+                          TextStyle(fontSize: 10, color: bluetext),
+                        )),
+                  ),
+
+                  SizedBox(
+                    width: 10,
+                  ),
+
+
+
+
+                  // Container(
+                  //   height: 31,
+                  //   width: 110,
+                  //   decoration: BoxDecoration(
+                  //       color: blueshade,
+                  //       borderRadius: BorderRadius.all(
+                  //           Radius.circular(10))),
+                  //   child: Center(
+                  //       child: Text(
+                  //         "Wallet",
+                  //         style: TextStyle(
+                  //             color: white, fontSize: 12),
+                  //       )),
+                  // ),
+
                 ],
               ),
             ),
+
+
+
             SizedBox(
-              height: 5,
+              height: 20,
             ),
 
             SizedBox(
@@ -553,7 +522,7 @@ class _profileinnerpageState extends State<profileinnerpage>
                           height: 200,
                           child: Image.network(
                             profileinnerpageshow['result'][0]['media'][index]['filePath'],
-                            fit: BoxFit.cover,
+                            fit: BoxFit.fill,
                           ),
                         ),
                       ),

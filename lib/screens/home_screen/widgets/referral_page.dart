@@ -219,6 +219,21 @@ class _referralpageState extends State<referralpage> {
                   shrinkWrap: true,
                   itemCount: _referrals.length,
                   itemBuilder: (BuildContext context, int index) {
+                    final referral = _referrals[index];
+                    final transactions = referral['transactions'] as List<dynamic>;
+
+                    // Calculate total amount from transactions if available
+                    double totalAmount = 0.0;
+                    if (transactions.isNotEmpty) {
+                      totalAmount = transactions.isNotEmpty
+                          ? transactions
+                          .map((transaction) => (transaction['amount'] is int)
+                          ? (transaction['amount'] as int).toDouble()
+                          : transaction['amount'] as double)
+                          .reduce((sum, amount) => sum + amount)
+                          : 0.0;
+                    }
+
                     return Padding(
                       padding: const EdgeInsets.symmetric(vertical: 5),
                       child: Column(
@@ -231,32 +246,32 @@ class _referralpageState extends State<referralpage> {
                                   "assets/svg/circlearrow.svg",
                                 ),
                               ),
-                              SizedBox(width: 10,),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    _referrals[index]['firstName'],
-                                    style: TextStyle(fontSize: 14, color: bluetext),
-                                  ),
-                                ],
-                              ),
-                              Expanded(child: SizedBox()),
+                              SizedBox(width: 10),
                               Text(
-                                _referrals[index]['isVerified'] ? 'Verified' : 'Not Verified',
+                                referral['firstName'],
+                                style: TextStyle(fontSize: 14, color: bluetext),
+                              ),
+
+                              Expanded(child: SizedBox()),
+
+                              Text(
+                                transactions.isEmpty
+                                    ? 'No Transactions'
+                                    : ' ${totalAmount.toStringAsFixed(2)}',
                                 style: TextStyle(
-                                  fontSize: 10,
-                                  color: _referrals[index]['isVerified'] ? Colors.green : appBlueColor,
+                                  fontSize: 12,
+                                  color: transactions.isEmpty ? Colors.grey : bluetext,
                                 ),
-                              )
+                              ),
                             ],
                           ),
-                          Divider(color: bluetext, thickness: .1,)
+                          Divider(color: bluetext, thickness: .1),
                         ],
                       ),
                     );
                   },
                 ),
+
               ),
               _isLoadingMore
                   ? Center(
