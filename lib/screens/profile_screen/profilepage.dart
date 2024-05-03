@@ -431,17 +431,7 @@ class _profilepageState extends State<profilepage>
                           ),
                         ),
                       ),
-                      Align(
-                        alignment: Alignment.topLeft,
-                        child: Text(
-                          (profiledetails?['user']?['firstName'] ??
-                              'loading...'),
-                          style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: bluetext),
-                        ),
-                      ),
+
                     ],
                   ),
 
@@ -531,6 +521,52 @@ class _profilepageState extends State<profilepage>
                   ),
                 ],
               ),
+              SizedBox(height: 10,),
+
+              Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 20),
+                    child: Align(
+                      alignment: Alignment.topLeft,
+                      child: Text(
+                        (profiledetails?['user']?['firstName'] ??
+                            'loading...'),
+                        style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: bluetext),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 5,),
+
+                  Text(
+                    (profiledetails?['user']?['lastName'] ??
+                        'loading...'),
+                    style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: bluetext),
+                  ),
+                ],
+              ),
+
+              // Padding(
+              //   padding: const EdgeInsets.only(left: 20),
+              //   child: Align(
+              //     alignment: Alignment.topLeft,
+              //     child: Text(
+              //       (profiledetails?['user']?['firstName'] ??
+              //           'loading...'),
+              //       style: TextStyle(
+              //           fontSize: 14,
+              //           fontWeight: FontWeight.w500,
+              //           color: bluetext),
+              //     ),
+              //   ),
+              // ),
+
 
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -689,212 +725,10 @@ class _profilepageState extends State<profilepage>
                 ),
               ),
 
-              // Container(
-              //   height: 300,
-              //
-              //   decoration: BoxDecoration(
-              //       color: profilebg,
-              //       borderRadius: BorderRadius.only(
-              //           topLeft: Radius.circular(84),
-              //           topRight: Radius.circular(84))),
-              //
-              //   child: Stack(
-              //     clipBehavior: Clip.none,
-              //     children: [
-              //       Positioned(
-              //           top: -40.0,
-              //           right: 25,
-              //           child: Column(
-              //             children: [
-              //               Stack(children: [
-              //                 Container(
-              //                   margin: EdgeInsets.only(top: 20),
-              //                   height: 20, // Set a specific height
-              //                   decoration: BoxDecoration(
-              //                     borderRadius: BorderRadius.circular(16.0),
-              //                     color: Colors.blue, // Example background color
-              //                   ),
-              //                 ),
-              //
-              //
-              //               ]),
-              //
-              //
-              //              // old subcription
-              //               // Row(
-              //               //   children: [
-              //               //     profiledetails?['user']['isVerified'] == false
-              //               //         ? Container(
-              //               //             height: 40,
-              //               //             width: 130,
-              //               //             decoration: BoxDecoration(
-              //               //                 color: greybg,
-              //               //                 borderRadius: BorderRadius.all(
-              //               //                     Radius.circular(20))),
-              //               //             child: Center(
-              //               //                 child: Text(
-              //               //               "Subscription",
-              //               //               style: TextStyle(
-              //               //                   color: white, fontSize: 12),
-              //               //             )),
-              //               //           )
-              //               //         : GestureDetector(
-              //               //             onTap: () {
-              //               //               Navigator.of(context).push(
-              //               //                   MaterialPageRoute(
-              //               //                       builder: (context) =>
-              //               //                           premiumpage()));
-              //               //             },
-              //               //             child: Container(
-              //               //               height: 40,
-              //               //               width: 130,
-              //               //               decoration: BoxDecoration(
-              //               //                   color: buttoncolor,
-              //               //                   borderRadius: BorderRadius.all(
-              //               //                       Radius.circular(20))),
-              //               //               child: Center(
-              //               //                   child: Text(
-              //               //                 "Subscription",
-              //               //                 style: TextStyle(
-              //               //                     color: white, fontSize: 12),
-              //               //               )),
-              //               //             ),
-              //               //           ),
-              //               //     SizedBox(
-              //               //       width: 20,
-              //               //     ),
-              //               //
-              //               //   ],
-              //               // ),
-              //
-              //             ],
-              //           )),
-              //     ],
-              //   ),
-              // ),
               SizedBox(
                 height: 5,
               ),
 
-
-             // oldpackage
-
-              // SizedBox(
-              //   height: 65,
-              //   child: ListView.builder(
-              //     itemCount: profilepagestatus != null &&
-              //             profilepagestatus.containsKey('memberProfits')
-              //         ? profilepagestatus['memberProfits'].length
-              //         : 0,
-              //     // Check if profilepagestatus is not null and contains 'memberProfits'
-              //     scrollDirection: Axis.horizontal,
-              //     itemBuilder: (BuildContext context, int index) {
-              //       return Padding(
-              //         padding: const EdgeInsets.symmetric(horizontal: 10),
-              //         child: Row(
-              //           children: [
-              //             Column(
-              //               crossAxisAlignment: CrossAxisAlignment.start,
-              //               children: [
-              //                 SizedBox(
-              //                   height: 5,
-              //                 ),
-              //                 Container(
-              //                   width: 175,
-              //                   decoration: BoxDecoration(
-              //                     border: Border.all(color: yellowborder),
-              //                     borderRadius:
-              //                         BorderRadius.all(Radius.circular(5)),
-              //                   ),
-              //                   child: Column(
-              //                     children: [
-              //                       SizedBox(
-              //                         height: 5,
-              //                       ),
-              //                       Text(
-              //                         profilepagestatus != null &&
-              //                                 profilepagestatus
-              //                                     .containsKey('memberProfits')
-              //                             ? profilepagestatus['memberProfits']
-              //                                 [index]['packageName']
-              //                             : '',
-              //                         // Check again before accessing nested keys
-              //                         style: TextStyle(
-              //                             fontSize: 12, color: yellowborder1),
-              //                       ),
-              //                       Row(
-              //                         crossAxisAlignment:
-              //                             CrossAxisAlignment.center,
-              //                         mainAxisAlignment: MainAxisAlignment.center,
-              //                         children: [
-              //                           Column(
-              //                             children: [
-              //                               Text(
-              //                                 "Members",
-              //                                 style: TextStyle(fontSize: 10),
-              //                               ),
-              //                               Text(
-              //                                 profilepagestatus != null &&
-              //                                         profilepagestatus
-              //                                             .containsKey(
-              //                                                 'memberProfits')
-              //                                     ? profilepagestatus[
-              //                                                 'memberProfits']
-              //                                             [index]['usersCount']
-              //                                         .toString()
-              //                                     : '',
-              //                                 // Check again before accessing nested keys
-              //                                 style: TextStyle(fontSize: 12),
-              //                               ),
-              //                             ],
-              //                           ),
-              //                           Padding(
-              //                             padding: const EdgeInsets.symmetric(
-              //                                 vertical: 5),
-              //                             child: VerticalDivider(
-              //                               color: Colors.black,
-              //                               thickness: .2,
-              //                             ),
-              //                           ),
-              //                           Column(
-              //                             children: [
-              //                               Text(
-              //                                 "Amount",
-              //                                 style: TextStyle(
-              //                                   fontSize: 10,
-              //                                 ),
-              //                               ),
-              //                               Text(
-              //                                 profilepagestatus != null &&
-              //                                         profilepagestatus
-              //                                             .containsKey(
-              //                                                 'memberProfits')
-              //                                     ? profilepagestatus[
-              //                                                 'memberProfits']
-              //                                             [index]['splitAmount']
-              //                                         .toString()
-              //                                     : '',
-              //                                 // Check again before accessing nested keys
-              //                                 style: TextStyle(
-              //                                   fontSize: 12,
-              //                                   fontWeight: FontWeight.w700,
-              //                                 ),
-              //                               ),
-              //                             ],
-              //                           ),
-              //                         ],
-              //                       ),
-              //                     ],
-              //                   ),
-              //                 ),
-              //               ],
-              //             ),
-              //           ],
-              //         ),
-              //       );
-              //     },
-              //   ),
-              // ),
               SizedBox(
                 height: 15,
               ),

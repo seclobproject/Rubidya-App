@@ -340,12 +340,23 @@ class _premiuminnerpageState extends State<premiuminnerpage> {
                     style: TextStyle(color: white),
                   ),
 
-                  Text(
-                    '\₹ ${deductedAmount.isEmpty ? "0" : deductedAmount}',
-                    style: TextStyle(
-                        color: white,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 24),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+
+                      SvgPicture.asset(
+                        'assets/svg/whitelogorubidia.svg',
+                        fit: BoxFit.cover,
+                        height: 25,
+                      ),
+                      Text(
+                        ' ${deductedAmount.isEmpty ? "0" : deductedAmount}',
+                        style: TextStyle(
+                            color: white,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 24),
+                      ),
+                    ],
                   ),
 
                   Padding(

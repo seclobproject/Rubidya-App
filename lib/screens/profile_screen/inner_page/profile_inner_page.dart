@@ -73,28 +73,6 @@ class _profileinnerpageState extends State<profileinnerpage>
   }
 
 
-  // void _toggleFollow() {
-  //   setState(() {
-  //     isFollowing = !isFollowing;
-  //   });
-  //   if (isFollowing) {
-  //     _Follow();
-  //   } else {
-  //     _UnFollow();
-  //   }
-  // }
-  // void _toggleFollow() {
-  //   setState(() {
-  //     // Toggle the follow status based on the followCount variable
-  //     isFollowing = !followCount;
-  //   });
-  //   if (isFollowing) {
-  //     _Follow();
-  //   } else {
-  //     _UnFollow();
-  //   }
-  // }
-
 
   Future _profileInner() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -224,7 +202,7 @@ class _profileinnerpageState extends State<profileinnerpage>
         child: Column(
           children: [
             SizedBox(
-              height: 70,
+              height: 20,
             ),
 
 
@@ -270,17 +248,7 @@ class _profileinnerpageState extends State<profileinnerpage>
                         ),
                       ),
                     ),
-                    Align(
-                      alignment: Alignment.topLeft,
-                      child: Text(
-                        (profileinnerpageshow?['result']?[0]['firstName'] ??
-                            'loading...'),
-                        style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: bluetext),
-                      ),
-                    ),
+
                   ],
                 ),
 
@@ -370,27 +338,58 @@ class _profileinnerpageState extends State<profileinnerpage>
                 ),
               ],
             ),
+            SizedBox(height: 20,),
+
+            Row(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 25),
+                  child: Align(
+                    alignment: Alignment.topLeft,
+                    child: Text(
+                      (profileinnerpageshow?['result']?[0]['firstName'] ??
+                          'loading...'),
+                      style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: bluetext),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 5,),
+                Align(
+                  alignment: Alignment.topLeft,
+                  child: Text(
+                    (profileinnerpageshow?['result']?[0]['lastName'] ??
+                        'loading...'),
+                    style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: bluetext),
+                  ),
+                ),
+              ],
+            ),
 
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
+              padding: const EdgeInsets.symmetric(horizontal: 25),
               child: Align(
                 alignment: Alignment.topLeft,
                 child: Text(
-                    (profileinnerpageshow?['result']?[0]['firstName'] ??
-                        'loading...'),
-                    style: TextStyle(
-                        color: bluetext,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w200),
-                    textAlign:
-                    TextAlign.center, // Center-align the text
-                    overflow: TextOverflow.ellipsis,
-                    maxLines:3
+                  (profileinnerpageshow?['result']?[0]['bio'] ??
+                      'loading...'),
+                  style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: bluetext),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 2,
+
                 ),
               ),
             ),
 
-            SizedBox(height: 10,),
+            SizedBox(height: 20,),
 
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -401,7 +400,7 @@ class _profileinnerpageState extends State<profileinnerpage>
                     onTap: _toggleFollow,
                     child: Container(
                       height: 31,
-                      width: 110,
+                      width: 180,
                       decoration: BoxDecoration(
                           color: bluetext,
                           borderRadius: BorderRadius.all(
@@ -421,7 +420,7 @@ class _profileinnerpageState extends State<profileinnerpage>
 
                   Container(
                     height: 31,
-                    width: 110,
+                    width: 150,
                     decoration: BoxDecoration(
                         color: conainer220,
                         borderRadius:
@@ -504,65 +503,85 @@ class _profileinnerpageState extends State<profileinnerpage>
                   // phototab(),
               Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-              child: GridView.builder(
+              child:GridView.builder(
                 physics: NeverScrollableScrollPhysics(),
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 3,
                   crossAxisSpacing: 8.0,
                   mainAxisSpacing: 8.0,
                 ),
-                itemCount: profileinnerpageshow != null && profileinnerpageshow['result'] != null ? profileinnerpageshow['result'][0]['media'].length : 0,
+                itemCount: (profileinnerpageshow != null &&
+                    profileinnerpageshow['result'] != null &&
+                    profileinnerpageshow['result'][0]['media'] != null)
+                    ? profileinnerpageshow['result'][0]['media'].length
+                    : 0,
                 itemBuilder: (BuildContext context, int index) {
-                  return Stack(
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: Container(
-                          width: 112,
-                          height: 200,
-                          child: Image.network(
-                            profileinnerpageshow['result'][0]['media'][index]['filePath'],
-                            fit: BoxFit.fill,
+                  if (profileinnerpageshow != null &&
+                      profileinnerpageshow['result'] != null &&
+                      profileinnerpageshow['result'][0]['media'] != null) {
+                    return InkWell(
+                      onTap: () {
+                        // List<dynamic> imageUrls = profileinnerpageshow['result'][0]['media']
+                        //     .map((item) => item['filePath'])
+                        //     .toList();
+                        // int selectedIndex = index;
+                        // _showFullScreenImage(context, imageUrls, selectedIndex, profileinnerpageshow);
+                      },
+                      child: Stack(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: Container(
+                              width: 112,
+                              height: 200,
+                              child: Image.network(
+                                profileinnerpageshow['result'][0]['media'][index]['filePath'],
+                                fit: BoxFit.fill,
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                      Positioned(
-                        top: 85,
-                        left: 30,
-                        child: Column(
-                          children: [
-                            SvgPicture.asset(
-                              "assets/svg/heart.svg",
-                              height: 18,
+                          Positioned(
+                            top: 85,
+                            left: 30,
+                            child: Column(
+                              children: [
+                                SvgPicture.asset(
+                                  "assets/svg/heart.svg",
+                                  height: 18,
+                                ),
+                                Text(
+                                  '0',
+                                  style: TextStyle(fontSize: 10, color: Colors.white),
+                                )
+                              ],
                             ),
-                            Text(
-                              '0',
-                              style: TextStyle(fontSize: 10, color: Colors.white),
-                            )
-                          ],
-                        ),
-                      ),
-                      Positioned(
-                        top: 85,
-                        right: 30,
-                        child: Column(
-                          children: [
-                            SvgPicture.asset(
-                              "assets/svg/coment2.svg",
-                              height: 18,
+                          ),
+                          Positioned(
+                            top: 85,
+                            right: 30,
+                            child: Column(
+                              children: [
+                                SvgPicture.asset(
+                                  "assets/svg/coment2.svg",
+                                  height: 18,
+                                ),
+                                Text(
+                                  "200",
+                                  style: TextStyle(fontSize: 10, color: Colors.white),
+                                )
+                              ],
                             ),
-                            Text(
-                              "200",
-                              style: TextStyle(fontSize: 10, color: Colors.white),
-                            )
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                    ],
-                  );
+                    );
+                  } else {
+                    return SizedBox(); // Return an empty SizedBox if data is not available
+                  }
                 },
               )
-            ),
+
+              ),
                   vediotab()
                 ],
               ),
@@ -575,3 +594,200 @@ class _profileinnerpageState extends State<profileinnerpage>
 }
 
 
+void _showFullScreenImage(BuildContext context, List<dynamic> imageUrls, int initialIndex,dynamic profileinnerpageshow) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      // Using a ScrollController to manage the scroll position
+      ScrollController scrollController = ScrollController(initialScrollOffset: initialIndex * 650.0); // Assuming image height is 600. Adjust as needed.
+
+      return Scaffold(
+        appBar: AppBar(
+          title: Text("Posts",style: TextStyle(fontSize: 14),),
+        ),
+        body: Column(
+          children: [
+            Expanded(
+              child: ListView.builder(
+                controller: scrollController,
+                itemCount: imageUrls.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return GestureDetector(
+                    // Handle double tap here
+                    child: Container(
+                      height: 610,
+                      child: Column(
+                        children: [
+                          Stack(
+                            children: [
+                              InkWell(
+                                onDoubleTap: () {},
+                                child: Row(
+                                  children: [
+                                    SizedBox(width: 60),
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          profileinnerpageshow['result'][index]['firstName'],
+                                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                                        ),
+                                        // Text(
+                                        //   profilelist['media'][index]['userId']['lastName'],
+                                        //   style: TextStyle(fontSize: 11, color: Colors.grey),
+                                        // ),
+                                      ],
+                                    ),
+                                    Expanded(child: SizedBox()),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                                      child: Icon(Icons.more_vert, color: Colors.grey),
+                                    ),
+                                  ],
+                                ),
+                              ),
+
+                              InkWell(
+                                onTap: () {
+                                  // Navigator.push(
+                                  //   context,
+                                  //   MaterialPageRoute(
+                                  //     builder: (context) => profileinnerpage(
+                                  //       id: widget.userId,
+                                  //     ),
+                                  //   ),
+                                  // );
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                                  child: Stack(
+                                    children: [
+                                      Container(
+                                        height: 40,
+                                        width: 40,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: Colors.transparent, // Set background color to transparent
+                                        ),
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.all(Radius.circular(100)),
+                                          child: profileinnerpageshow['result'][index]['profilePic'] != null
+                                              ? Image.network(
+                                            profileinnerpageshow['result'][index]['profilePic'],
+                                            height: 51,
+                                            fit: BoxFit.cover,
+                                          )
+                                              : Container(
+                                            // Placeholder or alternative content when profilePic is null
+                                            width: 51,
+                                            height: 51,
+                                            color: Colors.grey, // Example placeholder color
+                                          ),
+                                        ),
+
+                                      ),
+                                      Positioned(
+                                        top: 28,
+                                        left: 28,
+                                        child: Image.asset('assets/image/verificationlogo.png'),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 10),
+                          Container(
+                            decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(0))),
+                            child: Image.network(
+                              imageUrls[index],
+                              fit: BoxFit.cover,
+                              height: 500,
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(right: 23, top: 10, left: 15),
+                            child: Row(
+                              children: [
+                                // FavoriteButton(
+                                //   iconSize: 40,
+                                //   isFavorite: widget.likeCount,
+                                //   iconDisabledColor: Colors.black26,
+                                //   valueChanged: (_) {
+                                //     widget.onLikePressed(); // Call the callback function when like button is pressed
+                                //   },
+                                // ),
+                                SizedBox(width: 10),
+                                Text("Likes", style: TextStyle(color: Colors.blue, fontSize: 10)),
+                                SizedBox(width: 2),
+                                // Text(
+                                //   profileinnerpageshow['result'][index]['likeCount'].toString(), // Convert int to String
+                                //   style: TextStyle(
+                                //     color: Colors.blue,
+                                //     fontSize: 13,
+                                //     fontWeight: FontWeight.w700,
+                                //   ),
+                                // ),
+                                SizedBox(width: 2),
+                                Expanded(child: SizedBox()),
+                                SvgPicture.asset(
+                                  "assets/svg/comment.svg",
+                                  height: 20,
+                                ),
+                                SizedBox(width: 20),
+                                SvgPicture.asset(
+                                  "assets/svg/share.svg",
+                                  height: 20,
+                                ),
+                                SizedBox(width: 20),
+                                SvgPicture.asset(
+                                  "assets/svg/save.svg",
+                                  height: 20,
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(height: 10,),
+                          // Padding(
+                          //   padding: const EdgeInsets.symmetric(horizontal: 10),
+                          //   child: Container(
+                          //     height: isExpanded ? null : 40, // Adjust height when expanded
+                          //     child: Text(
+                          //       widget.description,
+                          //       maxLines: isExpanded ? null : 2,
+                          //       style: TextStyle(fontSize: 11),
+                          //     ),
+                          //   ),
+                          // ),
+                          // GestureDetector(
+                          //   onTap: () {
+                          //     setState(() {
+                          //       isExpanded = !isExpanded;
+                          //     });
+                          //   },
+                          //   child: Padding(
+                          //     padding: const EdgeInsets.symmetric(horizontal: 10),
+                          //     child: Align(
+                          //       alignment: Alignment.bottomRight,
+                          //       child: Text(
+                          //         isExpanded ? 'See Less' : 'See More',
+                          //         style: TextStyle(color: bluetext,fontSize: 8),
+                          //       ),
+                          //     ),
+                          //   ),
+                          // ),
+                          SizedBox(height: 15,)
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}

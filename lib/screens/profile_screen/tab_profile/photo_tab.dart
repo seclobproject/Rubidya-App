@@ -67,20 +67,23 @@ class _phototabState extends State<phototab> {
         ),
         itemCount: profilelist['media'].length,
         itemBuilder: (BuildContext context, int index) {
+
+
           return GestureDetector(
             onTap: () {
               List<dynamic> imageUrls = profilelist['media'].map((item) => item['filePath']).toList();
               int selectedIndex = index; // This is the index of the tapped image
-              _showFullScreenImage(context, imageUrls, selectedIndex);
+              _showFullScreenImage(context, imageUrls, selectedIndex,profilelist);
             },
 
             child: Stack(
               children: [
+
                 ClipRRect(
                   borderRadius: BorderRadius.circular(10),
                   child: Container(
                     width: 112,
-                    height: 250,
+                    height: 300,
                     child: Image.network(
                        profilelist['media'][index]['filePath'],
                       fit: BoxFit.cover,
@@ -113,7 +116,7 @@ class _phototabState extends State<phototab> {
                         height: 18,
                       ),
                       Text(
-                        "200",
+                          '200',
                         style: TextStyle(fontSize: 10, color: Colors.white),
                       )
                     ],
@@ -134,45 +137,8 @@ class _phototabState extends State<phototab> {
 }
 
 
-// void _showFullScreenImage(BuildContext context, List<dynamic> imageUrls, int initialIndex) {
-//   showDialog(
-//     context: context,
-//     builder: (BuildContext context) {
-//       // Using a ScrollController to manage the scroll position
-//       ScrollController scrollController = ScrollController(initialScrollOffset: initialIndex * 300.0); // Assuming image height is 600. Adjust as needed.
-//
-//       return Scaffold(
-//         appBar: AppBar(
-//           title: Text("Posts",style: TextStyle(fontSize: 14),),
-//         ),
-//         body: Column(
-//           children: [
-//           Expanded(
-//             child: ListView.builder(
-//             controller: scrollController,
-//             itemCount: imageUrls.length,
-//             itemBuilder: (BuildContext context, int index) {
-//               return Padding(
-//                 padding: const EdgeInsets.symmetric(vertical: 10.0),
-//                 child: Center(
-//                   child: Image.network(
-//                     imageUrls[index],
-//                     fit: BoxFit.cover,
-//                   ),
-//                 ),
-//               );
-//             },
-//                     ),
-//           ),
-//           ],
-//         ),
-//       );
-//     },
-//   );
-// }
 
-
-void _showFullScreenImage(BuildContext context, List<dynamic> imageUrls, int initialIndex) {
+void _showFullScreenImage(BuildContext context, List<dynamic> imageUrls, int initialIndex,dynamic profilelist) {
   showDialog(
     context: context,
     builder: (BuildContext context) {
@@ -207,13 +173,13 @@ void _showFullScreenImage(BuildContext context, List<dynamic> imageUrls, int ini
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          "kkkkk",
+                                    profilelist['media'][index]['userId']['firstName'],
                                           style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
                                         ),
-                                        Text(
-                                          "12635656",
-                                          style: TextStyle(fontSize: 11, color: Colors.grey),
-                                        ),
+                                        // Text(
+                                        //   profilelist['media'][index]['userId']['lastName'],
+                                        //   style: TextStyle(fontSize: 11, color: Colors.grey),
+                                        // ),
                                       ],
                                     ),
                                     Expanded(child: SizedBox()),
@@ -250,7 +216,7 @@ void _showFullScreenImage(BuildContext context, List<dynamic> imageUrls, int ini
                                         child: ClipRRect(
                                           borderRadius: BorderRadius.all(Radius.circular(100)),
                                           child: Image.network(
-                                            'https://play-lh.googleusercontent.com/4HZhLFCcIjgfbXoVj3mgZdQoKO2A_z-uX2gheF5yNCkb71wzGqwobr9muj8I05Nc8u8',
+                                            profilelist['media'][index]['filePath'],
                                             height: 51,
                                             fit: BoxFit.cover,
                                           ),
@@ -269,7 +235,7 @@ void _showFullScreenImage(BuildContext context, List<dynamic> imageUrls, int ini
                           ),
                           SizedBox(height: 10),
                           Container(
-                            decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(10))),
+                            decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(0))),
                             child: Image.network(
                               imageUrls[index],
                               fit: BoxFit.cover,
@@ -291,7 +257,14 @@ void _showFullScreenImage(BuildContext context, List<dynamic> imageUrls, int ini
                                 SizedBox(width: 10),
                                 Text("Likes", style: TextStyle(color: Colors.blue, fontSize: 10)),
                                 SizedBox(width: 2),
-                                Text('1', style: TextStyle(color: Colors.blue, fontSize: 13, fontWeight: FontWeight.w700)),
+                                Text(
+                                  profilelist['media'][index]['likeCount'].toString(), // Convert int to String
+                                  style: TextStyle(
+                                    color: Colors.blue,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
                                 SizedBox(width: 2),
                                 Expanded(child: SizedBox()),
                                 SvgPicture.asset(

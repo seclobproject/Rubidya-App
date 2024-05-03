@@ -44,6 +44,8 @@ class _homepageState extends State<homepage> {
   late SharedPreferences prefs;
   bool _hasMore = true;
   bool _isLoadingMore = false;
+  late List<Map<String, dynamic>> suggestFollow = [];
+
 
 
 
@@ -179,12 +181,14 @@ class _homepageState extends State<homepage> {
   Future<void> _refresh() async {
     await _profiledetailsapi();
     await _profileapi();
+    await _homeFeed();
+    await _suggestFollowList();
     setState(() {
       _isLoading = false;
     });
   }
 
-  
+
   ScrollController _scrollController = ScrollController();
 
   // @override
@@ -206,6 +210,15 @@ class _homepageState extends State<homepage> {
       _loadMore();
     }
   }
+
+  Future<void> _suggestFollowList() async {
+    var response = await HomeService.usersuggetionlistfollow();
+    log.i('refferal details show.. $response');
+    setState(() {
+      suggestFollow = List<Map<String, dynamic>>.from(response['result']);
+    });
+  }
+
 
   Future<void> _homeFeed({int page = 1}) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -305,10 +318,10 @@ class _homepageState extends State<homepage> {
                     Spacer(),
                     InkWell(
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => Homepages()),
-                        );
+                        // Navigator.push(
+                        //   context,
+                        //   MaterialPageRoute(builder: (context) => Homepages()),
+                        // );
                       },
                       child: SvgPicture.asset(
                         "assets/svg/massage.svg",
@@ -378,7 +391,8 @@ class _homepageState extends State<homepage> {
                         description: homeList['posts'][index]['description'] ?? '',
                         likes: homeList['posts'][index]['likeCount']?.toString() ?? '',
                         img: homeList['posts'][index]['filePath'] ?? '',
-                        profilepic: homeList['posts'][index]['profilePic']?['filePath'] ?? '',
+                        profilepic: homeList['posts'][index]['filePath'] ?? '',
+                        likedby: homeList['posts'][index]['lastLikedUserName'] ?? '',
                         id: homeList['posts'][index]['_id'] ?? '',
                         userId: homeList['posts'][index]['userId'] ?? '',
                         likeCount: homeList['posts'][index]['isLiked'] ?? false,
@@ -419,6 +433,7 @@ class ProductCard extends StatefulWidget {
     required this.id,
     required this.userId,
     required this.likeCount,
+    required this.likedby,
     required this.description,
     required this.onLikePressed,
     required this.onDoubleTapLike,
@@ -429,6 +444,7 @@ class ProductCard extends StatefulWidget {
   final String createdTime;
   final String id;
   final String userId;
+  final String likedby;
   final String likes;
   final String profilepic;
   final String description;
@@ -504,7 +520,7 @@ class _ProductCardState extends State<ProductCard> {
                         child: ClipRRect(
                           borderRadius: BorderRadius.all(Radius.circular(100)),
                           child: Image.network(
-                            'https://play-lh.googleusercontent.com/4HZhLFCcIjgfbXoVj3mgZdQoKO2A_z-uX2gheF5yNCkb71wzGqwobr9muj8I05Nc8u8',
+                            widget.profilepic,
                             height: 51,
                             fit: BoxFit.cover,
                           ),
@@ -523,49 +539,100 @@ class _ProductCardState extends State<ProductCard> {
           ),
           SizedBox(height: 10),
           Container(
-            decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(10))),
+            decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(20))),
             child: Image.network(
               widget.img,
               fit: BoxFit.fill,
               // height: 400,
             ),
           ),
+
+          SizedBox(height: 10,),
+
+
           Padding(
             padding: const EdgeInsets.only(right: 23, top: 10, left: 15),
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                FavoriteButton(
-                  iconSize: 40,
-                  isFavorite: widget.likeCount,
-                  iconDisabledColor: Colors.black26,
-                  valueChanged: (_) {
-                    widget.onLikePressed(); // Call the callback function when like button is pressed
-                  },
+                Row(
+                  children: [
+                    FavoriteButton(
+                      iconSize: 40,
+                      isFavorite: widget.likeCount,
+                      iconDisabledColor: Colors.black26,
+                      valueChanged: (_) {
+                        widget.onLikePressed(); // Call the callback function when like button is pressed
+                      },
+                    ),
+                    SizedBox(width: 20),
+
+                    SvgPicture.asset(
+                      "assets/svg/comment.svg",
+                      height: 20,
+                    ),
+                    SizedBox(width: 20),
+                    SvgPicture.asset(
+                      "assets/svg/save.svg",
+                      height: 20,
+                    ),
+                    SizedBox(width: 20),
+
+                    Expanded(child: SizedBox()),
+
+                    SvgPicture.asset(
+                      "assets/svg/share.svg",
+                      height: 20,
+                    ),
+                  ],
                 ),
-                SizedBox(width: 10),
-                Text("Likes", style: TextStyle(color: Colors.blue, fontSize: 10)),
-                SizedBox(width: 2),
-                Text(widget.likes, style: TextStyle(color: Colors.blue, fontSize: 13, fontWeight: FontWeight.w700)),
-                SizedBox(width: 2),
-                Expanded(child: SizedBox()),
-                SvgPicture.asset(
-                  "assets/svg/comment.svg",
-                  height: 20,
-                ),
-                SizedBox(width: 20),
-                SvgPicture.asset(
-                  "assets/svg/share.svg",
-                  height: 20,
-                ),
-                SizedBox(width: 20),
-                SvgPicture.asset(
-                  "assets/svg/save.svg",
-                  height: 20,
+                SizedBox(height: 10,),
+                Row(
+                  children: [
+                    RichText(
+                      text: TextSpan(
+                        style: TextStyle(
+                          color: bluetext,
+                          fontSize: 12,
+                        ),
+                        children: [
+                          TextSpan(
+                            text: "Liked by ",
+                            style: TextStyle(
+
+                            ),
+                          ),
+                          TextSpan(
+                            text: "${widget.likedby}",
+                            style: TextStyle(
+                              color: bluetext,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+
+                          TextSpan(
+                            text: " and",
+                            style: TextStyle(
+                              color: bluetext,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    SizedBox(width: 2),
+                    Text( "${widget.likes} Others ",
+                        style: TextStyle(
+                            color: bluetext,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700)),
+                    SizedBox(width: 2),
+                  ],
                 ),
               ],
             ),
           ),
-          SizedBox(height: 10,),
 
           Align(
             alignment: Alignment.topLeft,
@@ -576,7 +643,7 @@ class _ProductCardState extends State<ProductCard> {
                 child: Text(
                   widget.description,
                   maxLines: isExpanded ? null : 2,
-                  style: TextStyle(fontSize: 11,fontWeight: FontWeight.w600),
+                  style: TextStyle(fontSize: 12,fontWeight: FontWeight.w700),
                 ),
               ),
             ),
@@ -600,8 +667,6 @@ class _ProductCardState extends State<ProductCard> {
                 ),
               ),
             ),
-
-
 
 
           SizedBox(height: 15,)

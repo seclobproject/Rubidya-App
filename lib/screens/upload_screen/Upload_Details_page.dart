@@ -184,7 +184,7 @@ class _uploadedetailsState extends State<uploadedetails> {
               child:RepaintBoundary(
                 key: imageKey,
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(10.0), // Adjust the value as per your requirement
+                  borderRadius: BorderRadius.circular(0.0), // Adjust the value as per your requirement
                   child: widget.imageUrl,
                 ),
               )

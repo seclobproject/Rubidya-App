@@ -115,12 +115,9 @@ class _UploadScreenState extends State<UploadScreen> {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
-      File? croppedFile = await _cropImage(pickedFile.path);
-      if (croppedFile != null) {
-        setState(() {
-          imageUrl = croppedFile.path;
-        });
-      }
+      setState(() {
+        imageUrl = pickedFile.path; // Use the original image path without cropping
+      });
     }
   }
 
@@ -128,40 +125,41 @@ class _UploadScreenState extends State<UploadScreen> {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.camera);
     if (pickedFile != null) {
-      File? croppedFile = await _cropImage(pickedFile.path);
-      if (croppedFile != null) {
-        setState(() {
-          imageUrl = croppedFile.path;
-        });
-      }
+      setState(() {
+        imageUrl = pickedFile.path; // Use the original image path without cropping
+      });
     }
   }
 
-  Future<File?> _cropImage(String imagePath) async {
-    final imageCropper = ImageCropper();
-    File? croppedFile = await imageCropper.cropImage(
-      aspectRatioPresets: [
-        CropAspectRatioPreset.square,
-        CropAspectRatioPreset.ratio3x2,
-        CropAspectRatioPreset.original,
-        CropAspectRatioPreset.ratio4x3,
-        CropAspectRatioPreset.ratio16x9
-      ],
-      sourcePath: imagePath,
-      aspectRatio: CropAspectRatio(ratioX: 1.0, ratioY: 1.0),
-      compressQuality: 100,
-      maxHeight: 1000,
-      maxWidth: 1000,
-      compressFormat: ImageCompressFormat.jpg,
-      androidUiSettings: AndroidUiSettings(
-          toolbarTitle: 'Cropper',
-          toolbarColor: Colors.blue,
-          toolbarWidgetColor: Colors.white,
+  Future<void> _cropImage() async {
+    if (imageUrl != null) {
+      File? croppedImage = await ImageCropper().cropImage(
+        sourcePath: imageUrl!,
+        aspectRatioPresets: [
+          CropAspectRatioPreset.square,
+          CropAspectRatioPreset.ratio3x2,
+          CropAspectRatioPreset.original,
+          CropAspectRatioPreset.ratio4x3,
+          CropAspectRatioPreset.ratio16x9
+        ],
+        androidUiSettings: AndroidUiSettings(
+          toolbarTitle: 'Crop Image',
+          toolbarColor: Colors.white,
+          toolbarWidgetColor: Colors.blue,
           initAspectRatio: CropAspectRatioPreset.original,
-          hideBottomControls: false,
-          lockAspectRatio: true),
-    );
-    return croppedFile;
+          lockAspectRatio: false,
+        ),
+        iosUiSettings: IOSUiSettings(
+          minimumAspectRatio: 1.0,
+        ),
+      );
+
+      if (croppedImage != null) {
+        setState(() {
+          imageUrl = croppedImage.path; // Update the imageUrl with the cropped image path
+        });
+      }
+    }
   }
 
 
@@ -206,6 +204,22 @@ class _UploadScreenState extends State<UploadScreen> {
         backgroundColor: white,
 
         actions: [
+
+          if (imageUrl != null)
+            InkWell(
+              onTap: () {
+                _cropImage(); // Call _cropImage function when button is pressed
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Text(
+                  "Crop",
+                  style: TextStyle(color: Colors.blue),
+                ),
+              ),
+            ),
+
+
           if (imageUrl != null)
             InkWell(
               onTap: (){
@@ -238,12 +252,13 @@ class _UploadScreenState extends State<UploadScreen> {
           SizedBox(height: 20),
           Center(
             child: Container(
+               height: 445,
               child: Stack(
                 children: [
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 10),
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(5), // Adjust the radius as per your preference
+                      borderRadius: BorderRadius.circular(0), // Adjust the radius as per your preference
                       child: filteredImage(),
                     ),
                   ),
@@ -276,7 +291,6 @@ class _UploadScreenState extends State<UploadScreen> {
                           child: Image.network(
                             'https://cdn.britannica.com/45/5645-050-B9EC0205/head-treasure-flower-disk-flowers-inflorescence-ray.jpg',
                             fit: BoxFit.cover,
-
                           ),
                         ),
                       ),
@@ -390,3 +404,6 @@ class _UploadScreenState extends State<UploadScreen> {
     );
   }
 }
+
+
+
