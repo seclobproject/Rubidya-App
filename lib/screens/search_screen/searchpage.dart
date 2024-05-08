@@ -22,6 +22,8 @@ class _searchpageState extends State<searchpage> {
   late SharedPreferences prefs;
   late List<Map<String, dynamic>> searchlist = [];
   late TextEditingController _searchController;
+  late List<Map<String, dynamic>> originalSearchList = [];
+
 
   @override
   void initState() {
@@ -42,11 +44,18 @@ class _searchpageState extends State<searchpage> {
   }
 
   Future<void> _searchFollowList() async {
-    var response = await SearchService.searchpage();
-    log.i('search list show.. $response');
-    setState(() {
-      searchlist = List<Map<String, dynamic>>.from(response['result']);
-    });
+    try {
+      var response = await SearchService.searchpage();
+      if (mounted) {
+        setState(() {
+          originalSearchList = List<Map<String, dynamic>>.from(response['result']);
+          searchlist = List<Map<String, dynamic>>.from(originalSearchList);
+        });
+      }
+    } catch (e) {
+      // Handle error
+      print('Error fetching search data: $e');
+    }
   }
 
   Future<void> toggleFollow(int index) async {
@@ -77,11 +86,15 @@ class _searchpageState extends State<searchpage> {
 
   // Function to handle text field changes
   void _onSearchTextChanged(String text) {
-    // Filter the search results based on the entered text
-    setState(() {
-      searchlist = _filterSearchResults(text);
-    });
+    if (mounted) { // Check if the widget is still mounted
+      setState(() {
+        searchlist = originalSearchList.where((result) =>
+            result['firstName'].toLowerCase().contains(text.toLowerCase())).toList();
+      });
+    }
   }
+
+
 
   List<Map<String, dynamic>> _filterSearchResults(String query) {
     if (query.isEmpty) {
@@ -103,6 +116,8 @@ class _searchpageState extends State<searchpage> {
       ),
       body: Column(
         children: [
+
+
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10.0),
             child: Container(
@@ -131,6 +146,22 @@ class _searchpageState extends State<searchpage> {
             ),
           ),
           SizedBox(height: 20,),
+
+          Visibility(
+            visible: searchlist.isEmpty && _searchController.text.isNotEmpty,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Text(
+                'No results found',
+                style: TextStyle(
+                  color: greybg,
+                  fontSize: 12,
+                ),
+              ),
+            ),
+          ),
+
+
           Expanded(
             child: ListView.builder(
               itemCount: _searchController.text.isEmpty ? 0 : searchlist.length,
@@ -142,8 +173,6 @@ class _searchpageState extends State<searchpage> {
                   img: searchlist[index]['profilePic'] != null
                       ? searchlist[index]['profilePic']['filePath']
                       : '',
-
-
                   onFollowToggled: () => toggleFollow(index),
                 );
               },
@@ -154,6 +183,10 @@ class _searchpageState extends State<searchpage> {
     );
   }
 }
+
+
+
+
 
 class MembersListing extends StatelessWidget {
   const MembersListing({

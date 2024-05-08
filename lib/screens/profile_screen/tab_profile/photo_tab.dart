@@ -23,43 +23,81 @@ class _phototabState extends State<phototab> {
   bool isLoading = false;
 
 
-  Future _profileapi() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    userid = prefs.getString('userid');
-    var response = await ProfileService.getProfileimage();
-    log.i('profile data Show.. $response');
-    setState(() {
-      profilelist = response; // This line is causing the error
-    });
-  }
 
 
 
-  Future _initLoad() async {
-    await Future.wait(
-      [
-        _profileapi()
-      ],
-    );
-    isLoading = false;
-  }
+  var userId;
+  var profileDetails;
+  bool _isLoading = true;
+  bool isExpanded = false;
+  int _pageNumber = 1;
+  ScrollController _scrollController = ScrollController();
+
 
   @override
   void initState() {
+    _initLoad();
+    _scrollController.addListener(_scrollListener);
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollListener() {
+    if (_scrollController.offset >= _scrollController.position.maxScrollExtent &&
+        !_scrollController.position.outOfRange) {
+      _loadMore();
+    }
+  }
+
+  Future<void> _ProfileImage({int page = 1}) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    userId = prefs.getString('userId');
+    var response = await ProfileService.getProfileimage(page: page);
+    log.i('Profile Image Loading........: $response');
     setState(() {
-      _initLoad();
+      if (profilelist == null) {
+        profilelist = response;
+      } else {
+        profilelist['media'].addAll(response['media']);
+      }
     });
   }
+
+
+
+  Future<void> _initLoad() async {
+    await _ProfileImage();
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
+  Future<void> _loadMore() async {
+    setState(() {
+      _pageNumber++;
+      isLoading = true;
+    });
+    await _ProfileImage(page: _pageNumber);
+    setState(() {
+      isLoading = false;
+    });
+  }
+
 
 
   @override
   Widget build(BuildContext context) {
-    return  Padding(
+    return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
       child: profilelist != null && profilelist['media'] != null
           ? GridView.builder(
-        physics: NeverScrollableScrollPhysics(),
+        controller: _scrollController,
+        physics: AlwaysScrollableScrollPhysics(),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 3,
           crossAxisSpacing: 8.0,
@@ -67,29 +105,27 @@ class _phototabState extends State<phototab> {
         ),
         itemCount: profilelist['media'].length,
         itemBuilder: (BuildContext context, int index) {
-
-
           return GestureDetector(
             onTap: () {
-              List<dynamic> imageUrls = profilelist['media'].map((item) => item['filePath']).toList();
-              int selectedIndex = index; // This is the index of the tapped image
-              _showFullScreenImage(context, imageUrls, selectedIndex,profilelist);
+              List<dynamic> imageUrls =
+              profilelist['media'].map((item) => item['filePath']).toList();
+              int selectedIndex = index;
+              _showFullScreenImage(context, imageUrls, selectedIndex, profilelist);
             },
-
             child: Stack(
               children: [
-
                 ClipRRect(
                   borderRadius: BorderRadius.circular(10),
                   child: Container(
                     width: 112,
                     height: 300,
                     child: Image.network(
-                       profilelist['media'][index]['filePath'],
-                      fit: BoxFit.cover,
+                      profilelist['media'][index]['filePath'],
+                      fit: BoxFit.fill, // Use BoxFit.cover to stretch and maintain aspect ratio
                     ),
                   ),
                 ),
+
                 Positioned(
                   top: 78,
                   left: 30,
@@ -116,7 +152,7 @@ class _phototabState extends State<phototab> {
                         height: 18,
                       ),
                       Text(
-                          '200',
+                        '200', // This is a placeholder, should be replaced with dynamic data
                         style: TextStyle(fontSize: 10, color: Colors.white),
                       )
                     ],
@@ -128,13 +164,19 @@ class _phototabState extends State<phototab> {
         },
       )
           : Center(
-        // Show a placeholder or message when there is no data
-        child: Text("No data available",style: TextStyle(color: textblack),),
+        child: isLoading
+            ? CircularProgressIndicator()
+            : Text(
+          "No images available",
+          style: TextStyle(color: Colors.black),
+        ),
       ),
     );
 
   }
 }
+
+
 
 
 
@@ -159,7 +201,7 @@ void _showFullScreenImage(BuildContext context, List<dynamic> imageUrls, int ini
                   return GestureDetector(
                     // Handle double tap here
                     child: Container(
-                      height: 610,
+                      // height: 610,
                       child: Column(
                         children: [
                           Stack(
@@ -173,7 +215,7 @@ void _showFullScreenImage(BuildContext context, List<dynamic> imageUrls, int ini
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                    profilelist['media'][index]['userId']['firstName'],
+                                          profilelist['media'][index]['firstName'],
                                           style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
                                         ),
                                         // Text(
@@ -216,7 +258,7 @@ void _showFullScreenImage(BuildContext context, List<dynamic> imageUrls, int ini
                                         child: ClipRRect(
                                           borderRadius: BorderRadius.all(Radius.circular(100)),
                                           child: Image.network(
-                                            profilelist['media'][index]['filePath'],
+                                            profilelist['media'][index]['profilePic'],
                                             height: 51,
                                             fit: BoxFit.cover,
                                           ),
@@ -238,8 +280,8 @@ void _showFullScreenImage(BuildContext context, List<dynamic> imageUrls, int ini
                             decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(0))),
                             child: Image.network(
                               imageUrls[index],
-                              fit: BoxFit.cover,
-                              height: 500,
+                              fit: BoxFit.scaleDown,
+                              // height: 400,
                             ),
                           ),
                           Padding(
@@ -313,7 +355,7 @@ void _showFullScreenImage(BuildContext context, List<dynamic> imageUrls, int ini
                           //     ),
                           //   ),
                           // ),
-                          SizedBox(height: 15,)
+                          SizedBox(height: 50,)
                         ],
                       ),
                     ),
@@ -327,5 +369,3 @@ void _showFullScreenImage(BuildContext context, List<dynamic> imageUrls, int ini
     },
   );
 }
-
-

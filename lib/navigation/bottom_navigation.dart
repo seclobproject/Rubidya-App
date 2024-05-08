@@ -36,7 +36,7 @@ class _BottomnavState extends State<Bottomnav> {
     {'page': searchpage(), 'title': 'Search'},
     {'page': UploadScreen(), 'title': 'Upload'},
     {'page': chatpage(), 'title': 'Chat pgae'},
-    {'page': profilepage(), 'title': 'Profile'},
+    {'page': ProfileView(), 'title': 'Profile'},
   ];
 
   void _selectPage(int index) {

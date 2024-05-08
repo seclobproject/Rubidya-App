@@ -62,7 +62,7 @@ class _uploadedetailsState extends State<uploadedetails> {
     try {
       // Get the rendered image
       RenderRepaintBoundary boundary = imageKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
-      ui.Image image = await boundary.toImage(pixelRatio: 1.0);
+      ui.Image image = await boundary.toImage(pixelRatio: 5.0);
       ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
       Uint8List uint8List = byteData!.buffer.asUint8List();
 

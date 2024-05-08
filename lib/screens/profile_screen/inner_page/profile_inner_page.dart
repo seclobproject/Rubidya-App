@@ -24,6 +24,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:dio/dio.dart';
 import 'dart:io';
 
+import 'follower_inner_list.dart';
+import 'following_inner_list.dart';
+
 
 class profileinnerpage extends StatefulWidget {
    profileinnerpage({super.key,required this.id});
@@ -48,6 +51,7 @@ class _profileinnerpageState extends State<profileinnerpage>
   String? imageUrl;
   var followCount;
   bool isFollowing = false;
+  final fallbackImageUrl = 'https://pbs.twimg.com/media/CidJXBuUUAEgAYu.jpg';
 
 
 
@@ -79,9 +83,9 @@ class _profileinnerpageState extends State<profileinnerpage>
     userid = prefs.getString('userid');
     var response = await ProfileService.Profileinnerpage(widget.id);
 
-    if (response != null && response['result'] != null) {
+    if (response != null && response['media'] != null) {
       // Accessing 'isFollowing' directly from the response
-      bool initialFollowStatus = response['result'][0]['isFollowing'];
+      bool initialFollowStatus = response['media'][0]['isFollowing'];
 
       // Set the initial follow status
       setState(() {
@@ -112,8 +116,6 @@ class _profileinnerpageState extends State<profileinnerpage>
   }
 
 
-
-
   Future _initLoad() async {
     await Future.wait(
       [
@@ -139,6 +141,9 @@ class _profileinnerpageState extends State<profileinnerpage>
     _tabController.dispose();
   }
 
+
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -146,7 +151,7 @@ class _profileinnerpageState extends State<profileinnerpage>
         centerTitle: true,
         automaticallyImplyLeading: false,
         title: Text(
-          (profileinnerpageshow?['result']?[0]['firstName'] ??
+          (profileinnerpageshow?['media']?[0]['firstName'] ??
               'loading...'),
           style: TextStyle(fontSize: 14),
         ),
@@ -217,35 +222,36 @@ class _profileinnerpageState extends State<profileinnerpage>
                         alignment: Alignment.topLeft,
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(100),
-                          child: Container(
-                            width: 90,
+                          child: profileinnerpageshow != null &&
+                              profileinnerpageshow['media'] != null &&
+                              profileinnerpageshow['media'].isNotEmpty &&
+                              profileinnerpageshow['media'][0]['profilePic'] != null
+                              ? SizedBox(
+                            width: 90,  // Set a fixed width for the image container
                             height: 90,
-                            child: profileinnerpageshow != null &&
-                                profileinnerpageshow?['result'][0]['profilePic'] != null &&
-                                profileinnerpageshow?['result'][0]['profilePic']
-                                ['filePath'] !=
-                                    null
-                                ? Image.network(
-                              profileinnerpageshow?['result'][0]['profilePic']['filePath'],
-                              fit: BoxFit.cover,
-                            )
-                                : Center(
-                              child: Container(
-                                height: 90,
-                                width: 90,
-                                decoration: BoxDecoration(
-                                    color: grad2,
-                                    borderRadius: BorderRadius.all(
-                                        Radius.circular(100))),
-                                child: Center(
-                                    child: Text(
-                                      "No Img",
-                                      style: TextStyle(color: greybg),
-                                    )),
+                            child: Image.network(
+                              profileinnerpageshow['media'][0]['profilePic'],
+                              fit: BoxFit.contain,
+                            ),
+                          )
+                              : Center(
+                            child: Container(
+                              height: 90,
+                              width: 90,
+                              decoration: BoxDecoration(
+                                color: grad2,
+                                borderRadius: BorderRadius.circular(100),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  "No Img",
+                                  style: TextStyle(color: greybg),
+                                ),
                               ),
                             ),
                           ),
                         ),
+
                       ),
                     ),
 
@@ -268,9 +274,8 @@ class _profileinnerpageState extends State<profileinnerpage>
                             height: 10,
                           ),
                           Text(
-                            postcount != null && postcount['postCount'] != null
-                                ? postcount['postCount'].toString()
-                                : '0', // Default value if postcount or postCount is null
+                            (profileinnerpageshow?['media']?[0]['post'].toString() ??
+                                'loading...'),// Default value if postcount or postCount is null
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w500,
@@ -285,17 +290,21 @@ class _profileinnerpageState extends State<profileinnerpage>
                       InkWell(
                         onTap: () {
 
-                          Navigator.of(context).push(
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      FollowersList()));
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => Followerinnerlist(
+                                id: widget.id,
+                              ),
+                            ),
+                          );
                         },
                         child: Column(
                           children: [
                             SizedBox(
                               height: 10,
                             ),
-                            Text((profileinnerpageshow?['result']?[0]['followers'].toString() ??
+                            Text((profileinnerpageshow?['media']?[0]['followers'].toString() ??
                                 'loading...'),
                                 style: TextStyle(
                                     fontSize: 18,
@@ -309,17 +318,21 @@ class _profileinnerpageState extends State<profileinnerpage>
                       ),
                       InkWell(
                         onTap: () {
-                          Navigator.of(context).push(
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      FollowingList()));
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => Followinginnerpage(
+                                id: widget.id,
+                              ),
+                            ),
+                          );
                         },
                         child: Column(
                           children: [
                             SizedBox(
                               height: 10,
                             ),
-                            Text((profileinnerpageshow?['result']?[0]['following'].toString() ??
+                            Text((profileinnerpageshow?['media']?[0]['following'].toString() ??
                                 'loading...'),
                                 style: TextStyle(
                                     fontSize: 18,
@@ -347,7 +360,7 @@ class _profileinnerpageState extends State<profileinnerpage>
                   child: Align(
                     alignment: Alignment.topLeft,
                     child: Text(
-                      (profileinnerpageshow?['result']?[0]['firstName'] ??
+                      (profileinnerpageshow?['media']?[0]['firstName'] ??
                           'loading...'),
                       style: TextStyle(
                           fontSize: 14,
@@ -360,7 +373,7 @@ class _profileinnerpageState extends State<profileinnerpage>
                 Align(
                   alignment: Alignment.topLeft,
                   child: Text(
-                    (profileinnerpageshow?['result']?[0]['lastName'] ??
+                    (profileinnerpageshow?['media']?[0]['lastName'] ??
                         'loading...'),
                     style: TextStyle(
                         fontSize: 14,
@@ -376,7 +389,7 @@ class _profileinnerpageState extends State<profileinnerpage>
               child: Align(
                 alignment: Alignment.topLeft,
                 child: Text(
-                  (profileinnerpageshow?['result']?[0]['bio'] ??
+                  (profileinnerpageshow?['media']?[0]['bio'] ??
                       'loading...'),
                   style: TextStyle(
                       fontSize: 12,
@@ -503,83 +516,86 @@ class _profileinnerpageState extends State<profileinnerpage>
                   // phototab(),
               Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-              child:GridView.builder(
+
+              child: profileinnerpageshow != null && profileinnerpageshow['media'] != null
+                  ?GridView.builder(
                 physics: NeverScrollableScrollPhysics(),
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 3,
                   crossAxisSpacing: 8.0,
                   mainAxisSpacing: 8.0,
                 ),
-                itemCount: (profileinnerpageshow != null &&
-                    profileinnerpageshow['result'] != null &&
-                    profileinnerpageshow['result'][0]['media'] != null)
-                    ? profileinnerpageshow['result'][0]['media'].length
-                    : 0,
+                itemCount: profileinnerpageshow['media'].length,
                 itemBuilder: (BuildContext context, int index) {
-                  if (profileinnerpageshow != null &&
-                      profileinnerpageshow['result'] != null &&
-                      profileinnerpageshow['result'][0]['media'] != null) {
-                    return InkWell(
-                      onTap: () {
-                        // List<dynamic> imageUrls = profileinnerpageshow['result'][0]['media']
-                        //     .map((item) => item['filePath'])
-                        //     .toList();
-                        // int selectedIndex = index;
-                        // _showFullScreenImage(context, imageUrls, selectedIndex, profileinnerpageshow);
-                      },
-                      child: Stack(
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
-                            child: Container(
-                              width: 112,
-                              height: 200,
-                              child: Image.network(
-                                profileinnerpageshow['result'][0]['media'][index]['filePath'],
-                                fit: BoxFit.fill,
+
+
+                  return GestureDetector(
+                    onTap: () {
+                      List<dynamic> imageUrls = profileinnerpageshow['media'].map((item) => item['filePath']).toList();
+                      int selectedIndex = index; // This is the index of the tapped image
+                      _showFullScreenImage(context, imageUrls, selectedIndex,profileinnerpageshow);
+                    },
+
+                    child: Stack(
+                      children: [
+
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Container(
+                            width: 112,
+                            height: 300,
+                            child: profileinnerpageshow['media'] != null &&
+                                profileinnerpageshow['media'][index] != null &&
+                                profileinnerpageshow['media'][index]['filePath'] != null
+                                ? Image.network(
+                              profileinnerpageshow['media'][index]['filePath'],
+                              fit: BoxFit.fill,
+                            )
+                                : Image.network('https://pbs.twimg.com/media/CidJXBuUUAEgAYu.jpg')
+                          ),
+                        ),
+
+                        Positioned(
+                          top: 78,
+                          left: 30,
+                          child: Column(
+                            children: [
+                              SvgPicture.asset(
+                                "assets/svg/heart.svg",
+                                height: 18,
                               ),
-                            ),
+                              Text(
+                                profileinnerpageshow['media'][index]['likeCount'].toString(),
+                                style: TextStyle(fontSize: 10, color: Colors.white),
+                              )
+                            ],
                           ),
-                          Positioned(
-                            top: 85,
-                            left: 30,
-                            child: Column(
-                              children: [
-                                SvgPicture.asset(
-                                  "assets/svg/heart.svg",
-                                  height: 18,
-                                ),
-                                Text(
-                                  '0',
-                                  style: TextStyle(fontSize: 10, color: Colors.white),
-                                )
-                              ],
-                            ),
+                        ),
+                        Positioned(
+                          top: 78,
+                          right: 30,
+                          child: Column(
+                            children: [
+                              SvgPicture.asset(
+                                "assets/svg/coment2.svg",
+                                height: 18,
+                              ),
+                              Text(
+                                '200',
+                                style: TextStyle(fontSize: 10, color: Colors.white),
+                              )
+                            ],
                           ),
-                          Positioned(
-                            top: 85,
-                            right: 30,
-                            child: Column(
-                              children: [
-                                SvgPicture.asset(
-                                  "assets/svg/coment2.svg",
-                                  height: 18,
-                                ),
-                                Text(
-                                  "200",
-                                  style: TextStyle(fontSize: 10, color: Colors.white),
-                                )
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  } else {
-                    return SizedBox(); // Return an empty SizedBox if data is not available
-                  }
+                        ),
+                      ],
+                    ),
+                  );
                 },
               )
+                  : Center(
+                // Show a placeholder or message when there is no data
+                child: Text("No data available",style: TextStyle(color: textblack),),
+              ),
 
               ),
                   vediotab()
@@ -615,7 +631,7 @@ void _showFullScreenImage(BuildContext context, List<dynamic> imageUrls, int ini
                   return GestureDetector(
                     // Handle double tap here
                     child: Container(
-                      height: 610,
+
                       child: Column(
                         children: [
                           Stack(
@@ -629,7 +645,7 @@ void _showFullScreenImage(BuildContext context, List<dynamic> imageUrls, int ini
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          profileinnerpageshow['result'][index]['firstName'],
+                                          profileinnerpageshow['media'][index]['firstName'],
                                           style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
                                         ),
                                         // Text(
@@ -659,7 +675,7 @@ void _showFullScreenImage(BuildContext context, List<dynamic> imageUrls, int ini
                                   // );
                                 },
                                 child: Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                                  padding: EdgeInsets.symmetric(horizontal: 10),
                                   child: Stack(
                                     children: [
                                       Container(
@@ -671,17 +687,16 @@ void _showFullScreenImage(BuildContext context, List<dynamic> imageUrls, int ini
                                         ),
                                         child: ClipRRect(
                                           borderRadius: BorderRadius.all(Radius.circular(100)),
-                                          child: profileinnerpageshow['result'][index]['profilePic'] != null
+                                          child: profileinnerpageshow['media'][index]['profilePic'] != null
                                               ? Image.network(
-                                            profileinnerpageshow['result'][index]['profilePic'],
+                                            profileinnerpageshow['media'][index]['profilePic'],
                                             height: 51,
                                             fit: BoxFit.cover,
                                           )
                                               : Container(
-                                            // Placeholder or alternative content when profilePic is null
                                             width: 51,
                                             height: 51,
-                                            color: Colors.grey, // Example placeholder color
+                                            color: Colors.grey, // Placeholder color or provide a custom placeholder widget
                                           ),
                                         ),
 
@@ -698,14 +713,23 @@ void _showFullScreenImage(BuildContext context, List<dynamic> imageUrls, int ini
                             ],
                           ),
                           SizedBox(height: 10),
+
                           Container(
                             decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(0))),
-                            child: Image.network(
+                            child: imageUrls[index] != null
+                                ? Image.network(
                               imageUrls[index],
-                              fit: BoxFit.cover,
-                              height: 500,
+                              fit: BoxFit.scaleDown,
+                            )
+                                : Container(
+                              color: Colors.grey, // Placeholder container color
+                              child: Center(
+                                child: Image.network('https://pbs.twimg.com/media/CidJXBuUUAEgAYu.jpg')
+                              ),
                             ),
                           ),
+
+
                           Padding(
                             padding: const EdgeInsets.only(right: 23, top: 10, left: 15),
                             child: Row(
@@ -721,14 +745,14 @@ void _showFullScreenImage(BuildContext context, List<dynamic> imageUrls, int ini
                                 SizedBox(width: 10),
                                 Text("Likes", style: TextStyle(color: Colors.blue, fontSize: 10)),
                                 SizedBox(width: 2),
-                                // Text(
-                                //   profileinnerpageshow['result'][index]['likeCount'].toString(), // Convert int to String
-                                //   style: TextStyle(
-                                //     color: Colors.blue,
-                                //     fontSize: 13,
-                                //     fontWeight: FontWeight.w700,
-                                //   ),
-                                // ),
+                                Text(
+                                  profileinnerpageshow['media'][index]['likeCount'].toString(), // Convert int to String
+                                  style: TextStyle(
+                                    color: Colors.blue,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
                                 SizedBox(width: 2),
                                 Expanded(child: SizedBox()),
                                 SvgPicture.asset(
@@ -791,3 +815,6 @@ void _showFullScreenImage(BuildContext context, List<dynamic> imageUrls, int ini
     },
   );
 }
+
+
+

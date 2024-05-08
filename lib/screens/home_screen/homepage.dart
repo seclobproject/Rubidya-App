@@ -3,20 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:rubidya/resources/color.dart';
-import 'package:rubidya/screens/home_screen/widgets/home_feed.dart';
+import 'package:rubidya/screens/home_screen/widgets/comment_home.dart';
 import 'package:rubidya/screens/home_screen/widgets/home_follow.dart';
 import 'package:rubidya/screens/home_screen/widgets/home_story.dart';
-import 'package:rubidya/screens/home_screen/widgets/referral_page.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:favorite_button/favorite_button.dart';
 import '../../commonpage/test.dart';
-import '../../networking/constant.dart';
 import '../../services/home_service.dart';
 import '../../services/profile_service.dart';
 import '../../support/logger.dart';
-import 'package:youtube_player_flutter/youtube_player_flutter.dart';
-
 import '../profile_screen/inner_page/profile_inner_page.dart';
 
 class homepage extends StatefulWidget {
@@ -27,176 +21,22 @@ class homepage extends StatefulWidget {
 }
 
 class _homepageState extends State<homepage> {
-  bool isFavorite = false;
-  var userid;
-  var profiledetails;
-  var profilelist;
-  var suggestfollow;
-  bool isLoading = false;
-  bool _isLoading = true;
-  late List<Map<String, dynamic>> Homefeed = [];
   var userId;
   var profileDetails;
   var homeList;
+  bool isLoading = false;
+  bool _isLoading = true;
   bool isExpanded = false;
-  bool isFollowing = false;
   int _pageNumber = 1;
-  late SharedPreferences prefs;
-  bool _hasMore = true;
-  bool _isLoadingMore = false;
-  late List<Map<String, dynamic>> suggestFollow = [];
+  ScrollController _scrollController = ScrollController();
 
-
-
-
-  void toggleFollow() {
-    setState(() {
-      if (isFollowing) {
-        isFollowing = false;
-        print("follow");
-      } else {
-        isFollowing = true;
-        print("unfollow");
-      }
-    });
-  }
-
-  Future _profileapi() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    userid = prefs.getString('userid');
-    var response = await ProfileService.getProfileimage();
-    log.i('profile data Show.. $response');
-    setState(() {
-      profilelist = response; // This line is causing the error
-    });
-  }
-
-  Future _profiledetailsapi() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    userid = prefs.getString('userid');
-    print(userid);
-    var response = await ProfileService.getProfile();
-    log.i('profile details show.. $response');
-    setState(() {
-      profiledetails = response;
-    });
-  }
-
-  // Future _homefeed() async {
-  //   SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   userid = prefs.getString('userid');
-  //   var response = await HomeService.getFeed();
-  //   log.i('homefeed data Show.. $response');
-  //   setState(() {
-  //     profilelist = response; // This line is causing the error
-  //   });
-  // }
-
-  Future _suggestfollowlist() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    userid = prefs.getString('userid');
-    print(userid);
-    var response = await HomeService.usersuggetionlistfollow();
-    log.i('refferal details show.. $response');
-    setState(() {
-      suggestfollow = response;
-    });
-  }
-
-  // Future<void> _homeFeedList() async {
-  //   var response = await HomeService.getFeed(page: _pageNumber);
-  //   log.i('Following list details show.. $response');
-  //   setState(() {
-  //     Homefeed.addAll(List<Map<String, dynamic>>.from(response['posts']));
-  //     _isLoading = false; // Set loading state to false once data is loaded
-  //   });
-  // }
-
-
-  // Future<void> _homeFeed() async {
-  //   SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   userId = prefs.getString('userId');
-  //   var response = await HomeService.getFeed();
-  //   log.i('Home feed data: $response');
-  //   setState(() {
-  //     homeList = response;
-  //   });
-  // }
-  Future<void> _initLoad() async {
-    prefs = await SharedPreferences.getInstance();
-    await _homeFeed();
-    await _profiledetailsapi();
-    await _profileapi();
-    await _suggestfollowlist();
-    await _homeFeed();
-  }
-
-
-  Future<void> _loadMoreData() async {
-    if (_isLoadingMore || !_hasMore) return;
-
-    setState(() {
-      _isLoadingMore = true;
-    });
-
-    try {
-      final response = await HomeService.getFeed(page: _pageNumber + 1);
-      final List<Map<String, dynamic>> newFollowingList = List<Map<String, dynamic>>.from(response['posts']);
-      setState(() {
-        _pageNumber++;
-        _isLoadingMore = false;
-        Homefeed.addAll(newFollowingList);
-
-        if (newFollowingList.isEmpty) {
-          _hasMore = false;
-        }
-      });
-    } catch (e) {
-      // Handle error
-      setState(() {
-        _isLoadingMore = false;
-      });
-    }
-  }
-
-  // Future _initLoad() async {
-  //   await Future.wait([
-  //     _profiledetailsapi(),
-  //     _profileapi(),
-  //     _suggestfollowlist(),
-  //     _homefeed()
-  //
-  //   ]);
-  //   _isLoading = false;
-  // }
 
   @override
   void initState() {
     _initLoad();
-    _homeFeed();
     _scrollController.addListener(_scrollListener);
     super.initState();
   }
-
-  Future<void> _refresh() async {
-    await _profiledetailsapi();
-    await _profileapi();
-    await _homeFeed();
-    await _suggestFollowList();
-    setState(() {
-      _isLoading = false;
-    });
-  }
-
-
-  ScrollController _scrollController = ScrollController();
-
-  // @override
-  // void initState() {
-  //   _initLoad();
-  //   _scrollController.addListener(_scrollListener);
-  //   super.initState();
-  // }
 
   @override
   void dispose() {
@@ -210,15 +50,6 @@ class _homepageState extends State<homepage> {
       _loadMore();
     }
   }
-
-  Future<void> _suggestFollowList() async {
-    var response = await HomeService.usersuggetionlistfollow();
-    log.i('refferal details show.. $response');
-    setState(() {
-      suggestFollow = List<Map<String, dynamic>>.from(response['result']);
-    });
-  }
-
 
   Future<void> _homeFeed({int page = 1}) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -235,12 +66,13 @@ class _homepageState extends State<homepage> {
   }
 
 
-  // Future<void> _initLoad() async {
-  //   await _homeFeed();
-  //   setState(() {
-  //     _isLoading = false;
-  //   });
-  // }
+
+  Future<void> _initLoad() async {
+    await _homeFeed();
+    setState(() {
+      _isLoading = false;
+    });
+  }
 
   Future<void> _loadMore() async {
     setState(() {
@@ -287,8 +119,14 @@ class _homepageState extends State<homepage> {
     log.i('Add to Like: $response');
   }
 
+  Future<void> _refresh() async {
+    setState(() {
+      _pageNumber = 1;
+      homeList = null; // Clear existing data
+    });
+    await _homeFeed(page: 1);
 
-
+  }
 
 
   @override
@@ -320,7 +158,7 @@ class _homepageState extends State<homepage> {
                       onTap: () {
                         // Navigator.push(
                         //   context,
-                        //   MaterialPageRoute(builder: (context) => Homepages()),
+                        //   MaterialPageRoute(builder: (context) => InstagramProfile()),
                         // );
                       },
                       child: SvgPicture.asset(
@@ -328,9 +166,16 @@ class _homepageState extends State<homepage> {
                       ),
                     ),
                     SizedBox(width: 20),
-                    SvgPicture.asset(
-                      "assets/svg/notification.svg",
-                    ),
+                    // SvgPicture.asset(
+                    //   "assets/svg/notification.svg",
+                    // ),
+
+                    IconButton(
+                        onPressed: () {},
+                        icon: Badge(
+                            textColor: Colors.white,
+                            label: Text("5"),
+                            child: Icon(Icons.notifications,color: buttoncolor,))),
                   ],
                 ),
               ),
@@ -364,12 +209,11 @@ class _homepageState extends State<homepage> {
                   "New People",
                   style: TextStyle(
                     fontWeight: FontWeight.w500,
-                    color: Colors.blue, // Assuming bluetext is defined
+                    color: buttoncolor, // Assuming bluetext is defined
                   ),
                 ),
               ),
               SizedBox(height: 15),
-
 
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -385,24 +229,27 @@ class _homepageState extends State<homepage> {
                 itemBuilder: (BuildContext context, int index) {
                   return Column(
                     children: [
-                      ProductCard(
-                        createdTime: _calculateTimeDifference(homeList['posts'][index]['createdAt']),
-                        name: homeList['posts'][index]['username'] ?? '',
-                        description: homeList['posts'][index]['description'] ?? '',
-                        likes: homeList['posts'][index]['likeCount']?.toString() ?? '',
-                        img: homeList['posts'][index]['filePath'] ?? '',
-                        profilepic: homeList['posts'][index]['filePath'] ?? '',
-                        likedby: homeList['posts'][index]['lastLikedUserName'] ?? '',
-                        id: homeList['posts'][index]['_id'] ?? '',
-                        userId: homeList['posts'][index]['userId'] ?? '',
-                        likeCount: homeList['posts'][index]['isLiked'] ?? false,
-                        onLikePressed: () {
-                          _toggleLikePost(homeList['posts'][index]['_id']);
-                        },
-                        onDoubleTapLike: () {
-                          _toggleLikePost(homeList['posts'][index]['_id']);
-                        },
-                      ),
+                      if (homeList['posts'] != null && index < homeList['posts'].length)
+                        ProductCard(
+                          createdTime: _calculateTimeDifference(homeList['posts'][index]['createdAt']),
+                          name: homeList['posts'][index]['username'] ?? '',
+                          description: homeList['posts'][index]['description'] ?? '', // Handle nested comments safely
+                          likes: homeList['posts'][index]['likeCount']?.toString() ?? '',
+                          img: homeList['posts'][index]['filePath'] ?? '',
+                          profilepic: homeList['posts'][index]['profilePic'] ?? '',
+                          likedby: homeList['posts'][index]['lastLikedUserName'] ?? '',
+                          commentby: homeList['posts'][index]['lastCommentedUser'] ?? '',
+                          commentcount: homeList['posts'][index]['commentCount'].toString() ?? '',
+                          id: homeList['posts'][index]['_id'] ?? '',
+                          userId: homeList['posts'][index]['userId'] ?? '',
+                          likeCount: homeList['posts'][index]['isLiked'] ?? false,
+                          onLikePressed: () {
+                            _toggleLikePost(homeList['posts'][index]['_id']);
+                          },
+                          onDoubleTapLike: () {
+                            _toggleLikePost(homeList['posts'][index]['_id']);
+                          },
+                        ),
                       if (isLoading && index == homeList['posts'].length - 1)
                         Padding(
                           padding: const EdgeInsets.all(8.0),
@@ -410,6 +257,7 @@ class _homepageState extends State<homepage> {
                         ),
                     ],
                   );
+
                 },
               ),
             ],
@@ -434,6 +282,8 @@ class ProductCard extends StatefulWidget {
     required this.userId,
     required this.likeCount,
     required this.likedby,
+    required this.commentcount,
+    required this.commentby,
     required this.description,
     required this.onLikePressed,
     required this.onDoubleTapLike,
@@ -445,7 +295,9 @@ class ProductCard extends StatefulWidget {
   final String id;
   final String userId;
   final String likedby;
+  final String commentby;
   final String likes;
+  final String commentcount;
   final String profilepic;
   final String description;
   final bool likeCount;
@@ -453,12 +305,15 @@ class ProductCard extends StatefulWidget {
   final VoidCallback onLikePressed;
   final VoidCallback onDoubleTapLike;
 
+
   @override
   _ProductCardState createState() => _ProductCardState();
 }
 
 class _ProductCardState extends State<ProductCard> {
+
   bool isExpanded = false;
+
 
   @override
   Widget build(BuildContext context) {
@@ -473,18 +328,30 @@ class _ProductCardState extends State<ProductCard> {
                 child: Row(
                   children: [
                     SizedBox(width: 60),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          widget.name,
-                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
-                        ),
-                        Text(
-                          widget.createdTime,
-                          style: TextStyle(fontSize: 11, color: Colors.grey),
-                        ),
-                      ],
+                    InkWell(
+                      onTap: (){
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => profileinnerpage(
+                              id: widget.userId,
+                            ),
+                          ),
+                        );
+                      },
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.name,
+                            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                          ),
+                          Text(
+                            widget.createdTime,
+                            style: TextStyle(fontSize: 11, color: Colors.grey),
+                          ),
+                        ],
+                      ),
                     ),
                     Expanded(child: SizedBox()),
                     Padding(
@@ -519,13 +386,21 @@ class _ProductCardState extends State<ProductCard> {
                         ),
                         child: ClipRRect(
                           borderRadius: BorderRadius.all(Radius.circular(100)),
-                          child: Image.network(
+                          child: widget.profilepic != null && widget.profilepic.isNotEmpty
+                              ? Image.network(
                             widget.profilepic,
                             height: 51,
+                            width: 51,
                             fit: BoxFit.cover,
-                          ),
+                            errorBuilder: (context, error, stackTrace) {
+                              return Text('Failed to load image');
+                            },
+                          )
+                              : Image.network('https://play-lh.googleusercontent.com/4HZhLFCcIjgfbXoVj3mgZdQoKO2A_z-uX2gheF5yNCkb71wzGqwobr9muj8I05Nc8u8'),
                         ),
+
                       ),
+
                       Positioned(
                         top: 28,
                         left: 28,
@@ -557,24 +432,43 @@ class _ProductCardState extends State<ProductCard> {
               children: [
                 Row(
                   children: [
-                    FavoriteButton(
-                      iconSize: 40,
-                      isFavorite: widget.likeCount,
-                      iconDisabledColor: Colors.black26,
-                      valueChanged: (_) {
-                        widget.onLikePressed(); // Call the callback function when like button is pressed
-                      },
+                    IconButton(
+                      onPressed: widget.onLikePressed,
+                      icon: Icon(
+                        widget.likeCount ? Icons.favorite : Icons.favorite_border,
+                        color: widget.likeCount ? Colors.red : Colors.black26,
+                        size: 40.0,
+                      ),
                     ),
+
                     SizedBox(width: 20),
 
-                    SvgPicture.asset(
-                      "assets/svg/comment.svg",
-                      height: 20,
+                    InkWell(
+                      onTap: () {
+                        showModalBottomSheet<void>(
+                          backgroundColor: white,
+                          context: context,
+                          isScrollControlled: true,
+                          builder: (BuildContext context) {
+                            late Map<String, dynamic>? homeList;
+                            return Padding(
+                              padding: const EdgeInsets.all(20.0).copyWith(
+                                  bottom: MediaQuery.of(context).viewInsets.bottom
+                              ),
+                              child: Commentbottomsheet(id:widget.id),
+                            );
+                          },
+                        );
+                      },
+                      child: SvgPicture.asset(
+                        "assets/svg/comment.svg",
+                        height: 25,
+                      ),
                     ),
                     SizedBox(width: 20),
                     SvgPicture.asset(
                       "assets/svg/save.svg",
-                      height: 20,
+                      height: 25,
                     ),
                     SizedBox(width: 20),
 
@@ -582,7 +476,7 @@ class _ProductCardState extends State<ProductCard> {
 
                     SvgPicture.asset(
                       "assets/svg/share.svg",
-                      height: 20,
+                      height: 25,
                     ),
                   ],
                 ),
@@ -628,7 +522,59 @@ class _ProductCardState extends State<ProductCard> {
                             fontSize: 13,
                             fontWeight: FontWeight.w700)),
                     SizedBox(width: 2),
+
                   ],
+                ),
+
+
+
+                InkWell(
+                  onTap: (){
+                    showModalBottomSheet<void>(
+                      backgroundColor: white,
+                      context: context,
+                      isScrollControlled: true,
+                      builder: (BuildContext context) {
+                        late Map<String, dynamic>? homeList;
+                        return Padding(
+                          padding: const EdgeInsets.all(20.0).copyWith(
+                              bottom: MediaQuery.of(context).viewInsets.bottom
+                          ),
+                          child: Commentbottomsheet(id:widget.id),
+                        );
+                      },
+                    );
+                  },
+                  child: Row(
+                    children: [
+                      RichText(
+                        text: TextSpan(
+                          style: TextStyle(
+                            color: bluetext,
+                            fontSize: 12,
+                          ),
+                          children: [
+                            TextSpan(
+                              text: "View All",
+                              style: TextStyle(
+
+                              ),
+                            ),
+
+
+                          ],
+                        ),
+                      ),
+
+                      SizedBox(width: 2),
+                      Text( "${widget.commentcount} Comments ",
+                          style: TextStyle(
+                              color: bluetext,
+                              fontSize: 13,)),
+
+
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -668,10 +614,11 @@ class _ProductCardState extends State<ProductCard> {
               ),
             ),
 
-
           SizedBox(height: 15,)
         ],
       ),
     );
   }
 }
+
+

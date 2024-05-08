@@ -71,6 +71,41 @@ class HomeService {
   // }
 
 
+
+  static Future getfollowerinner(id) async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.get('$baseURL/api/users/get-followers-list/$id');
+      return response.data;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  static Future getfollowinginner(id) async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.get('$baseURL/api/users/get-following-list/$id');
+      return response.data;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+
+  // static Future<Map<String, dynamic>> getfollowinginner({int page = 1, int limit = 3,id}) async {
+  //   try {
+  //     var dio = await DioHelper.getInstance();
+  //     var response = await dio.get('$baseURL/api/posts/get-latest-posts/$id?page=$page&limit=$limit');
+  //     return response.data;
+  //   } catch (e) {
+  //     // Handle error appropriately, e.g., log the error or throw it further
+  //     throw e;
+  //   }
+  // }
+
+
+
   static Future<Map<String, dynamic>> followingList({int page = 1, int limit = 10}) async {
     try {
       var dio = await DioHelper.getInstance();
@@ -115,7 +150,7 @@ class HomeService {
   //   }
   // }
 
-  static Future<Map<String, dynamic>> getFeed({int page = 1, int limit = 5}) async {
+  static Future<Map<String, dynamic>> getFeed({int page = 1, int limit = 3}) async {
     try {
       var dio = await DioHelper.getInstance();
       var response = await dio.get('$baseURL/api/posts/get-latest-posts?page=$page&limit=$limit');
@@ -125,6 +160,7 @@ class HomeService {
       throw e;
     }
   }
+
 
 
   static Future like(data) async {
@@ -138,7 +174,37 @@ class HomeService {
   }
 
 
+  static Future comment(id) async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.get('$baseURL/api/posts/get-comment-details/$id');
+      return response.data;
+    } catch (e) {
+      rethrow;
+    }
+  }
 
+
+  static Future postcomment(data) async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.post('$baseURL/api/posts/post-comment',data: data);
+      return response.data;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+
+  static Future deletemycomment(id) async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.delete('$baseURL/api/posts/delete-comment/$id');
+      return response.data;
+    } catch (e) {
+      rethrow;
+    }
+  }
 
 
 
