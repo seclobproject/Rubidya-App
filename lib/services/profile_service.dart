@@ -134,7 +134,19 @@ class ProfileService {
   }
 
 
-  static Future onvertinr(data) async {
+  static Future withdraw(data) async {
+    var dio = await DioHelper.getInstance();
+    var response = await dio.post('$baseURL/api/wallet/withdraw',data:data);
+    return response.data;
+  }
+
+  static Future sendmoney(data) async {
+    var dio = await DioHelper.getInstance();
+    var response = await dio.post('$baseURL/api/wallet/pay-to-rubideum',data:data);
+    return response.data;
+  }
+
+  static Future convertinr(data) async {
     var dio = await DioHelper.getInstance();
     var response = await dio.post('$baseURL/api/users/convert-inr',data:data);
     return response.data;

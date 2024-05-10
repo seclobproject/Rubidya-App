@@ -1,14 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:rubidya/screens/profile_screen/widget/success_page.dart';
-import 'package:rubidya/screens/profile_screen/widget/wallet.dart';
-import '../../../navigation/bottom_navigation.dart';
-import '../../../resources/color.dart';
+import 'package:rubidya/screens/profile_screen/widget/rubidium_widget/success_page.dart';
+import 'package:rubidya/screens/profile_screen/widget/rubidium_widget/wallet.dart';
+import '../../../../navigation/bottom_navigation.dart';
+import '../../../../resources/color.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../services/profile_service.dart';
-import '../../../support/logger.dart';
+import '../../../../services/profile_service.dart';
+import '../../../../support/logger.dart';
 import 'package:easy_debounce/easy_debounce.dart';
 
 class premiuminnerpage extends StatefulWidget {
@@ -181,7 +181,7 @@ class _premiuminnerpageState extends State<premiuminnerpage> {
         'amount': packageamount,
       };
 
-      var response = await ProfileService.onvertinr(reqData);
+      var response = await ProfileService.convertinr(reqData);
       log.i('Done deducting.... . $response');
 
       if (response['sts'] == '01') {
@@ -231,9 +231,6 @@ class _premiuminnerpageState extends State<premiuminnerpage> {
     await Future.wait(
       [
         convertinr(),
-
-
-
       ],
     );
     isLoading = false;

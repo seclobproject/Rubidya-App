@@ -6,6 +6,8 @@ import '../../../support/logger.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
+import '../../profile_screen/inner_page/profile_inner_page.dart';
+
 class Commentbottomsheet extends StatefulWidget {
   final String id;
   const Commentbottomsheet({super.key,required this.id});
@@ -147,70 +149,82 @@ class _commentState extends State<Commentbottomsheet> {
             ),
           ),
           SizedBox(height: 16),
-        Expanded(
-          child: commentlist != null &&
-              commentlist['results'] != null &&
-              (commentlist['results'] as List).isNotEmpty
-              ? ListView.builder(
-            itemCount: commentlist['results'].length,
-            itemBuilder: (context, index) {
-              bool isMyComment = commentlist['results'][index]['isMyComment'] ?? false;
-              String profilePicUrl = commentlist['results'][index]['profilePic'] ?? '';
+          Expanded(
+            child: commentlist != null &&
+                commentlist['results'] != null &&
+                (commentlist['results'] as List).isNotEmpty
+                ? ListView.builder(
+              itemCount: commentlist['results'].length,
+              itemBuilder: (context, index) {
+                bool isMyComment = commentlist['results'][index]['isMyComment'] ?? false;
+                String profilePicUrl = commentlist['results'][index]['profilePic'] ?? '';
 
-              // Check if profilePicUrl is a valid URL
-              bool isValidUrl = Uri.tryParse(profilePicUrl)?.isAbsolute ?? false;
+                // Check if profilePicUrl is a valid URL
+                bool isValidUrl = Uri.tryParse(profilePicUrl)?.isAbsolute ?? false;
 
-              return ListTile(
-                  leading: isValidUrl
-                      ? CircleAvatar(
-                    backgroundImage: NetworkImage(profilePicUrl),
-                    radius: 30, // Adjust the radius as needed
-                  )
-                      : Text(""),
-                title: Text(
-                  commentlist['results'][index]['firstName'] ?? '',
-                ),
-                subtitle: Text(
-                  commentlist['results'][index]['comment'] ?? '',
-                ),
-                trailing: isMyComment
-                    ? GestureDetector(
-                  onTap: () {
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          title: Text('Delete Comment?'),
-                          content: Text('Delete this comment?'),
-                          actions: <Widget>[
-                            TextButton(
-                              onPressed: () {
-                                _DeleteMycomment(); // Assuming this method exists
-                                Navigator.pop(context);
-                              },
-                              child: Text('Delete'),
-                            ),
-                          ],
-                        );
-                      },
+                return InkWell(
+                  onTap: (){
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => profileinnerpage(
+                          id: commentlist['results'][0]['userId'],
+                        ),
+                      ),
                     );
                   },
-                  child: Container(
-                    height: 50,
-                      child: Icon(Icons.delete, size: 20, color: buttoncolor)),
-                )
-                    : null,
-              );
-            },
-          )
-              : Center(
-            child: Text(""),
+                  child: ListTile(
+                    leading: isValidUrl
+                        ? CircleAvatar(
+                      backgroundImage: NetworkImage(profilePicUrl),
+                      radius: 30, // Adjust the radius as needed
+                    )
+                        : Text(""),
+                    title: Text(
+                      commentlist['results'][index]['firstName'] ?? '',
+                    ),
+                    subtitle: Text(
+                      commentlist['results'][index]['comment'] ?? '',
+                    ),
+                    trailing: isMyComment
+                        ? GestureDetector(
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: Text('Delete Comment?'),
+                              content: Text('Delete this comment?'),
+                              actions: <Widget>[
+                                TextButton(
+                                  onPressed: () {
+                                    _DeleteMycomment(); // Assuming this method exists
+                                    Navigator.pop(context);
+                                  },
+                                  child: Text('Delete'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                      child: Container(
+                          height: 50,
+                          child: Icon(Icons.delete, size: 15, color: buttoncolor)),
+                    )
+                        : null,
+                  ),
+                );
+              },
+            )
+                : Center(
+              child: Text(""),
+            ),
           ),
-        ),
 
 
 
-        SizedBox(height: 16),
+          SizedBox(height: 16),
           _isLoading
               ? Center(
             child: CircularProgressIndicator(),

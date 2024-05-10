@@ -388,8 +388,8 @@ import 'package:rubidya/screens/profile_screen/tab_profile/vedio_tab.dart';
 import 'package:rubidya/screens/profile_screen/widget/edit_profile.dart';
 import 'package:rubidya/screens/profile_screen/widget/followers_list.dart';
 import 'package:rubidya/screens/profile_screen/widget/following_list.dart';
-import 'package:rubidya/screens/profile_screen/widget/my_wallet.dart';
-import 'package:rubidya/screens/profile_screen/widget/verification_page.dart';
+import 'package:rubidya/screens/profile_screen/widget/rubidium_widget/my_wallet.dart';
+import 'package:rubidya/screens/profile_screen/widget/rubidium_widget/verification_page.dart';
 import '../../resources/color.dart';
 import '../home_screen/widgets/referral_page.dart';
 
@@ -1017,39 +1017,62 @@ class _ProfileViewState extends State<ProfileView> {
 
 
 
-                  profiledetails?['user']['isVerified'] == true
-                      ? InkWell(
-                    onTap: () {
-                      // Navigator.of(context).push(
-                      //     MaterialPageRoute(
-                      //         builder: (context) =>
-                      //             wallet()));
-                      Navigator.of(context).push(
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  MyWallet()));
-                    },
-                    child: Container(
-                      height: 31,
-                      width: 110,
-                      decoration: BoxDecoration(
-                          color: blueshade,
-                          borderRadius: BorderRadius.all(
-                              Radius.circular(10))),
-                      child: Center(
-                          child: Text(
-                            "Wallet",
-                            style: TextStyle(
-                                color: white, fontSize: 12),
-                          )),
-                    ),
-                  )
-                      : InkWell(
-                    onTap: () {
-                      Navigator.of(context).push(
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  Verification()));
+                  // profiledetails?['user']['isVerified'] == true
+                  //     ? InkWell(
+                  //   onTap: () {
+                  //     // Navigator.of(context).push(
+                  //     //     MaterialPageRoute(
+                  //     //         builder: (context) =>
+                  //     //             wallet()));
+                  //     Navigator.of(context).push(
+                  //         MaterialPageRoute(
+                  //             builder: (context) =>
+                  //                 MyWallet()));
+                  //   },
+                  //   child: Container(
+                  //     height: 31,
+                  //     width: 110,
+                  //     decoration: BoxDecoration(
+                  //         color: blueshade,
+                  //         borderRadius: BorderRadius.all(
+                  //             Radius.circular(10))),
+                  //     child: Center(
+                  //         child: Text(
+                  //           "Wallet",
+                  //           style: TextStyle(
+                  //               color: white, fontSize: 12),
+                  //         )),
+                  //   ),
+                  // )
+                  //     : InkWell(
+                  //   onTap: () {
+                  //     Navigator.of(context).push(
+                  //         MaterialPageRoute(
+                  //             builder: (context) =>
+                  //                 Verification()));
+                  //   },
+                  //   child: Container(
+                  //     height: 31,
+                  //     width: 110,
+                  //     decoration: BoxDecoration(
+                  //         color: blueshade,
+                  //         borderRadius: BorderRadius.all(
+                  //             Radius.circular(10))),
+                  //     child: Center(
+                  //         child: Text(
+                  //           "Wallet",
+                  //           style: TextStyle(
+                  //               color: white, fontSize: 12),
+                  //         )),
+                  //   ),
+                  // ),
+
+                  InkWell(
+                    onTap: (){
+                          Navigator.of(context).push(
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      MyWallet()));
                     },
                     child: Container(
                       height: 31,
@@ -1066,6 +1089,8 @@ class _ProfileViewState extends State<ProfileView> {
                           )),
                     ),
                   ),
+
+
 
                 ],
               ),

@@ -2,12 +2,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:rubidya/resources/color.dart';
-import 'package:rubidya/screens/profile_screen/widget/premium_inner_page.dart';
+import 'package:rubidya/screens/profile_screen/widget/rubidium_widget/premium_inner_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import '../../../navigation/bottom_navigation.dart';
-import '../../../services/profile_service.dart';
-import '../../../support/logger.dart';
+import '../../../../navigation/bottom_navigation.dart';
+import '../../../../services/profile_service.dart';
+import '../../../../support/logger.dart';
 
 class premiumpage extends StatefulWidget {
   const premiumpage({super.key});

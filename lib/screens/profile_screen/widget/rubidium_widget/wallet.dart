@@ -2,12 +2,12 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import '../../../../resources/color.dart';
+import '../../../../../resources/color.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
-import '../../../../services/wallet_service.dart';
-import '../../../../support/logger.dart';
-import '../../../services/profile_service.dart';
+import '../../../../../services/wallet_service.dart';
+import '../../../../../support/logger.dart';
+import '../../../../services/profile_service.dart';
 
 class wallet extends StatefulWidget {
   const wallet({super.key});

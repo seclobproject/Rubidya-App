@@ -569,8 +569,8 @@ class _ProductCardState extends State<ProductCard> {
                       SizedBox(width: 2),
                       Text( "${widget.commentcount} Comments ",
                           style: TextStyle(
-                              color: bluetext,
-                              fontSize: 13,)),
+                            color: bluetext,
+                            fontSize: 13,)),
 
 
                     ],
@@ -620,5 +620,3 @@ class _ProductCardState extends State<ProductCard> {
     );
   }
 }
-
-

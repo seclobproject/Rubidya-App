@@ -2,15 +2,17 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:rubidya/screens/profile_screen/widget/rubidya_exchange.dart';
-import 'package:rubidya/screens/profile_screen/widget/rubidya_premium.dart';
-import 'package:rubidya/screens/profile_screen/widget/wallet.dart';
-import '../../../navigation/bottom_navigation.dart';
-import '../../../resources/color.dart'; // Assuming this is your custom color file
+import 'package:rubidya/screens/profile_screen/widget/rubidium_widget/rubidya_exchange.dart';
+import 'package:rubidya/screens/profile_screen/widget/rubidium_widget/rubidya_premium.dart';
+import 'package:rubidya/screens/profile_screen/widget/rubidium_widget/verification_page.dart';
+import 'package:rubidya/screens/profile_screen/widget/rubidium_widget/wallet.dart';
+import 'package:rubidya/screens/profile_screen/widget/rubidium_widget/withdrawal_page.dart';
+import '../../../../navigation/bottom_navigation.dart';
+import '../../../../resources/color.dart'; // Assuming this is your custom color file
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../services/profile_service.dart';
-import '../../../support/logger.dart';
+import '../../../../services/profile_service.dart';
+import '../../../../support/logger.dart';
 
 class MyWallet extends StatefulWidget {
   const MyWallet({Key? key}) : super(key: key);
@@ -27,18 +29,16 @@ class _MyWalletState extends State<MyWallet> {
   var userid;
   bool _isLoading = true;
   var profiledata;
+  var profiledetails;
 
 
-
-
-
-  Future _profiledetails() async {
+  Future _profiledetailsapi() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     userid = prefs.getString('userid');
     var response = await ProfileService.getProfile();
-    log.i('profile Details show...... $response');
+    log.i('profile details show.. $response');
     setState(() {
-      profiledata = response;
+      profiledetails = response;
     });
   }
 
@@ -58,7 +58,7 @@ class _MyWalletState extends State<MyWallet> {
     await Future.wait(
       [
         _profilestatussapi(),
-        _profiledetails(),
+        _profiledetailsapi(),
 
       ],
     );
@@ -101,6 +101,8 @@ class _MyWalletState extends State<MyWallet> {
             :Column(
           // mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            profiledetails?['user']['isVerified'] == true
+                  ?
             InkWell(
               onTap: (){
                 Navigator.of(context).push(
@@ -135,7 +137,41 @@ class _MyWalletState extends State<MyWallet> {
                   ),
                 ),
               ),
-            ),
+            ):InkWell(
+                onTap: (){
+                  Navigator.of(context).push(
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              Verification()));
+                },
+                child: Align(
+                  alignment: Alignment.center,
+                  child: Container(
+                    height: 36,
+                    width: 130,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.white, width: 0.2),
+                      gradient: LinearGradient(
+                        colors: [gradnew, gradnew1],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                      ),
+                      borderRadius: BorderRadius.all(Radius.circular(10)),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text("Get wallet", style: TextStyle(fontSize: 10, color: Colors.white)),
+                        SizedBox(width: 10),
+                        SvgPicture.asset(
+                          "assets/svg/addmoney.svg",
+                          height: 12,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             SizedBox(height: 20),
             Align(
               alignment: Alignment.center,
@@ -163,11 +199,8 @@ class _MyWalletState extends State<MyWallet> {
                           child: Text("Available balance", style: TextStyle(fontSize: 12, color: Colors.white))),
                       SizedBox(height: 8),
         
-        
                       Row(
-        
                         children: [
-        
                           Image.asset(
                             "assets/logo/logowt.png",
                             height: 30,
@@ -176,7 +209,7 @@ class _MyWalletState extends State<MyWallet> {
                           Align(
                             alignment: Alignment.topLeft,
                             child: Text(
-                                profiledata?['user']?['walletAmount']?.toString() ?? 'Loading...',
+                              profiledetails?['user']?['walletAmount']?.toString() ?? 'Loading...',
                               style: TextStyle(fontSize: 36, color: Colors.white, fontWeight: FontWeight.w700),
                             ),
                           ),
@@ -199,11 +232,13 @@ class _MyWalletState extends State<MyWallet> {
                           ),
                         ],
                       ),
-        
-        
-        
+
+
+
                       if (isExpanded)
-        
+
+                        profiledetails?['user']['isVerified'] == true
+                          ?
                         Padding(
                           padding: const EdgeInsets.only(top: 30),
                           child: Row(
@@ -268,7 +303,74 @@ class _MyWalletState extends State<MyWallet> {
                               ),
                             ],
                           ),
+                        ):
+                      InkWell(
+                        onTap: (){
+                              Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          Verification()));
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 30),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                height: 36,
+                                width: 130,
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.white, width: 0.2),
+                                  gradient: LinearGradient(
+                                    colors: [gradnew, gradnew1],
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                  ),
+                                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text("Rubidya exchange", style: TextStyle(fontSize: 10, color: Colors.white)),
+                                    SizedBox(width: 10),
+                                    SvgPicture.asset(
+                                      "assets/svg/arrowtop.svg",
+                                      height: 12,
+                                    ),
+                                  ],
+                                ),
+                              ),
+
+                              SizedBox(width: 10,),
+
+                              Container(
+                                height: 36,
+                                width: 130,
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.white, width: 0.2),
+                                  gradient: LinearGradient(
+                                    colors: [gradnew, gradnew1],
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                  ),
+                                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text("Wallet connect", style: TextStyle(fontSize: 10, color: Colors.white)),
+                                    SizedBox(width: 10),
+                                    SvgPicture.asset(
+                                      "assets/svg/arrowtop.svg",
+                                      height: 12,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
+                      )
         
         
                     ],
@@ -846,10 +948,7 @@ class _MyWalletState extends State<MyWallet> {
 
             InkWell(
               onTap: (){
-                // Navigator.of(context).push(
-                //     MaterialPageRoute(
-                //         builder: (context) =>
-                //             premiumpage()));
+                Navigator.of(context).push(MaterialPageRoute(builder: (context) => withdrawalpage()));
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),

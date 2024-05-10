@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../../../navigation/bottom_navigation.dart';
-import '../../../resources/color.dart';
+import '../../../../navigation/bottom_navigation.dart';
+import '../../../../resources/color.dart';
 
 class successpage extends StatefulWidget {
   const successpage({super.key});

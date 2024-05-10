@@ -1,9 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../../resources/color.dart';
-import '../../../services/profile_service.dart';
-import '../../../support/logger.dart';
+import '../../../../resources/color.dart';
+import '../../../../services/profile_service.dart';
+import '../../../../support/logger.dart';
 import 'package:easy_debounce/easy_debounce.dart';
 
 import 'my_wallet.dart';
