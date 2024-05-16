@@ -184,6 +184,16 @@ class HomeService {
     }
   }
 
+  static Future commentreplay(id) async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.get('$baseURL/api/posts/get-reply-of-comment/$id');
+      return response.data;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
 
   static Future postcomment(data) async {
     try {

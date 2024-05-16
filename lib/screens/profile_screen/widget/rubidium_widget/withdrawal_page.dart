@@ -234,18 +234,14 @@ class _withdrawalpageState extends State<withdrawalpage> {
                           "assets/svg/arrowright.svg",
                           height: 12,
                         ),
-
                       ],
                     ),
                   )
               ),
             ),
           )
-
         ],
       ),
-
-
     );
   }
 }
