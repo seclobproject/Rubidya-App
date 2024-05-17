@@ -414,13 +414,33 @@ class _ProductCardState extends State<ProductCard> {
           ),
           SizedBox(height: 10),
           Container(
+            key: ValueKey(widget.img),
             decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(20))),
             child: Image.network(
               widget.img,
               fit: BoxFit.fill,
-              // height: 400,
+              headers: {'Cache-Control': 'no-cache'},
+              loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+                if (loadingProgress == null) {
+                  return child;
+                } else {
+                  return Center(
+                    child: CupertinoActivityIndicator(),
+                  );
+                }
+              },
+              errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
+                return Center(
+                  child: Text(
+                    'Failed to load image',
+                    style: TextStyle(color: Colors.red),
+                  ),
+                );
+              },
             ),
           ),
+
+
 
           SizedBox(height: 10,),
 
@@ -455,7 +475,7 @@ class _ProductCardState extends State<ProductCard> {
                               padding: const EdgeInsets.all(20.0).copyWith(
                                   bottom: MediaQuery.of(context).viewInsets.bottom
                               ),
-                              child: Commentbottomsheet(id:widget.id),
+                              child: CommentBottomSheet(id:widget.id),
                             );
                           },
                         );
@@ -540,7 +560,7 @@ class _ProductCardState extends State<ProductCard> {
                           padding: const EdgeInsets.all(20.0).copyWith(
                               bottom: MediaQuery.of(context).viewInsets.bottom
                           ),
-                          child: Commentbottomsheet(id:widget.id),
+                          child: CommentBottomSheet(id:widget.id),
                         );
                       },
                     );

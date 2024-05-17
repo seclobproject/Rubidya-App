@@ -4,26 +4,26 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../resources/color.dart';
 import '../../../services/home_service.dart';
 import '../../../support/logger.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import '../../profile_screen/inner_page/profile_inner_page.dart';
 
-class Commentbottomsheet extends StatefulWidget {
+class CommentBottomSheet extends StatefulWidget {
   final String id;
-  const Commentbottomsheet({super.key, required this.id});
+  const CommentBottomSheet({super.key, required this.id});
 
   @override
-  State<Commentbottomsheet> createState() => _CommentbottomsheetState();
+  State<CommentBottomSheet> createState() => _CommentBottomSheetState();
 }
 
-class _CommentbottomsheetState extends State<Commentbottomsheet> {
+class _CommentBottomSheetState extends State<CommentBottomSheet> {
   bool isExpanded = false;
   var userid;
-  var commentlist;
-  var commentreplaylist;
+  List<dynamic> commentList = [];
   String? comment;
+  String? replaycomment;
   bool _isLoading = false;
   bool showReplies = false;
+  List<bool> showRepliesList = [];
 
   Future<void> _addComment() async {
     if (comment?.isNotEmpty ?? false) {
@@ -36,8 +36,8 @@ class _CommentbottomsheetState extends State<Commentbottomsheet> {
       };
       try {
         var response = await HomeService.postcomment(reqData);
-        log.i('Add to Like: $response');
-        await _commentGet();
+        log.i('Add Comment: $response');
+        await _fetchComments();
         setState(() {
           comment = '';
           _isLoading = false;
@@ -50,7 +50,32 @@ class _CommentbottomsheetState extends State<Commentbottomsheet> {
     }
   }
 
-  Future<void> _DeleteMycomment(String commentId) async {
+  Future<void> _addreplayComment() async {
+    if (replaycomment?.isNotEmpty ?? false) {
+      setState(() {
+        _isLoading = true;
+      });
+      var reqData = {
+        'commentId': commentList[0]['commentId'],
+        'comment': replaycomment,
+      };
+      try {
+        var response = await HomeService.postreplaycomment(reqData);
+        log.i('Add Reply Comment: $response');
+        await _fetchComments();
+        setState(() {
+          replaycomment = '';
+          _isLoading = false;
+        });
+      } catch (e) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _deleteComment(String commentId) async {
     try {
       var response = await HomeService.deletemycomment(commentId);
       log.i('Delete Comment: $response');
@@ -63,7 +88,7 @@ class _CommentbottomsheetState extends State<Commentbottomsheet> {
         textColor: Colors.white,
         fontSize: 14.0,
       );
-      await _commentGet();
+      await _fetchComments();
     } catch (e) {
       log.e('Error deleting comment: $e');
       Fluttertoast.showToast(
@@ -78,38 +103,39 @@ class _CommentbottomsheetState extends State<Commentbottomsheet> {
     }
   }
 
-  Future<void> _commentGet() async {
+  Future<void> _fetchComments() async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       userid = prefs.getString('userid');
       var response = await HomeService.comment(widget.id);
-      setState(() {
-        commentlist = response;
-      });
+
+      if (response['status'] == '01' && response['msg'] == 'Success') {
+        setState(() {
+          commentList = response['results'] ?? [];
+          showRepliesList = List<bool>.filled(commentList.length, false);
+
+          // Assuming you want the first postId
+          if (commentList.isNotEmpty) {
+            String postId = commentList[0]['postId'];
+            print('First postId: $postId');
+          }
+        });
+      } else {
+        print('Failed to fetch comments: ${response['msg']}');
+      }
     } catch (e) {
       print('Error fetching comments: $e');
     }
   }
 
-
-  Future<void> _commentreplayGet() async {
-    try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      userid = prefs.getString('userid');
-      var response = await HomeService.commentreplay(widget.id);
-      setState(() {
-        commentreplaylist = response;
-      });
-    } catch (e) {
-      print('Error fetching comments replay: $e');
-    }
-  }
-
   @override
   void initState() {
-    _commentGet();
-    _commentreplayGet();
     super.initState();
+    _fetchComments().then((_) {
+      setState(() {
+        showRepliesList = List<bool>.filled(commentList.length, false);
+      });
+    });
   }
 
   @override
@@ -137,34 +163,37 @@ class _CommentbottomsheetState extends State<Commentbottomsheet> {
             ),
           ),
           SizedBox(height: 16),
+
           Expanded(
-            child: commentlist != null && commentlist['results'] != null && (commentlist['results'] as List).isNotEmpty
+            child: commentList.isNotEmpty
                 ? ListView.builder(
-              itemCount: commentlist['results'].length,
+              itemCount: commentList.length,
               itemBuilder: (context, index) {
-                bool isMyComment = commentlist['results'][index]['isMyComment'] ?? false;
-                String profilePicUrl = commentlist['results'][index]['profilePic'] ?? '';
+                var commentItem = commentList[index];
+                bool isMyComment = commentItem['isMyComment'] ?? false;
+                String profilePicUrl = commentItem['profilePic'] ?? '';
                 bool isValidUrl = Uri.tryParse(profilePicUrl)?.isAbsolute ?? false;
-                List<dynamic> replies = commentlist['results'][index]['replies'] ?? [];
+                List<dynamic> replies = commentItem['replyComment'] ?? [];
 
                 return Container(
                   padding: EdgeInsets.all(8.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+
                       Row(
                         children: [
                           if (isValidUrl)
                             InkWell(
                               onTap: () {
-                                // Navigator.push(
-                                //   context,
-                                //   MaterialPageRoute(
-                                //     builder: (context) => ProfileInnerPage(
-                                //       id: commentlist['results'][index]['userId'],
-                                //     ),
-                                //   ),
-                                // );
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => profileinnerpage(
+                                      id: commentItem['userId'],
+                                    ),
+                                  ),
+                                );
                               },
                               child: CircleAvatar(
                                 backgroundImage: NetworkImage(profilePicUrl),
@@ -177,13 +206,11 @@ class _CommentbottomsheetState extends State<Commentbottomsheet> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  commentlist['results'][index]['firstName'] ?? '',
+                                  commentItem['firstName'] ?? '',
                                   style: TextStyle(fontWeight: FontWeight.bold),
                                 ),
                                 SizedBox(height: 4),
-                                Text(
-                                  commentlist['results'][index]['comment'] ?? '',
-                                ),
+                                Text(commentItem['comment'] ?? ''),
                                 SizedBox(height: 4),
                               ],
                             ),
@@ -200,7 +227,7 @@ class _CommentbottomsheetState extends State<Commentbottomsheet> {
                                       actions: <Widget>[
                                         TextButton(
                                           onPressed: () {
-                                            _DeleteMycomment(commentlist['results'][index]['commentId']);
+                                            _deleteComment(commentItem['commentId']);
                                             Navigator.pop(context);
                                           },
                                           child: Text('Delete'),
@@ -223,35 +250,35 @@ class _CommentbottomsheetState extends State<Commentbottomsheet> {
                               return AlertDialog(
                                 content: SizedBox(
                                   width: 300,
-                                  height: 106,
+                                  height: 50,
                                   child: Column(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      TextField(
+                                      _isLoading ? Center(child: CupertinoActivityIndicator())
+                                          : SizedBox(),
+                                      !_isLoading
+                                          ? TextField(
                                         decoration: InputDecoration(
                                           hintText: 'Write your reply here...',
+                                          hintStyle: TextStyle(
+                                              fontSize: 12, fontWeight: FontWeight.w600),
+                                          suffixIcon: IconButton(
+                                            icon: Icon(Icons.send, color: buttoncolor),
+                                            onPressed: () async {
+                                              if (replaycomment?.isNotEmpty ?? false) {
+                                                await _addreplayComment();
+                                                Navigator.pop(context);
+                                              }
+                                            },
+                                          ),
                                         ),
-                                      ),
-                                      SizedBox(height: 10),
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.end,
-                                        children: [
-                                          TextButton(
-                                            onPressed: () {
-                                              Navigator.pop(context);
-                                            },
-                                            child: Text('Cancel'),
-                                          ),
-                                          SizedBox(width: 10),
-                                          ElevatedButton(
-                                            onPressed: () {
-                                              // Implement reply logic here
-                                              Navigator.pop(context);
-                                            },
-                                            child: Text('Reply'),
-                                          ),
-                                        ],
-                                      ),
+                                        onChanged: (text) {
+                                          setState(() {
+                                            replaycomment = text;
+                                          });
+                                        },
+                                      )
+                                          : SizedBox(),
                                     ],
                                   ),
                                 ),
@@ -267,23 +294,42 @@ class _CommentbottomsheetState extends State<Commentbottomsheet> {
                       GestureDetector(
                         onTap: () {
                           setState(() {
-                            showReplies = !showReplies;
+                            showRepliesList[index] = !showRepliesList[index];
                           });
                         },
-                        child: Text(
-                          showReplies ? "-------Hide replies" : "-------View replies",
-                          style: TextStyle(fontSize: 10, color: Colors.blue),
+                        child: Visibility(
+                          visible: replies.isNotEmpty, // Only show if there are replies
+                          child: Text(
+                            showRepliesList[index] ? "-------Hide replies" : "-------View replies",
+                            style: TextStyle(fontSize: 10, color: Colors.black),
+                          ),
                         ),
                       ),
-                      if (showReplies)
+                      if (showRepliesList[index])
                         ListView.builder(
                           shrinkWrap: true,
                           physics: NeverScrollableScrollPhysics(),
-                          itemCount: 3,
+                          itemCount: replies.length,
                           itemBuilder: (BuildContext context, int replyIndex) {
+                            var replyItem = replies[replyIndex];
                             return ListTile(
-                              leading: const Icon(Icons.reply),
-                              title: Text("helloo"),
+                              leading: ClipRRect(
+                                borderRadius: BorderRadius.all(Radius.circular(100)),
+                                child: Image.network(
+                                  'https://play-lh.googleusercontent.com/4HZhLFCcIjgfbXoVj3mgZdQoKO2A_z-uX2gheF5yNCkb71wzGqwobr9muj8I05Nc8u8',
+                                  width: 30,
+                                  height: 30,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                              title: Text(
+                                replyItem['userId']['firstName'],
+                                style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: Colors.black),
+                              ),
+                              subtitle: Text(
+                                replyItem['comment'] ?? '',
+                                style: TextStyle(fontSize: 10),
+                              ),
                             );
                           },
                         ),
@@ -297,14 +343,9 @@ class _CommentbottomsheetState extends State<Commentbottomsheet> {
             ),
           ),
           SizedBox(height: 16),
-          _isLoading
-              ? Center(
-            child: CircularProgressIndicator(),
-          )
-              : SizedBox(),
-          _isLoading
-              ? SizedBox()
-              : TextField(
+          _isLoading ? Center(child: CupertinoActivityIndicator()) : SizedBox(),
+          !_isLoading
+              ? TextField(
             decoration: InputDecoration(
               hintText: 'Add a comment...',
               hintStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
@@ -322,7 +363,8 @@ class _CommentbottomsheetState extends State<Commentbottomsheet> {
                 comment = text;
               });
             },
-          ),
+          )
+              : SizedBox(),
         ],
       ),
     );

@@ -184,6 +184,8 @@ class HomeService {
     }
   }
 
+
+
   static Future commentreplay(id) async {
     try {
       var dio = await DioHelper.getInstance();
@@ -199,6 +201,17 @@ class HomeService {
     try {
       var dio = await DioHelper.getInstance();
       var response = await dio.post('$baseURL/api/posts/post-comment',data: data);
+      return response.data;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+
+  static Future postreplaycomment(data) async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.post('$baseURL/api/posts/reply-comment',data: data);
       return response.data;
     } catch (e) {
       rethrow;
