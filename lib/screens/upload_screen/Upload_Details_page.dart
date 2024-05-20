@@ -113,7 +113,7 @@ class _uploadedetailsState extends State<uploadedetails> {
         uploadImage);
 
     // After 3 seconds, hide the loading indicator
-    Future.delayed(Duration(seconds: 10), () {
+    Future.delayed(Duration(seconds: 25), () {
       setState(() {
         isLoading = false;
       });

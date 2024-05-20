@@ -50,13 +50,13 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
     }
   }
 
-  Future<void> _addreplayComment() async {
+  Future<void> _addreplayComment(String commentId) async {
     if (replaycomment?.isNotEmpty ?? false) {
       setState(() {
         _isLoading = true;
       });
       var reqData = {
-        'commentId': commentList[0]['commentId'],
+        'commentId': commentId,
         'comment': replaycomment,
       };
       try {
@@ -266,7 +266,7 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
                                             icon: Icon(Icons.send, color: buttoncolor),
                                             onPressed: () async {
                                               if (replaycomment?.isNotEmpty ?? false) {
-                                                await _addreplayComment();
+                                                await _addreplayComment(commentItem['commentId']);
                                                 Navigator.pop(context);
                                               }
                                             },
