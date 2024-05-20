@@ -17,5 +17,18 @@ class UploadService {
 
 
 
+  static Future<Map<String, dynamic>> getUploadMostlike({int page = 1, int limit = 15}) async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.get('$baseURL/api/posts/get-most-loved-posts?page=$page&limit=$limit');
+      return response.data;
+    } catch (e) {
+      // Handle error appropriately, e.g., log the error or throw it further
+      throw e;
+    }
+  }
+
+
+
 
 }

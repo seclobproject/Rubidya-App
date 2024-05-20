@@ -7,15 +7,14 @@ import '../../../services/home_service.dart';
 import '../../../support/logger.dart';
 import '../inner_page/profile_inner_page.dart';
 
-
 class FollowersList extends StatefulWidget {
   const FollowersList({Key? key}) : super(key: key);
 
   @override
-  State<FollowersList> createState() => _FollowingListState();
+  State<FollowersList> createState() => _FollowersListState();
 }
 
-class _FollowingListState extends State<FollowersList> {
+class _FollowersListState extends State<FollowersList> {
   TextEditingController _searchController = TextEditingController();
   bool _isLoading = true;
   late SharedPreferences prefs;
@@ -40,7 +39,7 @@ class _FollowingListState extends State<FollowersList> {
     var response = await HomeService.followersList(page: _pageNumber);
     log.i('Following list details show.. $response');
     setState(() {
-      followingList.addAll(List<Map<String, dynamic>>.from(response['followers']));
+      followingList = List<Map<String, dynamic>>.from(response['followers']);
       _isLoading = false; // Set loading state to false once data is loaded
     });
   }
@@ -54,7 +53,7 @@ class _FollowingListState extends State<FollowersList> {
 
     try {
       final response = await HomeService.followersList(page: _pageNumber + 1);
-      final List<Map<String, dynamic>> newFollowingList = List<Map<String, dynamic>>.from(response['following']);
+      final List<Map<String, dynamic>> newFollowingList = List<Map<String, dynamic>>.from(response['followers']);
       setState(() {
         _pageNumber++;
         _isLoadingMore = false;
@@ -132,7 +131,6 @@ class _FollowingListState extends State<FollowersList> {
                   border: InputBorder.none, // Remove the border
                   contentPadding: EdgeInsets.symmetric(vertical: 4, horizontal: 10),
                   suffixIcon: Icon(Icons.search),
-                  // Center align the hint text
                 ),
                 onChanged: (value) {
                   setState(() {}); // Trigger rebuild to update the filtered list
@@ -140,16 +138,16 @@ class _FollowingListState extends State<FollowersList> {
               ),
             ),
           ),
-          NotificationListener<ScrollNotification>(
-            onNotification: (ScrollNotification scrollInfo) {
-              if (!_isLoadingMore &&
-                  scrollInfo.metrics.pixels == 0 &&
-                  _hasMore) {
-                _loadMoreData();
-              }
-              return true;
-            },
-            child: Expanded(
+          Expanded(
+            child: NotificationListener<ScrollNotification>(
+              onNotification: (ScrollNotification scrollInfo) {
+                if (!_isLoadingMore &&
+                    scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent &&
+                    _hasMore) {
+                  _loadMoreData();
+                }
+                return true;
+              },
               child: ListView.builder(
                 itemCount: followingList.length,
                 itemBuilder: (BuildContext context, int index) {
@@ -241,7 +239,7 @@ class _MembersListingState extends State<MembersListing> {
         );
       },
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 5,vertical: 5),
+        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
         child: Column(
           children: [
             Row(
@@ -272,7 +270,7 @@ class _MembersListingState extends State<MembersListing> {
                   child: Text(
                     widget.name,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 12,fontWeight: FontWeight.w600),
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
                   ),
                 ),
                 Expanded(child: SizedBox()),

@@ -12,6 +12,7 @@ import '../../services/home_service.dart';
 import '../../services/profile_service.dart';
 import '../../support/logger.dart';
 import '../profile_screen/inner_page/profile_inner_page.dart';
+import '../search_screen/searchpage.dart';
 
 class homepage extends StatefulWidget {
   const homepage({Key? key}) : super(key: key);
@@ -154,6 +155,17 @@ class _homepageState extends State<homepage> {
                       width: 150,
                     ),
                     Spacer(),
+
+                    InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => searchpage()),
+                        );
+                      },
+                      child:Icon(CupertinoIcons.search,color: buttoncolor,)
+                    ),
+                    SizedBox(width: 20,),
                     InkWell(
                       onTap: () {
                         // Navigator.push(

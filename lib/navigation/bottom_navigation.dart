@@ -6,6 +6,7 @@ import '../screens/chat_screen/chatpage.dart';
 import '../screens/home_screen/homepage.dart';
 import '../screens/profile_screen/profilepage.dart';
 import '../screens/search_screen/searchpage.dart';
+import '../screens/trending_screen/trendingpage.dart';
 import '../screens/upload_screen/uploadscreen.dart';
 
 
@@ -33,7 +34,7 @@ class _BottomnavState extends State<Bottomnav> {
 
   final List<Map<String, Object>> _pages = [
     {'page': homepage(), 'title': 'Home'},
-    {'page': searchpage(), 'title': 'Search'},
+    {'page': TrendingPage(), 'title': 'Search'},
     {'page': UploadScreen(), 'title': 'Upload'},
     {'page': chatpage(), 'title': 'Chat pgae'},
     {'page': ProfileView(), 'title': 'Profile'},
@@ -78,7 +79,7 @@ class _BottomnavState extends State<Bottomnav> {
             icon: Padding(
               padding: const EdgeInsets.only(top: 11 ),
               child: SvgPicture.asset(
-                "assets/svg/search.svg",
+                "assets/svg/trending.svg",
                 color: (_selectedPageIndex == 1) ? bordercolor : null,
               ),
             ),

@@ -24,8 +24,6 @@ class _phototabState extends State<phototab> {
 
 
 
-
-
   var userId;
   var profileDetails;
   bool _isLoading = true;
@@ -92,20 +90,20 @@ class _phototabState extends State<phototab> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-      child: profilelist != null && profilelist['media'] != null
-          ? GridView.builder(
-        controller: _scrollController,
-        physics: AlwaysScrollableScrollPhysics(),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 3,
-          crossAxisSpacing: 8.0,
-          mainAxisSpacing: 8.0,
-        ),
-        itemCount: profilelist['media'].length,
-        itemBuilder: (BuildContext context, int index) {
-          return GestureDetector(
+    return profilelist != null && profilelist['media'] != null
+        ? GridView.builder(
+      controller: _scrollController,
+      physics: AlwaysScrollableScrollPhysics(),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        // crossAxisSpacing: 5,
+        mainAxisSpacing: 5,
+      ),
+      itemCount: profilelist['media'].length,
+      itemBuilder: (BuildContext context, int index) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10,vertical: 5),
+          child: GestureDetector(
             onTap: () {
               List<dynamic> imageUrls =
               profilelist['media'].map((item) => item['filePath']).toList();
@@ -160,16 +158,16 @@ class _phototabState extends State<phototab> {
                 ),
               ],
             ),
-          );
-        },
-      )
-          : Center(
-        child: isLoading
-            ? CircularProgressIndicator()
-            : Text(
-          "No images available",
-          style: TextStyle(color: Colors.black),
-        ),
+          ),
+        );
+      },
+    )
+        : Center(
+      child: isLoading
+          ? CircularProgressIndicator()
+          : Text(
+        "No images available",
+        style: TextStyle(color: Colors.black),
       ),
     );
 
