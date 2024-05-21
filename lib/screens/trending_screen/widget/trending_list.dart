@@ -16,15 +16,21 @@ class _TrendingListState extends State<TrendingList> {
   var trendingprice;
   var trendingcardprice;
   bool _isLoading = true;
+  bool _isLoadingMore = false;
+  int _pageNumber = 1;
+  bool _hasMore = true;
+  List<Map<String, dynamic>> trendinglist = [];
 
   Future<void> _trendingcarddetailsapi() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     userid = prefs.getString('userid');
     if (userid != null) {
-      var response = await TrendingService.tendingcard();
-      log.i('trending details show.. $response');
+      var response = await TrendingService.tendingcard(page: _pageNumber);
+      log.i('trending card details show.. $response');
       setState(() {
         trendingcardprice = response;
+        trendinglist = List<Map<String, dynamic>>.from(response['response']);
+        _hasMore = _pageNumber < response['totalPages'];
       });
     } else {
       log.e('User ID is null');
@@ -46,12 +52,10 @@ class _TrendingListState extends State<TrendingList> {
   }
 
   Future<void> _initLoad() async {
-    await Future.wait(
-      [
-        _trendingdetailsapi(),
-        _trendingcarddetailsapi()
-      ],
-    );
+    await Future.wait([
+      _trendingdetailsapi(),
+      _trendingcarddetailsapi(),
+    ]);
     setState(() {
       _isLoading = false;
     });
@@ -62,14 +66,38 @@ class _TrendingListState extends State<TrendingList> {
     _initLoad();
     super.initState();
   }
-//oregroundColor: Colors.white,
+
+  Future<void> _loadMoreData() async {
+    if (_isLoadingMore || !_hasMore) return;
+
+    setState(() {
+      _isLoadingMore = true;
+    });
+
+    try {
+      final response = await TrendingService.tendingcard(page: _pageNumber + 1);
+      final List<Map<String, dynamic>> newTrendingList = List<Map<String, dynamic>>.from(response['response']);
+      setState(() {
+        _pageNumber ++;
+        _isLoadingMore = false;
+        trendinglist.addAll(newTrendingList);
+        _hasMore = _pageNumber < response['totalPages'];
+      });
+    } catch (e) {
+      // Handle error
+      setState(() {
+        _isLoadingMore = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        foregroundColor: Colors.white,
         backgroundColor: bluetext,
-        title: Text("Trending", style: TextStyle(fontSize: 14, color: white)),
+        foregroundColor: Colors.white,
+        title: Text("On trend", style: TextStyle(fontSize: 14, color: white)),
         actions: [],
       ),
       body: SafeArea(
@@ -84,10 +112,10 @@ class _TrendingListState extends State<TrendingList> {
                 physics: NeverScrollableScrollPhysics(),
                 itemCount: 3,
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3, // Number of items per row
-                  crossAxisSpacing: 5.0, // Horizontal space between items
-                  mainAxisSpacing: 5.0, // Vertical space between items
-                  childAspectRatio: 0.6, // Aspect ratio of each item
+                  crossAxisCount: 3,
+                  crossAxisSpacing: 5.0,
+                  mainAxisSpacing: 5.0,
+                  childAspectRatio: 0.6,
                 ),
                 itemBuilder: (BuildContext context, int index) {
                   return Padding(
@@ -95,8 +123,6 @@ class _TrendingListState extends State<TrendingList> {
                     child: Container(
                       height: 190,
                       decoration: BoxDecoration(
-
-
                         borderRadius: BorderRadius.all(Radius.circular(10)),
                       ),
                       child: Column(
@@ -106,7 +132,7 @@ class _TrendingListState extends State<TrendingList> {
                             alignment: Alignment.center,
                             children: [
                               Container(
-                                padding: EdgeInsets.all(2.0), // Adjust padding as needed
+                                padding: EdgeInsets.all(2.0),
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                 ),
@@ -117,13 +143,12 @@ class _TrendingListState extends State<TrendingList> {
                                 ),
                               ),
                               Positioned(
-                                top: 20, // Adjust position as needed
+                                top: 20,
                                 child: Container(
                                   width: 20,
                                   height: 20,
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
-
                                   ),
                                 ),
                               ),
@@ -137,7 +162,7 @@ class _TrendingListState extends State<TrendingList> {
                                   radius: 30,
                                   backgroundColor: bluetext,
                                   backgroundImage: NetworkImage(
-                                      trendingcardprice['response'][index]['profilePic'] ?? ''),
+                                      trendinglist[index]['profilePic'] ?? ''),
                                 ),
                               ),
                               Positioned(
@@ -151,7 +176,7 @@ class _TrendingListState extends State<TrendingList> {
                                   ),
                                   child: Center(
                                     child: Text(
-                                      trendingcardprice['response'][index]['rank'].toString(),
+                                      trendinglist[index]['rank'].toString(),
                                       style: TextStyle(color: Colors.white, fontSize: 8),
                                     ),
                                   ),
@@ -163,14 +188,14 @@ class _TrendingListState extends State<TrendingList> {
                           Container(
                             height: 15,
                             child: Text(
-                              trendingcardprice['response'][index]['userName'] ?? '',
+                              trendinglist[index]['userName'] ?? '',
                               style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w500,
                                 color: Colors.white,
                               ),
-                              overflow: TextOverflow.ellipsis, // Ensures text overflow is handled
-                              maxLines: 1, // Limits the text to a single line
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
                             ),
                           ),
                           SizedBox(height: 5),
@@ -186,7 +211,7 @@ class _TrendingListState extends State<TrendingList> {
                                 ),
                               ),
                               Text(
-                                trendingcardprice['response'][index]['totalPoints'].toString(),
+                                trendinglist[index]['totalPoints'].toString(),
                                 style: TextStyle(
                                   fontSize: 9,
                                   fontWeight: FontWeight.w500,
@@ -196,24 +221,6 @@ class _TrendingListState extends State<TrendingList> {
                             ],
                           ),
                           SizedBox(height: 10),
-                          // Container(
-                          //   height: 20,
-                          //   width: 60,
-                          //   alignment: Alignment.center,
-                          //   decoration: BoxDecoration(
-                          //     border: Border.all(color: blueshade),
-                          //     color: bluetext,
-                          //     borderRadius: BorderRadius.all(Radius.circular(8)),
-                          //   ),
-                          //   // child: Text(
-                          //   //   "Good job",
-                          //   //   style: TextStyle(
-                          //   //     color: Colors.white,
-                          //   //     fontSize: 9,
-                          //   //     fontWeight: FontWeight.w600,
-                          //   //   ),
-                          //   // ),
-                          // ),
                         ],
                       ),
                     ),
@@ -221,29 +228,34 @@ class _TrendingListState extends State<TrendingList> {
                 },
               ),
             ),
-            // Adding space between the Row and ListView
             Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(0.0),
-                child: Container(
-                  child: ListView.builder(
-                    itemCount: trendingcardprice != null ? trendingcardprice['response'].length : 0,
-                    itemBuilder: (BuildContext context, int index) {
+              child: NotificationListener<ScrollNotification>(
+                onNotification: (ScrollNotification scrollInfo) {
+                  if (!_isLoadingMore &&
+                      scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent &&
+                      _hasMore) {
+                    _loadMoreData();
+                  }
+                  return true;
+                },
+                child: ListView.builder(
+                  itemCount: trendinglist.length - 3 + (_isLoadingMore ? 1 : 0),
+                  itemBuilder: (BuildContext context, int index) {
+                    if (index < trendinglist.length - 3) {
                       return Container(
                         color: Color(0xFFE6E8F4),
                         child: ListTile(
                           title: Container(
                             height: 50,
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.all(Radius.circular(5)),
+                              borderRadius: BorderRadius.all(Radius.circular(10)),
                               color: white,
                             ),
                             child: Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
                               children: [
-                                SizedBox(width: 10,),
+                                SizedBox(width: 10),
                                 Text(
-                                  trendingcardprice['response'][index]['rank'].toString(),
+                                  trendinglist[index + 3]['rank'].toString(),
                                   style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w500,
@@ -254,38 +266,48 @@ class _TrendingListState extends State<TrendingList> {
                                 CircleAvatar(
                                   radius: 20,
                                   backgroundColor: bluetext,
-                                  backgroundImage: NetworkImage(
-                                      trendingcardprice['response'][index]['profilePic'] ?? ''),
+                                  backgroundImage: NetworkImage(trendinglist[index + 3]['profilePic'] ?? ''),
                                 ),
-                                SizedBox(width: 10), // Add space between the avatar and the name
+                                SizedBox(width: 10),
                                 Text(
-                                  trendingcardprice['response'][index]['userName'] ?? '',
+                                  trendinglist[index + 3]['userName'] ?? '',
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: bluetext,
-                                    fontWeight: FontWeight.w400,
+                                    fontWeight: FontWeight.w500,
                                   ),
                                 ),
-                                Spacer(), // Add a spacer to push the points to the end
+                                Spacer(),
                                 Text(
-                                  trendingcardprice['response'][index]['totalPoints'].toString()+" Pts ",
+                                  trendinglist[index + 3]['totalPoints'].toString() + " Pts ",
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: bluetext,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
-                                SizedBox(width: 20,)
+                                SizedBox(width: 20)
                               ],
                             ),
                           ),
                         ),
                       );
-                    },
-                  ),
+                    } else {
+                      return _isLoadingMore
+                          ? Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                      )
+                          : Container(); // Adjust loading widget as needed
+                    }
+                  },
                 ),
               ),
             ),
+
+            SizedBox()
           ],
         ),
       ),

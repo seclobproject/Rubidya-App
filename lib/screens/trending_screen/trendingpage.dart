@@ -23,6 +23,7 @@ class _TrendingPageState extends State<TrendingPage> {
   var trendingcardprice;
   bool _isLoading = true;
   String _selectedDropdownValue = 'Today';
+  var status = 'month';
 
 
 
@@ -46,21 +47,52 @@ class _TrendingPageState extends State<TrendingPage> {
     });
   }
 
-  Future _initLoad() async {
-    await Future.wait(
-      [
-        _trendingdetailsapi(),
-        _trendingcarddetailsapi()
 
-      ],
-    );
-    _isLoading = false;
+  // Future _trendingtopSixapi() async {
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   userid = prefs.getString('userid');
+  //   var response = await TrendingService.TrendingtopSix(type:_selectedDropdownValue);
+  //   log.i('trending details show.. $response');
+  //   setState(() {
+  //     trendingcardprice = response;
+  //   });
+  // }
+
+
+  Future _trendingtopSixapi(String status) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? userid = prefs.getString('userid');
+    try {
+      var response = await TrendingService.TrendingtopSix(status);
+      log.i('tranding by days .. $response');
+      setState(() {
+        trendingcardprice = response;
+      });
+    } catch (e) {
+      // Handle error appropriately here
+      print('Error in _trendingtopSixapi: $e');
+    }
+  }
+
+  Future _initLoad() async {
+    try {
+      await Future.wait([
+        _trendingdetailsapi(),
+        _trendingtopSixapi(status),
+        _trendingcarddetailsapi(),
+      ]);
+      setState(() {
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('Initialization error: $e');
+      // Handle initialization errors here
+    }
   }
 
   @override
   void initState() {
     _initLoad();
-
     super.initState();
   }
 
@@ -70,7 +102,7 @@ class _TrendingPageState extends State<TrendingPage> {
         backgroundColor: bluetext,
         appBar: AppBar(
           backgroundColor: bluetext,
-          title: Text("Trending", style: TextStyle(fontSize: 14, color: white)),
+          title: Text("On trend", style: TextStyle(fontSize: 14, color: white)),
           actions: [],
         ),
         body: SingleChildScrollView(
@@ -120,7 +152,7 @@ class _TrendingPageState extends State<TrendingPage> {
                                           ),
                                           child: Center(
                                             child: Text(
-                                              'price: ' + trendingprice['result'][index]['rank'].toString(),
+                                              trendingprice['result'][index]['rank'].toString(),
                                               style: TextStyle(
                                                 color: Colors.white,
                                                 fontWeight: FontWeight.w600,
@@ -171,15 +203,30 @@ class _TrendingPageState extends State<TrendingPage> {
                         ),
                       ),
 
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 10),
-                        child: Align(
-                            alignment: Alignment.topLeft,
-                            child: Text(
-                              "This day",
-                              style: TextStyle(color: white),
-                            )),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 10),
+                            child: Align(
+                                alignment: Alignment.topLeft,
+                                child: Text(
+                                  "Today topper",
+                                  style: TextStyle(color: white),
+                                )),
+                          ),
+
+                          // Padding(
+                          //   padding: const EdgeInsets.symmetric(horizontal: 15),
+                          //   child: Icon(
+                          //     Icons.filter_list_outlined,
+                          //     color: Colors.black,
+                          //     size: 24.0,
+                          //     semanticLabel: 'filletr',
+                          //   ),
+                          // ),
+                        ],
                       ),
 
                       Padding(
@@ -637,7 +684,7 @@ class _TrendingPageState extends State<TrendingPage> {
                                 ),
                               ),
                               SizedBox(
-                                height: 20,
+                                height: 10,
                               ),
                             ],
                           ),

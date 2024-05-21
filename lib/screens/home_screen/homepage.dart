@@ -170,7 +170,7 @@ class _homepageState extends State<homepage> {
                       onTap: () {
                         // Navigator.push(
                         //   context,
-                        //   MaterialPageRoute(builder: (context) => InstagramProfile()),
+                        //   MaterialPageRoute(builder: (context) => TrendingPage()),
                         // );
                       },
                       child: SvgPicture.asset(
