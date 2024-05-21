@@ -863,7 +863,7 @@ class _ProfileViewState extends State<ProfileView> {
                           child: TabBarView(
                             // physics: NeverScrollableScrollPhysics(), // Prevent swiping
                             children: [
-                              phototab(),
+                              PhotoTab(),
                               vediotab(),
                             ],
                           ),

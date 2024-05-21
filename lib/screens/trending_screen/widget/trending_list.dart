@@ -239,7 +239,8 @@ class _TrendingListState extends State<TrendingList> {
                   return true;
                 },
                 child: ListView.builder(
-                  itemCount: trendinglist.length - 3 + (_isLoadingMore ? 1 : 0),
+                  // itemCount: trendinglist.length - 3 + (_isLoadingMore ? 1 : 0),
+                  itemCount: 100,
                   itemBuilder: (BuildContext context, int index) {
                     if (index < trendinglist.length - 3) {
                       return Container(
