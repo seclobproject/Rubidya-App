@@ -7,6 +7,7 @@ import '../../../resources/color.dart';
 import '../../../services/home_service.dart';
 import '../../../services/profile_service.dart';
 import '../../../support/logger.dart';
+import '../../home_screen/widgets/comment_home.dart';
 
 class PhotoTab extends StatefulWidget {
   const PhotoTab({super.key});
@@ -18,6 +19,7 @@ class PhotoTab extends StatefulWidget {
 class _PhotoTabState extends State<PhotoTab> {
   var userId;
   var profileList;
+  var homeList;
   bool isLoading = false;
   bool _isLoading = true;
   int _pageNumber = 1;
@@ -53,6 +55,21 @@ class _PhotoTabState extends State<PhotoTab> {
         profileList = response;
       } else {
         profileList['media'].addAll(response['media']);
+      }
+    });
+  }
+
+
+  Future<void> _homeFeed({int page = 1}) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    userId = prefs.getString('userId');
+    var response = await HomeService.getFeed(page: page);
+    log.i('Home feed data: $response');
+    setState(() {
+      if (homeList == null) {
+        homeList = response;
+      } else {
+        homeList['posts'].addAll(response['posts']);
       }
     });
   }
@@ -113,7 +130,7 @@ class _PhotoTabState extends State<PhotoTab> {
               List<dynamic> imageUrls =
               profileList['media'].map((item) => item['filePath']).toList();
               int selectedIndex = index;
-              _showFullScreenImage(context, imageUrls, selectedIndex, profileList);
+              _showFullScreenImage(context, imageUrls, selectedIndex, profileList,homeList);
             },
             child: Stack(
               children: [
@@ -176,57 +193,239 @@ class _PhotoTabState extends State<PhotoTab> {
     );
   }
 
-  void _showFullScreenImage(BuildContext context, List<dynamic> imageUrls, int initialIndex, dynamic profileList) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        ScrollController scrollController = ScrollController(initialScrollOffset: initialIndex * 650.0);
+// void _showFullScreenImage(BuildContext context, List<dynamic> imageUrls, int initialIndex, dynamic profileList) {
+//   showDialog(
+//     context: context,
+//     builder: (BuildContext context) {
+//       ScrollController scrollController = ScrollController(initialScrollOffset: initialIndex * 650.0);
+//
+//       return Scaffold(
+//         appBar: AppBar(
+//           title: Text("Posts", style: TextStyle(fontSize: 14)),
+//         ),
+//         body: Column(
+//           children: [
+//             Expanded(
+//               child: ListView.builder(
+//                 controller: scrollController,
+//                 itemCount: imageUrls.length,
+//                 itemBuilder: (BuildContext context, int index) {
+//                   return GestureDetector(
+//                     onDoubleTap: () {
+//                       _toggleLike(index, profileList['media'][index]['_id']);
+//                     },
+//                     child: Container(
+//                       child: Column(
+//                         children: [
+//                           Stack(
+//                             children: [
+//                               Row(
+//                                 children: [
+//                                   GestureDetector(
+//                                     onTap: () {
+//                                       // Navigate to profile inner page
+//                                     },
+//                                     child: Padding(
+//                                       padding: const EdgeInsets.symmetric(horizontal: 10),
+//                                       child: Stack(
+//                                         children: [
+//                                           Container(
+//                                             height: 40,
+//                                             width: 40,
+//                                             decoration: BoxDecoration(
+//                                               shape: BoxShape.circle,
+//                                               color: Colors.transparent,
+//                                             ),
+//                                             child: ClipRRect(
+//                                               borderRadius: BorderRadius.all(Radius.circular(100)),
+//                                               child: Image.network(
+//                                                 profileList['media'][index]['profilePic'],
+//                                                 height: 51,
+//                                                 fit: BoxFit.cover,
+//                                               ),
+//                                             ),
+//                                           ),
+//                                           Positioned(
+//                                             top: 28,
+//                                             left: 28,
+//                                             child: Image.asset('assets/image/verificationlogo.png'),
+//                                           ),
+//                                         ],
+//                                       ),
+//                                     ),
+//                                   ),
+//                                   SizedBox(width: 20),
+//                                   Column(
+//                                     crossAxisAlignment: CrossAxisAlignment.start,
+//                                     children: [
+//                                       Text(
+//                                         profileList['media'][index]['firstName'],
+//                                         style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+//                                       ),
+//                                     ],
+//                                   ),
+//                                   Expanded(child: SizedBox()),
+//                                   Padding(
+//                                     padding: const EdgeInsets.symmetric(horizontal: 10),
+//                                     child: Icon(Icons.more_vert, color: Colors.grey),
+//                                   ),
+//                                 ],
+//                               ),
+//                             ],
+//                           ),
+//                           SizedBox(height: 10),
+//                           Container(
+//                             decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(0))),
+//                             child: Image.network(
+//                               imageUrls[index],
+//                               fit: BoxFit.scaleDown,
+//                             ),
+//                           ),
+//                           Padding(
+//                             padding: const EdgeInsets.only(right: 23, top: 10, left: 15),
+//                             child: Column(
+//                               children: [
+//                                 Row(
+//                                   children: [
+//                                     GestureDetector(
+//                                       onDoubleTap: () {
+//                                         _toggleLike(index, profileList['media'][index]['_id']);
+//                                       },
+//                                       child: Icon(
+//                                         profileList['media'][index]['isLiked'] ?? false
+//                                             ? Icons.favorite
+//                                             : Icons.favorite_border,
+//                                         color: profileList['media'][index]['isLiked'] ?? false
+//                                             ? Colors.red
+//                                             : Colors.grey,
+//                                       ),
+//                                     ),
+//                                     SizedBox(width: 10),
+//                                     SvgPicture.asset(
+//                                       "assets/svg/comment.svg",
+//                                       height: 20,
+//                                     ),
+//                                     SizedBox(width: 20),
+//                                     SvgPicture.asset(
+//                                       "assets/svg/save.svg",
+//                                       height: 20,
+//                                     ),
+//                                     Expanded(child: SizedBox()),
+//                                     SvgPicture.asset(
+//                                       "assets/svg/share.svg",
+//                                       height: 20,
+//                                     ),
+//                                   ],
+//                                 ),
+//                                 Row(
+//                                   children: [
+//                                     Text("Likes", style: TextStyle(color: Colors.blue, fontSize: 10)),
+//                                     Text(
+//                                       profileList['media'][index]['likeCount'].toString(),
+//                                       style: TextStyle(
+//                                         color: Colors.blue,
+//                                         fontSize: 13,
+//                                         fontWeight: FontWeight.w700,
+//                                       ),
+//                                     ),
+//                                     SizedBox(width: 2),
+//                                   ],
+//                                 ),
+//                               ],
+//                             ),
+//                           ),
+//                           SizedBox(height: 10),
+//                           SizedBox(height: 50),
+//                         ],
+//                       ),
+//                     ),
+//                   );
+//                 },
+//               ),
+//             ),
+//           ],
+//         ),
+//       );
+//     },
+//   );
+// }
+}
 
-        return Scaffold(
-          appBar: AppBar(
-            title: Text("Posts", style: TextStyle(fontSize: 14)),
-          ),
-          body: Column(
-            children: [
-              Expanded(
-                child: ListView.builder(
-                  controller: scrollController,
-                  itemCount: imageUrls.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return GestureDetector(
-                      onDoubleTap: () {
-                        _toggleLike(index, profileList['media'][index]['_id']);
-                      },
-                      child: Container(
-                        child: Column(
+
+
+
+
+class FullScreenImageDialog extends StatefulWidget {
+  final List<dynamic> imageUrls;
+  final int initialIndex;
+  final dynamic profileList;
+  final dynamic homeList;
+
+  FullScreenImageDialog({required this.imageUrls, required this.initialIndex, required this.profileList,required this.homeList});
+
+  @override
+  _FullScreenImageDialogState createState() => _FullScreenImageDialogState();
+}
+
+class _FullScreenImageDialogState extends State<FullScreenImageDialog> {
+  late ScrollController scrollController;
+
+  @override
+  void initState() {
+    super.initState();
+    scrollController = ScrollController(initialScrollOffset: widget.initialIndex * 650.0);
+  }
+
+
+  void _toggleLike(int index, String mediaId) {
+    setState(() {
+      bool isLiked = widget.profileList['media'][index]['isLiked'] ?? false;
+      widget.profileList['media'][index]['isLiked'] = !isLiked;
+      widget.profileList['media'][index]['likeCount'] += isLiked ? -1 : 1;
+    });
+  }
+
+  void _showComments(BuildContext context, String postId) {
+    showModalBottomSheet<void>(
+      backgroundColor: white,
+      context: context,
+      isScrollControlled: true,
+      builder: (BuildContext context) {
+        return Padding(
+          padding: const EdgeInsets.all(20.0).copyWith(
+              bottom: MediaQuery.of(context).viewInsets.bottom),
+          child: CommentBottomSheet(id: postId),
+        );
+      },
+    );
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Posts", style: TextStyle(fontSize: 14)),
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: ListView.builder(
+              controller: scrollController,
+              itemCount: widget.imageUrls.length,
+              itemBuilder: (BuildContext context, int index) {
+                return GestureDetector(
+                  onDoubleTap: () {
+                    _toggleLike(index, widget.profileList['media'][index]['_id']);
+                  },
+                  child: Container(
+                    child: Column(
+                      children: [
+                        Stack(
                           children: [
-                            Stack(
+                            Row(
                               children: [
-                                InkWell(
-                                  onDoubleTap: () {
-                                    _toggleLike(index, profileList['media'][index]['_id']);
-                                  },
-                                  child: Row(
-                                    children: [
-                                      SizedBox(width: 60),
-                                      Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            profileList['media'][index]['firstName'],
-                                            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
-                                          ),
-                                        ],
-                                      ),
-                                      Expanded(child: SizedBox()),
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                                        child: Icon(Icons.more_vert, color: Colors.grey),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                InkWell(
+                                GestureDetector(
                                   onTap: () {
                                     // Navigate to profile inner page
                                   },
@@ -244,7 +443,7 @@ class _PhotoTabState extends State<PhotoTab> {
                                           child: ClipRRect(
                                             borderRadius: BorderRadius.all(Radius.circular(100)),
                                             child: Image.network(
-                                              profileList['media'][index]['profilePic'],
+                                              widget.profileList['media'][index]['profilePic'],
                                               height: 51,
                                               fit: BoxFit.cover,
                                             ),
@@ -259,83 +458,125 @@ class _PhotoTabState extends State<PhotoTab> {
                                     ),
                                   ),
                                 ),
+                                SizedBox(width: 20),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      widget.profileList['media'][index]['firstName'],
+                                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                                    ),
+                                  ],
+                                ),
+                                Expanded(child: SizedBox()),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                                  child: Icon(Icons.more_vert, color: Colors.grey),
+                                ),
                               ],
                             ),
-                            SizedBox(height: 10),
-                            Container(
-                              decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(0))),
-                              child: Image.network(
-                                imageUrls[index],
-                                fit: BoxFit.scaleDown,
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(right: 23, top: 10, left: 15),
-                              child: Column(
-                                children: [
-                                  Row(
-                                    children: [
-                                      Icon(
-                                        profileList['media'][index]['isLiked'] ?? false
-                                            ? Icons.favorite
-                                            : Icons.favorite_border,
-                                        color: profileList['media'][index]['isLiked'] ?? false
-                                            ? Colors.red
-                                            : Colors.grey,
-                                      ),
-                                      SizedBox(width: 10),
-
-                                      SizedBox(width: 2),
-                                      SvgPicture.asset(
-                                        "assets/svg/comment.svg",
-                                        height: 20,
-                                      ),
-                                      SizedBox(width: 20),
-                                      SvgPicture.asset(
-                                        "assets/svg/save.svg",
-                                        height: 20,
-                                      ),
-                                      Expanded(child: SizedBox()),
-                                      SvgPicture.asset(
-                                        "assets/svg/share.svg",
-                                        height: 20,
-                                      ),
-                                    ],
-                                  ),
-
-                                  Row(
-                                    children: [
-                                      Text("Likes", style: TextStyle(color: Colors.blue, fontSize: 10)),
-
-                                      Text(
-                                        profileList['media'][index]['likeCount'].toString(),
-                                        style: TextStyle(
-                                          color: Colors.blue,
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w700,
-                                        ),
-                                      ),
-
-                                      SizedBox(width: 2),
-                                    ],
-                                  ),
-
-                                ],
-                              ),
-                            ),
-                            SizedBox(height: 10),
-                            SizedBox(height: 50),
                           ],
                         ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
+                        SizedBox(height: 10),
+                        Container(
+                          decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(0))),
+                          child: Image.network(
+                            widget.imageUrls[index],
+                            fit: BoxFit.scaleDown,
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(right: 23, top: 10, left: 15),
+                          child: Column(
+                            children: [
+                              Row(
+                                children: [
+                                  GestureDetector(
+                                    onTap: () {
+                                      _toggleLike(index, widget.profileList['media'][index]['_id']);
+                                    },
+                                    child: Icon(
+                                      size: 40,
+                                      widget.profileList['media'][index]['isLiked'] ?? false
+                                          ? Icons.favorite
+                                          : Icons.favorite_border,
+                                      color: widget.profileList['media'][index]['isLiked'] ?? false
+                                          ? Colors.red
+                                          : Colors.grey,
+                                    ),
+                                  ),
+                                  SizedBox(width: 10),
+                                  InkWell(
+                                    onTap: () {
+                                      _showComments(context, widget.profileList['media'][index]['_id']);
+                                    },
+                                    child: SvgPicture.asset(
+                                      "assets/svg/comment.svg",
+                                      height: 20,
+                                    ),
+                                  ),
+                                  SizedBox(width: 20),
+                                  SvgPicture.asset(
+                                    "assets/svg/save.svg",
+                                    height: 20,
+                                  ),
+                                  Expanded(child: SizedBox()),
+                                  SvgPicture.asset(
+                                    "assets/svg/share.svg",
+                                    height: 20,
+                                  ),
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  Text("Likes", style: TextStyle(color: Colors.blue, fontSize: 10)),
+                                  Text(
+                                    widget.profileList['media'][index]['likeCount'].toString(),
+                                    style: TextStyle(
+                                      color: Colors.blue,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  SizedBox(width: 2),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: 10),
+                        SizedBox(height: 50),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
           ),
-        );
-      },
+        ],
+      ),
     );
   }
+}
+
+
+void _showFullScreenImage(BuildContext context, List<dynamic> imageUrls, int initialIndex, dynamic profileList, dynamic homeList) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return Dialog(
+        insetPadding: EdgeInsets.all(0),
+        child: Container(
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
+          child: FullScreenImageDialog(
+            imageUrls: imageUrls,
+            initialIndex: initialIndex,
+            profileList: profileList,
+            homeList: homeList,
+          ),
+        ),
+      );
+    },
+  );
 }

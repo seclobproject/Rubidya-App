@@ -1,4 +1,3 @@
-
 import '../networking/constant.dart';
 import '../support/dio_helper.dart';
 
@@ -103,6 +102,8 @@ class TrendingService {
   }
 
 
+
+
   static Future trendingapiThisall() async {
     try {
       var dio = await DioHelper.getInstance();
@@ -112,6 +113,51 @@ class TrendingService {
       rethrow;
     }
   }
+
+
+
+  static Future trendingallpointsthisday(id) async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.get('$baseURL/api/posts/this-day/$id');
+      return response.data;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+
+  static Future trendingallpointsthisweek(id) async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.get('$baseURL/api/posts/this-week/$id');
+      return response.data;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  static Future trendingallpointsthismonth(id) async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.get('$baseURL/api/posts/this-month/$id');
+      return response.data;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  static Future tendingprofile() async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.get('$baseURL/api/posts/points-and-details');
+      return response.data;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+
 
 
 

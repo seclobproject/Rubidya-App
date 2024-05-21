@@ -8,6 +8,7 @@ import 'package:rubidya/screens/trending_screen/widget/trending_list.dart';
 import 'package:rubidya/services/trending_service.dart';
 import 'package:rubidya/support/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class TrendingPage extends StatefulWidget {
   @override
@@ -18,6 +19,7 @@ class _TrendingPageState extends State<TrendingPage> {
   var userid;
   var trendingprice;
   var trendingcardprice;
+  var trendingpoint;
   bool _isLoading = true;
   String _selectedDropdownValue = 'This Week';
   var status = 'month';
@@ -57,12 +59,25 @@ class _TrendingPageState extends State<TrendingPage> {
     }
   }
 
+
+  Future _trendingpoint() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    userid = prefs.getString('userid');
+    var response = await TrendingService.tendingprofile();
+    log.i('trending details show.. $response');
+    setState(() {
+      trendingpoint = response;
+    });
+  }
+
+
   Future _initLoad() async {
     try {
       await Future.wait([
         _trendingdetailsapi(),
         _trendingtopSixapi(status),
         _trendingcarddetailsapi(),
+        _trendingpoint()
       ]);
       setState(() {
         _isLoading = false;
@@ -109,6 +124,9 @@ class _TrendingPageState extends State<TrendingPage> {
     }
   }
 
+
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -122,6 +140,56 @@ class _TrendingPageState extends State<TrendingPage> {
           : SingleChildScrollView(
         child: Column(
           children: [
+
+
+
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Image.asset('assets/logo/rubidyalogosmall.png',height: 12,),
+                  SizedBox(width: 10,),
+
+                  Text(trendingpoint['totalPoints'].toString(),style: TextStyle(fontSize: 12,color: white),),
+
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(100),
+                    child: Container(
+                      width: 90,
+                      height: 90,
+                      child: Image.network(
+                        trendingpoint['profilePic'],
+                        fit: BoxFit.contain,
+                        height: 20,
+                      )
+                    ),
+                  ),
+
+
+                ],
+              ),
+            ),
+
+            SizedBox(height: 10,),
+            
+
+
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SvgPicture.asset(
+                  "assets/svg/warning.svg",
+                ),
+
+                SizedBox(width: 20,),
+                
+                
+                Text("You will get rewards only if you get a minimum of \n1000 points.",style: TextStyle(fontSize: 12,color: white),)
+                
+              ],
+            ),
             Container(
               decoration: BoxDecoration(color: bluetext),
               child: Column(
@@ -210,9 +278,9 @@ class _TrendingPageState extends State<TrendingPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                        child: Align(
-                          alignment: Alignment.topLeft,
+                        child: Center(
                           child: Container(
+                            height: 35,
                             decoration: BoxDecoration(
                               color: blueshade,
                               borderRadius: BorderRadius.circular(5.0),
@@ -222,7 +290,13 @@ class _TrendingPageState extends State<TrendingPage> {
                               items: <String>['This Day', 'This Week', 'This Month'].map((String value) {
                                 return DropdownMenuItem<String>(
                                   value: value,
-                                  child: Text(value, style: TextStyle(fontSize: 10, color: Colors.black)),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text(
+                                      value,
+                                      style: TextStyle(fontSize: 10, color: Colors.white), // Ensuring text color is black
+                                    ),
+                                  ),
                                 );
                               }).toList(),
                               onChanged: (String? newValue) {
@@ -237,10 +311,13 @@ class _TrendingPageState extends State<TrendingPage> {
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
                               ),
+                              dropdownColor: blueshade , // Setting the dropdown menu background color
                             ),
                           ),
                         ),
-                      ),
+                      )
+
+
                     ],
                   ),
                   Padding(
