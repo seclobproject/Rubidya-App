@@ -70,4 +70,65 @@ class TrendingService {
 
 
 
+  static Future trendingapiThisweek() async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.get('$baseURL/api/posts/this-week-all-users');
+      return response.data;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+
+  static Future trendingapiThismonth() async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.get('$baseURL/api/posts/this-month-all-users');
+      return response.data;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+
+  static Future trendingapiThisday() async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.get('$baseURL/api/posts/this-day-all-users');
+      return response.data;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+
+  static Future trendingapiThisall() async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.get('$baseURL/api/posts/this-day-all-users');
+      return response.data;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+
+
+// static Future trendingapiThisweek(String status) async {
+//   try {
+//     var queryParameters = {
+
+//     };
+//     var dio = await DioHelper.getInstance();
+//     var response = await dio.get('$baseURL/api/posts/top-six', queryParameters: queryParameters);
+//     return response.data;
+//   } catch (e) {
+//     print('Error occurred: $e');
+//     // Handle the error appropriately here
+//     throw e; // Or handle it in another way
+//   }
+// }
+
+
 }
