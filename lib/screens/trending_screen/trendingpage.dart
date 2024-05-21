@@ -10,6 +10,8 @@ import 'package:rubidya/support/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../home_screen/widgets/referral_page.dart';
+
 class TrendingPage extends StatefulWidget {
   @override
   _TrendingPageState createState() => _TrendingPageState();
@@ -94,31 +96,58 @@ class _TrendingPageState extends State<TrendingPage> {
     super.initState();
   }
 
+  // Widget _getDropdownWidget(String value) {
+  //   switch (value) {
+  //     case 'This Day':
+  //       return Container(
+  //           height: 400,
+  //
+  //           child: Expanded(child: TopSixGridviewday())); // Widget for 'This Day'
+  //     case 'This Week':
+  //       return Container(
+  //           height: 400,
+  //
+  //           child: Expanded(child: TopSixGridviewweek()));
+  //
+  //
+  //     case 'This Month':
+  //       return Container(
+  //           height: 400,
+  //
+  //           child: Expanded(child: TopSixGridviewmonth()));
+  //     case 'All time':
+  //       return Container(
+  //           height: 400,
+  //
+  //           child: Expanded(child: TopSixGridviewall()));
+  //
+  //     default:
+  //       return Container();
+  //   }
+  // }
+
   Widget _getDropdownWidget(String value) {
     switch (value) {
       case 'This Day':
         return Container(
-            height: 400,
-
-            child: Expanded(child: TopSixGridviewday())); // Widget for 'This Day'
+          height: 400,
+          child: TopSixGridviewday(), // Widget for 'This Day'
+        );
       case 'This Week':
         return Container(
-            height: 400,
-
-            child: Expanded(child: TopSixGridviewweek()));
-
-
+          height: 400,
+          child: TopSixGridviewweek(),
+        );
       case 'This Month':
         return Container(
-            height: 400,
-
-            child: Expanded(child: TopSixGridviewmonth()));
+          height: 400,
+          child: TopSixGridviewmonth(),
+        );
       case 'All time':
         return Container(
-            height: 400,
-
-            child: Expanded(child: TopSixGridviewall()));
-
+          height: 400,
+          child: TopSixGridviewall(),
+        );
       default:
         return Container();
     }
@@ -149,22 +178,26 @@ class _TrendingPageState extends State<TrendingPage> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   Image.asset('assets/logo/rubidyalogosmall.png',height: 12,),
-                  SizedBox(width: 10,),
+                  SizedBox(width: 5,),
 
                   Text(trendingpoint['totalPoints'].toString(),style: TextStyle(fontSize: 12,color: white),),
+                  SizedBox(width: 10,),
 
                   ClipRRect(
-                    borderRadius: BorderRadius.circular(100),
+                    borderRadius: BorderRadius.circular(45),
                     child: Container(
-                      width: 90,
-                      height: 90,
+                      width: 25,
+                      height: 25,
+                      color: white,
                       child: Image.network(
                         trendingpoint['profilePic'],
-                        fit: BoxFit.contain,
-                        height: 20,
-                      )
+                        fit: BoxFit.fill,
+                        width: 30,
+                        height: 30,
+                      ),
                     ),
                   ),
+
 
 
                 ],
@@ -363,6 +396,41 @@ class _TrendingPageState extends State<TrendingPage> {
                       ),
                     ),
                   ),
+
+                  SizedBox(height: 20,),
+
+
+                  InkWell(
+                    onTap: (){
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) =>  referralpage()),
+                      );
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Container(
+                          height: 40,
+                          width: 400,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.white, width: 0.2),
+                            gradient: LinearGradient(
+                              colors: [gradnew, gradnew1],
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                            ),
+                            borderRadius: BorderRadius.all(Radius.circular(10)),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            child: Center(child: Text("Invite & Share",style: TextStyle(fontSize: 12,color: white),)),
+                          )
+                      ),
+                    ),
+                  ),
+
+                  SizedBox(height: 20,),
+
                 ],
               ),
             ),
