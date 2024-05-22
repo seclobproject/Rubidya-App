@@ -454,7 +454,7 @@ class _ProductCardState extends State<ProductCard> {
 
 
 
-          SizedBox(height: 10,),
+          // SizedBox(height: 10,),
 
 
           Padding(
@@ -469,11 +469,11 @@ class _ProductCardState extends State<ProductCard> {
                       icon: Icon(
                         widget.likeCount ? Icons.favorite : Icons.favorite_border,
                         color: widget.likeCount ? Colors.red : Colors.black26,
-                        size: 40.0,
+                        size: 30.0,
                       ),
                     ),
 
-                    SizedBox(width: 20),
+                    SizedBox(width: 10),
 
                     InkWell(
                       onTap: () {
@@ -494,13 +494,13 @@ class _ProductCardState extends State<ProductCard> {
                       },
                       child: SvgPicture.asset(
                         "assets/svg/comment.svg",
-                        height: 25,
+                        height: 20,
                       ),
                     ),
                     SizedBox(width: 20),
                     SvgPicture.asset(
                       "assets/svg/save.svg",
-                      height: 25,
+                      height: 20,
                     ),
                     SizedBox(width: 20),
 
@@ -508,7 +508,7 @@ class _ProductCardState extends State<ProductCard> {
 
                     SvgPicture.asset(
                       "assets/svg/share.svg",
-                      height: 25,
+                      height: 20,
                     ),
                   ],
                 ),

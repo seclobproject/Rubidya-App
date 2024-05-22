@@ -60,19 +60,6 @@ class _PhotoTabState extends State<PhotoTab> {
   }
 
 
-  Future<void> _homeFeed({int page = 1}) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    userId = prefs.getString('userId');
-    var response = await HomeService.getFeed(page: page);
-    log.i('Home feed data: $response');
-    setState(() {
-      if (homeList == null) {
-        homeList = response;
-      } else {
-        homeList['posts'].addAll(response['posts']);
-      }
-    });
-  }
 
   Future<void> _addLike(String postId, bool isLiked) async {
     var reqData = {
@@ -101,15 +88,7 @@ class _PhotoTabState extends State<PhotoTab> {
     });
   }
 
-  void _toggleLike(int index, String postId) {
-    setState(() {
-      bool isLiked = profileList['media'][index]['isLiked'] ?? false; // Provide default value of false
-      profileList['media'][index]['isLiked'] = !isLiked;
-      int likeCount = profileList['media'][index]['likeCount'] ?? 0; // Provide default value of 0
-      profileList['media'][index]['likeCount'] = isLiked ? likeCount - 1 : likeCount + 1;
-    });
-    _addLike(postId, profileList['media'].firstWhere((post) => post['_id'] == postId)['isLiked']);
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -361,7 +340,12 @@ class FullScreenImageDialog extends StatefulWidget {
   final dynamic profileList;
   final dynamic homeList;
 
-  FullScreenImageDialog({required this.imageUrls, required this.initialIndex, required this.profileList,required this.homeList});
+  FullScreenImageDialog({
+    required this.imageUrls,
+    required this.initialIndex,
+    required this.profileList,
+    required this.homeList,
+  });
 
   @override
   _FullScreenImageDialogState createState() => _FullScreenImageDialogState();
@@ -376,13 +360,32 @@ class _FullScreenImageDialogState extends State<FullScreenImageDialog> {
     scrollController = ScrollController(initialScrollOffset: widget.initialIndex * 650.0);
   }
 
-
-  void _toggleLike(int index, String mediaId) {
+  void _toggleLikePost(int index, String postId) {
     setState(() {
-      bool isLiked = widget.profileList['media'][index]['isLiked'] ?? false;
-      widget.profileList['media'][index]['isLiked'] = !isLiked;
-      widget.profileList['media'][index]['likeCount'] += isLiked ? -1 : 1;
+      // Find the post once and store it in a variable
+      var post = widget.profileList['media'].firstWhere((post) => post['_id'] == postId, orElse: () => null);
+
+      if (post != null) {
+        bool isLiked = post['isLiked'] ?? false; // Ensure isLiked is treated as a bool and not null
+        post['isLiked'] = !isLiked;
+        post['likeCount'] = (post['likeCount'] ?? 0) + (post['isLiked'] ? 1 : -1);
+      }
     });
+
+    // Call _addLike only if the post exists
+    var post = widget.profileList['media'].firstWhere((post) => post['_id'] == postId, orElse: () => null);
+    if (post != null) {
+      _addLike(postId, post['isLiked']);
+    }
+  }
+
+  Future<void> _addLike(String postId, bool isLiked) async {
+    var reqData = {
+      'postId': postId,
+      'isLiked': isLiked,
+    };
+    var response = await HomeService.like(reqData);
+    log.i('Add to Like: $response');
   }
 
   void _showComments(BuildContext context, String postId) {
@@ -392,14 +395,12 @@ class _FullScreenImageDialogState extends State<FullScreenImageDialog> {
       isScrollControlled: true,
       builder: (BuildContext context) {
         return Padding(
-          padding: const EdgeInsets.all(20.0).copyWith(
-              bottom: MediaQuery.of(context).viewInsets.bottom),
+          padding: const EdgeInsets.all(20.0).copyWith(bottom: MediaQuery.of(context).viewInsets.bottom),
           child: CommentBottomSheet(id: postId),
         );
       },
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -416,7 +417,7 @@ class _FullScreenImageDialogState extends State<FullScreenImageDialog> {
               itemBuilder: (BuildContext context, int index) {
                 return GestureDetector(
                   onDoubleTap: () {
-                    _toggleLike(index, widget.profileList['media'][index]['_id']);
+                    _toggleLikePost(index, widget.profileList['media'][index]['_id']);
                   },
                   child: Container(
                     child: Column(
@@ -493,10 +494,10 @@ class _FullScreenImageDialogState extends State<FullScreenImageDialog> {
                                 children: [
                                   GestureDetector(
                                     onTap: () {
-                                      _toggleLike(index, widget.profileList['media'][index]['_id']);
+                                      _toggleLikePost(index, widget.profileList['media'][index]['_id']);
                                     },
                                     child: Icon(
-                                      size: 40,
+                                      size: 30,
                                       widget.profileList['media'][index]['isLiked'] ?? false
                                           ? Icons.favorite
                                           : Icons.favorite_border,
@@ -505,16 +506,41 @@ class _FullScreenImageDialogState extends State<FullScreenImageDialog> {
                                           : Colors.grey,
                                     ),
                                   ),
-                                  SizedBox(width: 10),
+                                  SizedBox(width: 20),
+                                  // InkWell(
+                                  //   onTap: () {
+                                  //     _showComments(context, widget.profileList['media'][index]['_id']);
+                                  //   },
+                                  //   child: SvgPicture.asset(
+                                  //     "assets/svg/comment.svg",
+                                  //     height: 20,
+                                  //   ),
+                                  // ),
+
                                   InkWell(
                                     onTap: () {
-                                      _showComments(context, widget.profileList['media'][index]['_id']);
+                                      showModalBottomSheet<void>(
+                                        backgroundColor: white,
+                                        context: context,
+                                        isScrollControlled: true,
+                                        builder: (BuildContext context) {
+                                          late Map<String, dynamic>? homeList;
+                                          return Padding(
+                                            padding: const EdgeInsets.all(20.0).copyWith(
+                                                bottom: MediaQuery.of(context).viewInsets.bottom
+                                            ),
+                                            child: CommentBottomSheet(id:widget.profileList['media'][index]['_id']),
+                                          );
+                                        },
+                                      );
                                     },
                                     child: SvgPicture.asset(
                                       "assets/svg/comment.svg",
                                       height: 20,
                                     ),
                                   ),
+
+
                                   SizedBox(width: 20),
                                   SvgPicture.asset(
                                     "assets/svg/save.svg",
@@ -558,7 +584,6 @@ class _FullScreenImageDialogState extends State<FullScreenImageDialog> {
     );
   }
 }
-
 
 void _showFullScreenImage(BuildContext context, List<dynamic> imageUrls, int initialIndex, dynamic profileList, dynamic homeList) {
   showDialog(
