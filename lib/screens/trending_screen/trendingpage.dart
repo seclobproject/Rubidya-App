@@ -96,36 +96,6 @@ class _TrendingPageState extends State<TrendingPage> {
     super.initState();
   }
 
-  // Widget _getDropdownWidget(String value) {
-  //   switch (value) {
-  //     case 'This Day':
-  //       return Container(
-  //           height: 400,
-  //
-  //           child: Expanded(child: TopSixGridviewday())); // Widget for 'This Day'
-  //     case 'This Week':
-  //       return Container(
-  //           height: 400,
-  //
-  //           child: Expanded(child: TopSixGridviewweek()));
-  //
-  //
-  //     case 'This Month':
-  //       return Container(
-  //           height: 400,
-  //
-  //           child: Expanded(child: TopSixGridviewmonth()));
-  //     case 'All time':
-  //       return Container(
-  //           height: 400,
-  //
-  //           child: Expanded(child: TopSixGridviewall()));
-  //
-  //     default:
-  //       return Container();
-  //   }
-  // }
-
   Widget _getDropdownWidget(String value) {
     switch (value) {
       case 'This Day':
@@ -154,8 +124,6 @@ class _TrendingPageState extends State<TrendingPage> {
   }
 
 
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -169,8 +137,6 @@ class _TrendingPageState extends State<TrendingPage> {
           : SingleChildScrollView(
         child: Column(
           children: [
-
-
 
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -199,13 +165,12 @@ class _TrendingPageState extends State<TrendingPage> {
                   ),
 
 
-
                 ],
               ),
             ),
 
             SizedBox(height: 10,),
-            
+
 
 
 
@@ -217,10 +182,10 @@ class _TrendingPageState extends State<TrendingPage> {
                 ),
 
                 SizedBox(width: 20,),
-                
-                
+
+
                 Text("You will get rewards only if you get a minimum of \n1000 points.",style: TextStyle(fontSize: 12,color: white),)
-                
+
               ],
             ),
             Container(

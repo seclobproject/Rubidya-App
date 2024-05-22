@@ -159,6 +159,17 @@ class TrendingService {
 
 
 
+  static Future TrendingDayinnerpage(id) async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.get('$baseURL/api/posts/this-day/$id');
+      return response.data;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+
 
 
 // static Future trendingapiThisweek(String status) async {

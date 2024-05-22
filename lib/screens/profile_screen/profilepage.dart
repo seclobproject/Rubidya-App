@@ -89,17 +89,6 @@ class _ProfileViewState extends State<ProfileView> {
     });
   }
 
-  Future _initLoad() async {
-    await Future.wait(
-      [
-        _profiledetailsapi(),
-        _profileimgget(),
-        _profilestatussapi(),
-        _postcount()
-      ],
-    );
-    _isLoading = false;
-  }
 
   Future<void> logout() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -108,39 +97,6 @@ class _ProfileViewState extends State<ProfileView> {
     Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (context) => login()), (route) => false);
   }
-
-  // Future<void> uploadImage() async {
-  //   SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   userid = (prefs.getString('userid') ?? "");
-  //   try {
-  //     if (imageUrl == null) {
-  //       print("Please pick an image first");
-  //       return;
-  //     }
-  //     FormData formData = FormData.fromMap({
-  //       'media': await MultipartFile.fromFile(imageUrl!),
-  //     });
-  //     var response = await ProfileService.verificationimage(formData);
-  //     if (response.statusCode == 201) {
-  //       print("Image uploaded successfully");
-  //       print(response.data);
-  //       // Navigator.push(
-  //       //   context,
-  //       //   MaterialPageRoute(builder: (context) => Bottomnav()),
-  //       // );
-  //     } else {
-  //       // Navigator.push(
-  //       //   context,
-  //       //   MaterialPageRoute(builder: (context) => Bottomnav()),
-  //       // );
-  //       print(response.statusCode);
-  //       print(response.data);
-  //     }
-  //   } catch (e) {
-  //     print("Exception during image upload: $e");
-  //   }
-  // }
-
 
 
 
@@ -159,10 +115,6 @@ class _ProfileViewState extends State<ProfileView> {
       }
     }
   }
-
-
-
-
 
 
   bool isUploading = false;
@@ -231,16 +183,11 @@ class _ProfileViewState extends State<ProfileView> {
         imageUrl = croppedFile.path;
       });
 
-      // Upload the cropped image immediately after cropping
       uploadImage();
     }
 
     return croppedFile != null ? io.File(croppedFile.path) : null;
   }
-
-
-
-
 
 
   Future<void> _refresh() async {
@@ -249,16 +196,26 @@ class _ProfileViewState extends State<ProfileView> {
     setState(() {
       _isLoading = false;
     });
-
-    // Call uploadImage() after refreshing the profile
     uploadImage();
+  }
+
+
+
+  Future _initLoad() async {
+    await Future.wait(
+      [
+        _profiledetailsapi(),
+        _profileimgget(),
+        _profilestatussapi(),
+        _postcount()
+      ],
+    );
+    _isLoading = false;
   }
 
   @override
   void initState() {
-
     _initLoad();
-
     super.initState();
   }
 

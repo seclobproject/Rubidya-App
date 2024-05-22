@@ -10,11 +10,7 @@ import '../../navigation/bottom_navigation.dart';
 import '../../services/upload_image.dart';
 import 'dart:typed_data';
 import 'dart:ui' as ui; // Add this import for the Image class
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:dio/dio.dart';
-import '../../services/upload_image.dart';
 import 'package:easy_debounce/easy_debounce.dart';
 
 class uploadedetails extends StatefulWidget {
@@ -61,10 +57,10 @@ class _uploadedetailsState extends State<uploadedetails> {
     try {
       // Get the rendered image
       RenderRepaintBoundary boundary =
-          imageKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+      imageKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
       ui.Image image = await boundary.toImage(pixelRatio: 5.0);
       ByteData? byteData =
-          await image.toByteData(format: ui.ImageByteFormat.png);
+      await image.toByteData(format: ui.ImageByteFormat.png);
       Uint8List uint8List = byteData!.buffer.asUint8List();
 
       // Create FormData
@@ -82,7 +78,7 @@ class _uploadedetailsState extends State<uploadedetails> {
         print("Image uploaded successfully");
         Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(builder: (context) => Bottomnav()),
-            (route) => false);
+                (route) => false);
         print(response['msg']);
         // Handle success
       } else {
@@ -96,7 +92,7 @@ class _uploadedetailsState extends State<uploadedetails> {
     } finally {
       setState(() {
         uploading =
-            false; // Set uploading flag to false when upload completes or encounters an error
+        false; // Set uploading flag to false when upload completes or encounters an error
       });
     }
   }
@@ -106,13 +102,17 @@ class _uploadedetailsState extends State<uploadedetails> {
       isLoading = true; // Show loading indicator
     });
 
-    // Debounce the deductbalance function with a delay of 2000 milliseconds (2 seconds)
     EasyDebounce.debounce(
         'deductbalance', // unique ID for debounce
         Duration(milliseconds: 2000),
-        uploadImage);
+            () {
+          uploadImage().then((_) {
+            setState(() {
+              isLoading = false; // Hide loading indicator after upload completes
+            });
+          });
+        });
 
-    // After 3 seconds, hide the loading indicator
     Future.delayed(Duration(seconds: 25), () {
       setState(() {
         isLoading = false;
@@ -177,14 +177,6 @@ class _uploadedetailsState extends State<uploadedetails> {
             SizedBox(
               height: 10,
             ),
-
-            // Padding(
-            //   padding: const EdgeInsets.symmetric(horizontal: 10,vertical: 10),
-            //   child: ClipRRect(
-            //     borderRadius: BorderRadius.circular(10), // Adjust the radius as needed
-            //     child: widget.imageUrl,
-            //   ),
-            // ),
 
             Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -283,43 +275,6 @@ class _uploadedetailsState extends State<uploadedetails> {
               height: 20,
             ),
 
-            // Padding(
-            //   padding: const EdgeInsets.symmetric(horizontal: 10),
-            //   child: GestureDetector(
-            //     onTap: () {
-            //       setState(() {
-            //         showIndicator = !showIndicator;
-            //         uploadImage(); // Call uploadImage function
-            //
-            //       });
-            //     },
-            //     child: Stack(
-            //       children: [
-            //         Container(
-            //           height: 40,
-            //           width: 400,
-            //           decoration: BoxDecoration(
-            //             color: bluetext,
-            //             borderRadius: BorderRadius.all(Radius.circular(10)),
-            //           ),
-            //           child: Center(
-            //             child: Text(
-            //               "Share Post",
-            //               style: TextStyle(fontSize: 12, color: Colors.white),
-            //             ),
-            //           ),
-            //         ),
-            //         if (showIndicator)
-            //           Positioned.fill(
-            //             child: Center(
-            //               child: CircularProgressIndicator(),
-            //             ),
-            //           ),
-            //       ],
-            //     ),
-            //   ),
-            // ),
-
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10),
               child: InkWell(
@@ -335,22 +290,22 @@ class _uploadedetailsState extends State<uploadedetails> {
                   child: Center(
                     child: isLoading
                         ? LinearProgressIndicator(
-                            backgroundColor: Colors.transparent,
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Colors.white),
-                          ) // Show loading indicator
+                      backgroundColor: Colors.transparent,
+                      valueColor:
+                      AlwaysStoppedAnimation<Color>(Colors.white),
+                    ) // Show loading indicator
                         : Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                "Share Post",
-                                style: TextStyle(
-                                    color: white,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600),
-                              ),
-                            ],
-                          ),
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Share Post",
+                          style: TextStyle(
+                              color: white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
