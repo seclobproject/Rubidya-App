@@ -566,8 +566,14 @@ class _TopSixGridviewday extends State<TopSixGridviewweek> {
                         child: CircleAvatar(
                           radius: 30,
                           backgroundColor: bluetext,
-                          backgroundImage: NetworkImage(trendingthisweektopsix['response'][index]['profilePic']),
+                          backgroundImage: trendingthisweektopsix != null &&
+                              trendingthisweektopsix['response'] != null &&
+                              trendingthisweektopsix['response'][index] != null &&
+                              trendingthisweektopsix['response'][index]['profilePic'] != null
+                              ? NetworkImage(trendingthisweektopsix['response'][index]['profilePic'])
+                              : null,
                         ),
+
                       ),
                       Positioned(
                         top: 70,
