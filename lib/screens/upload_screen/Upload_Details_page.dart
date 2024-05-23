@@ -140,7 +140,7 @@ class _uploadedetailsState extends State<uploadedetails> {
                 alignment: Alignment.center,
                 padding: EdgeInsets.fromLTRB(30, 3, 20, 0),
                 margin: EdgeInsets.only(left: 10, right: 10),
-                height: 120,
+                // height: 120,
                 width: 400,
                 decoration: BoxDecoration(
                   color: white,
@@ -152,7 +152,7 @@ class _uploadedetailsState extends State<uploadedetails> {
                   maxLines: 5,
                   cursorColor: Colors.black,
                   textInputAction: TextInputAction.search,
-                  maxLength: 150,
+                  maxLength: 500,
                   // Set max length to 150 characters
                   decoration: InputDecoration(
                     border: InputBorder.none,

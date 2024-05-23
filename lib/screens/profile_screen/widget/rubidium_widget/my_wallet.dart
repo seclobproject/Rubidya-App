@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:rubidya/screens/profile_screen/widget/rubidium_widget/rubidya_exchange.dart';
 import 'package:rubidya/screens/profile_screen/widget/rubidium_widget/rubidya_premium.dart';
+import 'package:rubidya/screens/profile_screen/widget/rubidium_widget/transaction_History.dart';
 import 'package:rubidya/screens/profile_screen/widget/rubidium_widget/verification_page.dart';
 import 'package:rubidya/screens/profile_screen/widget/rubidium_widget/wallet.dart';
 import 'package:rubidya/screens/profile_screen/widget/rubidium_widget/withdrawal_page.dart';
@@ -987,10 +988,10 @@ class _MyWalletState extends State<MyWallet> {
 
             InkWell(
               onTap: (){
-                // Navigator.of(context).push(
-                //     MaterialPageRoute(
-                //         builder: (context) =>
-                //             premiumpage()));
+                Navigator.of(context).push(
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            TransactionHistory(id:  profiledetails?['user']?['_id'],)));
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),

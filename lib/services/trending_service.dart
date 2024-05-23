@@ -69,10 +69,13 @@ class TrendingService {
 
 
 
-  static Future trendingapiThisweek() async {
+  static Future trendingapiThisweek({int page = 1, int limit = 10}) async {
     try {
       var dio = await DioHelper.getInstance();
-      var response = await dio.get('$baseURL/api/posts/this-week-all-users');
+      var response = await dio.get('$baseURL/api/posts/this-week-all-users', queryParameters: {
+        'page': page,
+        'limit': limit,
+      },);
       return response.data;
     } catch (e) {
       rethrow;
@@ -80,7 +83,7 @@ class TrendingService {
   }
 
 
-  static Future trendingapiThismonth() async {
+  static Future trendingapiThismonth({int page = 1, int limit = 10}) async {
     try {
       var dio = await DioHelper.getInstance();
       var response = await dio.get('$baseURL/api/posts/this-month-all-users');
@@ -104,10 +107,13 @@ class TrendingService {
 
 
 
-  static Future trendingapiThisall() async {
+  static Future trendingapiThisall({int page = 1, int limit = 10}) async {
     try {
       var dio = await DioHelper.getInstance();
-      var response = await dio.get('$baseURL/api/posts/this-day-all-users');
+      var response = await dio.get('$baseURL/api/posts/this-day-all-users', queryParameters: {
+        'page': page,
+        'limit': limit,
+      },);
       return response.data;
     } catch (e) {
       rethrow;

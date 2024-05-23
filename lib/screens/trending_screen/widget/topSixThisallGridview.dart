@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rubidya/resources/color.dart';
+import 'package:rubidya/screens/trending_screen/widget/trending_Inner_Details.dart';
 import 'package:rubidya/services/trending_service.dart';
 import 'package:rubidya/support/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -18,7 +19,7 @@ class _TopSixGridviewall extends State<TopSixGridviewall> {
 
 
 
-  Future _trendingtopSixapithisweek(String status) async {
+  Future _trendingtopSixapithisall(String status) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? userid = prefs.getString('userid');
     try {
@@ -36,7 +37,7 @@ class _TopSixGridviewall extends State<TopSixGridviewall> {
   Future _initLoad() async {
     try {
       await Future.wait([
-        _trendingtopSixapithisweek(_selectedDropdownValue),
+        _trendingtopSixapithisall(_selectedDropdownValue),
 
 
       ]);
@@ -75,246 +76,14 @@ class _TopSixGridviewall extends State<TopSixGridviewall> {
         0.6, // Aspect ratio of each item
       ),
       itemBuilder: (BuildContext context, int index) {
-        return GestureDetector( onTap: () {
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                backgroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                contentPadding: EdgeInsets.zero,
-                content: StatefulBuilder(
-                    builder: (BuildContext context, StateSetter setState) {
-                      return Container(
-                        height: 325, //
-                        width: 315, //
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.all(Radius.circular(10)),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 10),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Container(
-                                    padding: EdgeInsets.all(3.0), // Border width
-                                    decoration: BoxDecoration(
-                                      color: bluetext, // Border color
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: CircleAvatar(
-                                      radius: 25,
-                                      backgroundColor: Colors.white,
-                                      backgroundImage: NetworkImage(
-                                        "https://www.befunky.com/images/wp/wp-2021-01-linkedin-profile-picture-focus-face.jpg?auto=avif,webp&format=jpg&width=1200",
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(width: 10),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment
-                                        .start, // Align text to start
-                                    children: [
-                                      SizedBox(height: 20,),
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                            top: 15.0), // Add top padding
-                                        child: Text(
-                                          'Lachu',
-                                          style: TextStyle(
-                                              color: bluetext,
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w600
-                                          ),
-                                        ),
-                                      ),
-                                      Text(
-                                        'Points: 654',
-                                        style: TextStyle(
-                                            color: bluetext,
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.w600
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 10,),
+        return GestureDetector(
+          onTap: () async {
 
-                              DropdownButton<String>(
-                                value: _selectedDropdownValue,
-                                items: <String>['Today', 'Week', 'Month'].map((String value) {
-                                  return DropdownMenuItem<String>(
-                                    value: value,
-                                    child: Text(value, style: TextStyle(fontSize: 10)),
-                                  );
-                                }).toList(),
-                                onChanged: (String? newValue) {
-                                  setState(() {
-                                    _selectedDropdownValue = newValue!;
-                                  });
-                                },
-                                underline: Container(),
-                                style: TextStyle(
-                                  color: bluetext,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => trendinginnerpage(id: trendingthisalltopsix['response'][index]['_id'],)),);
+          },
 
-
-
-                              Row(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.all(2.0),
-                                    child: Container(
-                                      height: 60,
-                                      width: 84,
-                                      decoration: BoxDecoration(
-                                          borderRadius:
-                                          BorderRadius.all(Radius.circular(10)),
-                                          color: Colors.white,
-                                          border: Border.all(
-                                              width: .5, color: bluetext)),
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            "Like",
-                                            style: TextStyle(
-                                                fontSize: 12, color: bluetext),
-                                          ),
-                                          Text(
-                                            "24",
-                                            style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold,
-                                                color: bluetext),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.all(2.0),
-                                    child: Container(
-                                      height: 60,
-                                      width: 84,
-                                      decoration: BoxDecoration(
-                                          borderRadius:
-                                          BorderRadius.all(Radius.circular(10)),
-                                          color: Colors.white,
-                                          border: Border.all(
-                                              width: .5, color: bluetext)),
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            "Comment",
-                                            style: TextStyle(
-                                                fontSize: 12, color: bluetext),
-                                          ),
-                                          Text(
-                                            "24",
-                                            style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold,
-                                                color: bluetext),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.all(2.0),
-                                    child: Container(
-                                      height: 60,
-                                      width: 84,
-                                      decoration: BoxDecoration(
-                                          borderRadius:
-                                          BorderRadius.all(Radius.circular(10)),
-                                          color: Colors.white,
-                                          border: Border.all(
-                                              width: .5, color: bluetext)),
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            "Referal",
-                                            style: TextStyle(
-                                                fontSize: 12, color: bluetext),
-                                          ),
-                                          Text(
-                                            "24",
-                                            style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold,
-                                                color: bluetext),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(
-                                height: 10,
-                              ),
-                              Row(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.all(2.0),
-                                    child: Container(
-                                      height: 60,
-                                      width: 84,
-                                      decoration: BoxDecoration(
-                                          borderRadius:
-                                          BorderRadius.all(Radius.circular(10)),
-                                          color: Colors.white,
-                                          border: Border.all(
-                                              width: .5, color: bluetext)),
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            "Photo",
-                                            style: TextStyle(
-                                                fontSize: 12, color: bluetext),
-                                          ),
-                                          Text(
-                                            "24",
-                                            style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold,
-                                                color: bluetext),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    }
-                ),
-              );
-
-            },
-          );
-        },
           child: Padding(
             padding: const EdgeInsets.symmetric(
                 horizontal: 10, vertical: 10),

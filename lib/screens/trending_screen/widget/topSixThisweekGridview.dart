@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rubidya/resources/color.dart';
+import 'package:rubidya/screens/trending_screen/widget/trending_Inner_Details.dart';
 import 'package:rubidya/services/trending_service.dart';
 import 'package:rubidya/support/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -47,7 +48,7 @@ class _TopSixGridviewday extends State<TopSixGridviewweek> {
 
   Future<int> _fetchfirstCommentPoints(String userId) async {
     try {
-      var response = await TrendingService.trendingallpointsthisday(userId);
+      var response = await TrendingService.trendingallpointsthisweek(userId);
       // Assuming the response is a JSON map and contains a list of points
       List<dynamic> points = response['response']; // Adjust based on actual API response structure
 
@@ -72,7 +73,7 @@ class _TopSixGridviewday extends State<TopSixGridviewweek> {
 
   Future<int> _fetchRefferalPoints(String userId) async {
     try {
-      var response = await TrendingService.trendingallpointsthisday(userId);
+      var response = await TrendingService.trendingallpointsthisweek(userId);
       // Assuming the response is a JSON map and contains a list of points
       List<dynamic> points = response['response']; // Adjust based on actual API response structure
 
@@ -98,7 +99,7 @@ class _TopSixGridviewday extends State<TopSixGridviewweek> {
 
   Future<int> _fetchPostPoints(String userId) async {
     try {
-      var response = await TrendingService.trendingallpointsthisday(userId);
+      var response = await TrendingService.trendingallpointsthisweek(userId);
       // Assuming the response is a JSON map and contains a list of points
       List<dynamic> points = response['response']; // Adjust based on actual API response structure
 
@@ -126,7 +127,7 @@ class _TopSixGridviewday extends State<TopSixGridviewweek> {
 
   Future<int> _fetchFirst_Points(String userId) async {
     try {
-      var response = await TrendingService.trendingallpointsthisday(userId);
+      var response = await TrendingService.trendingallpointsthisweek(userId);
       // Assuming the response is a JSON map and contains a list of points
       List<dynamic> points = response['response']; // Adjust based on actual API response structure
 
@@ -151,7 +152,7 @@ class _TopSixGridviewday extends State<TopSixGridviewweek> {
 
   Future<int> _fetchfollow_Points(String userId) async {
     try {
-      var response = await TrendingService.trendingallpointsthisday(userId);
+      var response = await TrendingService.trendingallpointsthisweek(userId);
       // Assuming the response is a JSON map and contains a list of points
       List<dynamic> points = response['response']; // Adjust based on actual API response structure
 
@@ -178,7 +179,7 @@ class _TopSixGridviewday extends State<TopSixGridviewweek> {
 
   Future<int> _fetchCommentPoints(String userId) async {
     try {
-      var response = await TrendingService.trendingallpointsthisday(userId);
+      var response = await TrendingService.trendingallpointsthisweek(userId);
       // Assuming the response is a JSON map and contains a list of points
       List<dynamic> points = response['response']; // Adjust based on actual API response structure
 
@@ -204,7 +205,7 @@ class _TopSixGridviewday extends State<TopSixGridviewweek> {
 
   Future<int> _fetchLikes(String userId) async {
     try {
-      var response = await TrendingService.trendingallpointsthisday(userId);
+      var response = await TrendingService.trendingallpointsthisweek(userId);
       // Assuming the response is a JSON map and contains a list of points
       List<dynamic> points = response['response']; // Adjust based on actual API response structure
 
@@ -262,262 +263,12 @@ class _TopSixGridviewday extends State<TopSixGridviewweek> {
       itemBuilder: (BuildContext context, int index) {
         return GestureDetector(
           onTap: () async {
-            String userName = trendingthisweektopsix['response'][index]['userName'];
-            String userId = trendingthisweektopsix['response'][index]['userId'];
-            var profile_pic_url = trendingthisweektopsix['response'][index]['profilePic'];
-            int points = await _fetchfullpoints(userId);
-            int likes = await _fetchLikes(userId);
 
-            int refferal = await _fetchRefferalPoints(userId);
-            int Comment = await _fetchCommentPoints(userId);
-            int follow = await _fetchFirst_Points(userId);
-
-            int post = await _fetchFirst_Points(userId);
-
-            showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return AlertDialog(
-                  backgroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  contentPadding: EdgeInsets.zero,
-                  content: StatefulBuilder(
-                    builder: (BuildContext context, StateSetter setState) {
-                      return Container(
-                        height: 325,
-                        width: 315,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.all(Radius.circular(10)),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Container(
-                                    padding: EdgeInsets.all(3.0), // Border width
-                                    decoration: BoxDecoration(
-                                      color: bluetext, // Border color
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: CircleAvatar(
-                                      radius: 25,
-                                      backgroundColor: Colors.white,
-                                      backgroundImage: NetworkImage(
-                                        profile_pic_url,
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(width: 10),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start, // Align text to start
-                                    children: [
-                                      SizedBox(height: 20),
-                                      Padding(
-                                        padding: const EdgeInsets.only(top: 15.0), // Add top padding
-                                        child: Text(
-                                          userName,
-                                          style: TextStyle(
-                                            color: bluetext,
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                      ),
-                                      Text(
-                                        'Points: $points',
-                                        style: TextStyle(
-                                          color: bluetext,
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 10),
-
-                              Row(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.all(2.0),
-                                    child: Container(
-                                      height: 60,
-                                      width: 84,
-                                      decoration: BoxDecoration(
-                                          borderRadius:
-                                          BorderRadius.all(Radius.circular(10)),
-                                          color: Colors.white,
-                                          border: Border.all(
-                                              width: .5, color: bluetext)),
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            "Like",
-                                            style: TextStyle(
-                                                fontSize: 12, color: bluetext),
-                                          ),
-                                          Text(
-                                            '$likes',
-                                            style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold,
-                                                color: bluetext),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.all(2.0),
-                                    child: Container(
-                                      height: 60,
-                                      width: 84,
-                                      decoration: BoxDecoration(
-                                          borderRadius:
-                                          BorderRadius.all(Radius.circular(10)),
-                                          color: Colors.white,
-                                          border: Border.all(
-                                              width: .5, color: bluetext)),
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            "comment",
-                                            style: TextStyle(
-                                                fontSize: 12, color: bluetext),
-                                          ),
-                                          Text(
-                                            '$Comment',
-                                            style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold,
-                                                color: bluetext),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.all(2.0),
-                                    child: Container(
-                                      height: 60,
-                                      width: 84,
-                                      decoration: BoxDecoration(
-                                          borderRadius:
-                                          BorderRadius.all(Radius.circular(10)),
-                                          color: Colors.white,
-                                          border: Border.all(
-                                              width: .5, color: bluetext)),
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            "Referal",
-                                            style: TextStyle(
-                                                fontSize: 12, color: bluetext),
-                                          ),
-                                          Text(
-                                            '$refferal',
-                                            style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold,
-                                                color: bluetext),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(
-                                height: 10,
-                              ),
-                              Row(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.all(2.0),
-                                    child: Container(
-                                      height: 60,
-                                      width: 84,
-                                      decoration: BoxDecoration(
-                                          borderRadius:
-                                          BorderRadius.all(Radius.circular(10)),
-                                          color: Colors.white,
-                                          border: Border.all(
-                                              width: .5, color: bluetext)),
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            "Photo",
-                                            style: TextStyle(
-                                                fontSize: 12, color: bluetext),
-                                          ),
-                                          Text(
-                                            '$post',
-                                            style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold,
-                                                color: bluetext),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-
-                                  Padding(
-                                    padding: const EdgeInsets.all(2.0),
-                                    child: Container(
-                                      height: 60,
-                                      width: 84,
-                                      decoration: BoxDecoration(
-                                          borderRadius:
-                                          BorderRadius.all(Radius.circular(10)),
-                                          color: Colors.white,
-                                          border: Border.all(
-                                              width: .5, color: bluetext)),
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            "Other",
-                                            style: TextStyle(
-                                                fontSize: 12, color: bluetext),
-                                          ),
-                                          Text(
-                                            '$follow',
-                                            style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold,
-                                                color: bluetext),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                );
-              },
-            );
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => trendinginnerpage(id: trendingthisweektopsix['response'][index]['_id'],)),);
           },
+
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
             child: Container(

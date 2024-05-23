@@ -353,6 +353,7 @@ class FullScreenImageDialog extends StatefulWidget {
 
 class _FullScreenImageDialogState extends State<FullScreenImageDialog> {
   late ScrollController scrollController;
+  bool isExpanded = false;
 
   @override
   void initState() {
@@ -567,11 +568,91 @@ class _FullScreenImageDialogState extends State<FullScreenImageDialog> {
                                   SizedBox(width: 2),
                                 ],
                               ),
+
+                              Row(
+                                children: [
+                                  RichText(
+                                    text: TextSpan(
+                                      style: TextStyle(
+                                        color: bluetext,
+                                        fontSize: 12,
+                                      ),
+                                      children: [
+                                        TextSpan(
+                                          text: "Liked by ",
+                                          style: TextStyle(
+
+                                          ),
+                                        ),
+                                        TextSpan(
+                                          text: "${widget.profileList['media'][index]['likeCount'].toString()}",
+                                          style: TextStyle(
+                                            color: bluetext,
+                                            fontWeight: FontWeight.w800,
+                                          ),
+                                        ),
+
+                                        TextSpan(
+                                          text: " and",
+                                          style: TextStyle(
+                                            color: bluetext,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+
+                                  SizedBox(width: 2),
+                                  Text( "${widget.profileList['media'][index]['lastLikedUserName'].toString()} Others ",
+                                      style: TextStyle(
+                                          color: bluetext,
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w700)),
+                                  SizedBox(width: 2),
+
+                                ],
+                              ),
                             ],
                           ),
+
                         ),
-                        SizedBox(height: 10),
-                        SizedBox(height: 50),
+                        SizedBox(height: 5),
+
+                        Align(
+                          alignment: Alignment.topLeft,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 15),
+                            child: Container(
+                              height: isExpanded ? null : 40, // Adjust height when expanded
+                              child: Text(
+                                widget.profileList['media'][index]['description'],
+                                maxLines: isExpanded ? null : 2,
+                                style: TextStyle(fontSize: 12,fontWeight: FontWeight.w700),
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        if ( widget.profileList['media'][index]['description'].split('\n').length > 2) // Check for multiline
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                isExpanded = !isExpanded; // Toggle the isExpanded state
+                              });
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 10),
+                              child: Align(
+                                alignment: Alignment.bottomRight,
+                                child: Text(
+                                  isExpanded ? 'See Less' : 'See More',
+                                  style: TextStyle(color: bluetext, fontSize: 8),
+                                ),
+                              ),
+                            ),
+                          ),
+
                       ],
                     ),
                   ),
