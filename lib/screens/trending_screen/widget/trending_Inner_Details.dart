@@ -137,7 +137,7 @@ class _TrendingInnerPageState extends State<TrendingInnerPage> {
                   childAspectRatio: 1.0,
 
                 ),
-                itemCount: 6,
+                itemCount: trendingdayInner?['response']?.length ?? 0,
                 itemBuilder: (context, index) {
                   return Padding(
                     padding: const EdgeInsets.only(left: 10,right: 10,top: 10,bottom: 10),

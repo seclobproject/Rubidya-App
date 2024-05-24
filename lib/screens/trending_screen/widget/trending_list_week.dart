@@ -274,7 +274,6 @@ class _TrendingListState extends State<TrendingListWeek> {
                     if (index < trendinglist.length ) {
                       return InkWell(
                         onTap: () async {
-
                           Navigator.push(
                             context,
                             MaterialPageRoute(builder: (context) => TrendingInnerPage(id: trendingthisalltopsix['response'][index]['_id'],dayidentifier: 'thisall')),);
