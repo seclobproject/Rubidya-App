@@ -17,11 +17,11 @@ class _TopSixGridviewmonth extends State<TopSixGridviewmonth> {
 
   var trendingalltimepoints;
 
-  Future _trendingtopSixapithisweek(String status) async {
+  Future _trendingtopSixapithismonth(String status) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? userid = prefs.getString('userid');
     try {
-      var response = await TrendingService.trendingapiThisweek();
+      var response = await TrendingService.trendingapiThismonth();
       log.i('tranding by days .. $response');
       setState(() {
         trendingthismonthtopsix = response;
@@ -34,7 +34,7 @@ class _TopSixGridviewmonth extends State<TopSixGridviewmonth> {
 
   Future<int> _fetchfullpoints(String userId) async {
     try {
-      var response = await TrendingService.trendingallpointsthisweek(userId);
+      var response = await TrendingService.trendingapiThismonth();
       return response['fullPoint'];  // Assuming the API response contains the 'likes' field
     } catch (e) {
       print('Error fetching likes: $e');
@@ -48,7 +48,7 @@ class _TopSixGridviewmonth extends State<TopSixGridviewmonth> {
 
   Future<int> _fetchfirstCommentPoints(String userId) async {
     try {
-      var response = await TrendingService.trendingallpointsthisday(userId);
+      var response = await TrendingService.trendingapiThismonth();
       // Assuming the response is a JSON map and contains a list of points
       List<dynamic> points = response['response']; // Adjust based on actual API response structure
 
@@ -73,7 +73,7 @@ class _TopSixGridviewmonth extends State<TopSixGridviewmonth> {
 
   Future<int> _fetchRefferalPoints(String userId) async {
     try {
-      var response = await TrendingService.trendingallpointsthisday(userId);
+      var response = await TrendingService.trendingapiThismonth();
       // Assuming the response is a JSON map and contains a list of points
       List<dynamic> points = response['response']; // Adjust based on actual API response structure
 
@@ -99,7 +99,7 @@ class _TopSixGridviewmonth extends State<TopSixGridviewmonth> {
 
   Future<int> _fetchPostPoints(String userId) async {
     try {
-      var response = await TrendingService.trendingallpointsthisday(userId);
+      var response = await TrendingService.trendingapiThismonth();
       // Assuming the response is a JSON map and contains a list of points
       List<dynamic> points = response['response']; // Adjust based on actual API response structure
 
@@ -127,7 +127,7 @@ class _TopSixGridviewmonth extends State<TopSixGridviewmonth> {
 
   Future<int> _fetchFirst_Points(String userId) async {
     try {
-      var response = await TrendingService.trendingallpointsthisday(userId);
+      var response = await TrendingService.trendingapiThismonth();
       // Assuming the response is a JSON map and contains a list of points
       List<dynamic> points = response['response']; // Adjust based on actual API response structure
 
@@ -152,7 +152,7 @@ class _TopSixGridviewmonth extends State<TopSixGridviewmonth> {
 
   Future<int> _fetchfollow_Points(String userId) async {
     try {
-      var response = await TrendingService.trendingallpointsthisday(userId);
+      var response = await TrendingService.trendingapiThismonth();
       // Assuming the response is a JSON map and contains a list of points
       List<dynamic> points = response['response']; // Adjust based on actual API response structure
 
@@ -179,7 +179,7 @@ class _TopSixGridviewmonth extends State<TopSixGridviewmonth> {
 
   Future<int> _fetchCommentPoints(String userId) async {
     try {
-      var response = await TrendingService.trendingallpointsthismonth(userId);
+      var response = await TrendingService.trendingapiThismonth();
       // Assuming the response is a JSON map and contains a list of points
       List<dynamic> points = response['response']; // Adjust based on actual API response structure
 
@@ -205,7 +205,7 @@ class _TopSixGridviewmonth extends State<TopSixGridviewmonth> {
 
   Future<int> _fetchLikes(String userId) async {
     try {
-      var response = await TrendingService.trendingallpointsthisday(userId);
+      var response = await TrendingService.trendingapiThismonth();
       // Assuming the response is a JSON map and contains a list of points
       List<dynamic> points = response['response']; // Adjust based on actual API response structure
 
@@ -230,7 +230,7 @@ class _TopSixGridviewmonth extends State<TopSixGridviewmonth> {
   Future _initLoad() async {
     try {
       await Future.wait([
-        _trendingtopSixapithisweek(_selectedDropdownValue),
+        _trendingtopSixapithismonth(_selectedDropdownValue),
       ]);
       setState(() {
         _isLoading = false;
@@ -267,7 +267,7 @@ class _TopSixGridviewmonth extends State<TopSixGridviewmonth> {
 
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => trendinginnerpage(id: trendingthismonthtopsix['response'][index]['_id'],)),);
+              MaterialPageRoute(builder: (context) => TrendingInnerPage(id: trendingthismonthtopsix['response'][index]['_id'],dayidentifier: "thismonth")),);
           },
 
           child: Padding(

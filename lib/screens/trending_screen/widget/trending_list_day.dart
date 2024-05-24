@@ -7,31 +7,48 @@ import 'package:rubidya/services/trending_service.dart';
 import 'package:rubidya/support/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class TrendingListAll extends StatefulWidget {
+
+class TrendingListDay extends StatefulWidget {
   @override
-  State<TrendingListAll> createState() => _TrendingListAllState();
+  State<TrendingListDay> createState() => _TrendingListState();
 }
 
-class _TrendingListAllState extends State<TrendingListAll> {
+class _TrendingListState extends State<TrendingListDay> {
+  String _selectedDropdownValue = 'Thisday';
   String? userid;
   var trendingprice;
   var trendingcardprice;
-  var trendingthisalltopsix;
   bool _isLoading = true;
   bool _isLoadingMore = false;
   int _pageNumber = 1;
   bool _hasMore = true;
+  var trendingthisalltopsix;
   List<Map<String, dynamic>> trendinglist = [];
 
+
+  Future _trendingtopSixapithisall(String status) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? userid = prefs.getString('userid');
+    try {
+      var response = await TrendingService.trendingapiThisday();
+      log.i('tranding by all .. $response');
+      setState(() {
+        trendingthisalltopsix = response;
+      });
+    } catch (e) {
+      // Handle error appropriately here
+      print('Error in _trendingtopSixapi: $e');
+    }
+  }
 
   Future<void> _trendingcarddetailsapi() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     userid = prefs.getString('userid');
     if (userid != null) {
-      var response = await TrendingService.trendingapiThisweek(page: _pageNumber);
+      var response = await TrendingService.trendingapiThisday(page: _pageNumber);
       log.i('trending card details show.. $response');
       setState(() {
-        trendingthisalltopsix = response;
+        trendingcardprice = response;
         trendinglist = List<Map<String, dynamic>>.from(response['response']);
         _hasMore = _pageNumber < response['totalPages'];
       });
@@ -40,12 +57,11 @@ class _TrendingListAllState extends State<TrendingListAll> {
     }
   }
 
-
   Future<void> _trendingdetailsapi() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     userid = prefs.getString('userid');
     if (userid != null) {
-      var response = await TrendingService.trendingapiThisallmore();
+      var response = await TrendingService.trendingapiThisday();
       log.i('trending details show.. $response');
       setState(() {
         trendingprice = response;
@@ -59,6 +75,7 @@ class _TrendingListAllState extends State<TrendingListAll> {
     await Future.wait([
       _trendingdetailsapi(),
       _trendingcarddetailsapi(),
+      _trendingtopSixapithisall(_selectedDropdownValue),
     ]);
     setState(() {
       _isLoading = false;
@@ -122,15 +139,17 @@ class _TrendingListAllState extends State<TrendingListAll> {
                   childAspectRatio: 0.6,
                 ),
                 itemBuilder: (BuildContext context, int index) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                    child: InkWell(
-                      onTap: () async {
 
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => TrendingInnerPage(id: trendingthisalltopsix['response'][index]['_id'],dayidentifier: 'thisall')),);
-                      },
+
+                  return GestureDetector(
+                    onTap: () async {
+
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => TrendingInnerPage(id: trendingthisalltopsix['response'][index]['_id'],dayidentifier: 'thisall')),);
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                       child: Container(
                         height: 190,
                         decoration: BoxDecoration(
@@ -259,18 +278,20 @@ class _TrendingListAllState extends State<TrendingListAll> {
 
                   itemCount: 100,
                   itemBuilder: (BuildContext context, int index) {
-                    if (index < trendinglist.length) {
-                      return Container(
-                        color: Color(0xFFE6E8F4),
-                        child: ListTile(
-                          title: InkWell(
-                            onTap: () async {
 
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => TrendingInnerPage(id: trendingthisalltopsix['response'][index]['_id'],dayidentifier: 'thisall')),);
-                            },
-                            child: Container(
+
+                    if (index < trendinglist.length - 3) {
+                      return GestureDetector(
+                        onTap: () async {
+
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => TrendingInnerPage(id: trendingthisalltopsix['response'][index]['_id'],dayidentifier: 'thisall')),);
+                        },
+                        child: Container(
+                          color: Color(0xFFE6E8F4),
+                          child: ListTile(
+                            title: Container(
                               height: 50,
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.all(Radius.circular(10)),
@@ -295,7 +316,7 @@ class _TrendingListAllState extends State<TrendingListAll> {
                                   ),
                                   SizedBox(width: 10),
                                   Text(
-                                    trendinglist[index ]['userName'] ?? '',
+                                    trendinglist[index]['userName'] ?? '',
                                     style: TextStyle(
                                       fontSize: 12,
                                       color: bluetext,
@@ -304,7 +325,7 @@ class _TrendingListAllState extends State<TrendingListAll> {
                                   ),
                                   Spacer(),
                                   Text(
-                                    trendinglist[index ]['totalPoints'].toString() + " Pts ",
+                                    trendinglist[index]['totalPoints'].toString() + " Pts ",
                                     style: TextStyle(
                                       fontSize: 12,
                                       color: bluetext,
@@ -318,7 +339,7 @@ class _TrendingListAllState extends State<TrendingListAll> {
                           ),
                         ),
                       );
-                    } else {
+                    } else
                       return _isLoadingMore
                           ? Padding(
                         padding: const EdgeInsets.all(8.0),
@@ -327,7 +348,7 @@ class _TrendingListAllState extends State<TrendingListAll> {
                         ),
                       )
                           : Container(); // Adjust loading widget as needed
-                    }
+
                   },
                 ),
               ),

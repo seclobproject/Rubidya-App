@@ -150,7 +150,7 @@ class HomeService {
   //   }
   // }
 
-  static Future<Map<String, dynamic>> getFeed({int page = 1, int limit = 2}) async {
+  static Future<Map<String, dynamic>> getFeed({int page = 1, int limit = 7}) async {
     try {
       var dio = await DioHelper.getInstance();
       var response = await dio.get('$baseURL/api/posts/get-latest-posts?page=$page&limit=$limit');

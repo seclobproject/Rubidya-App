@@ -273,15 +273,14 @@ class _homepageState extends State<homepage> {
                 physics: NeverScrollableScrollPhysics(),
                 shrinkWrap: true,
                 itemCount: (homeList != null &&
-                        homeList['posts'] != null &&
-                        homeList['posts'].isNotEmpty)
-                    ? homeList['posts'].length + (homeList['posts'].length ~/ 6)
-                    : 1,
-                // Ensure there's at least one item if posts are empty or homeList is null
+                    homeList['posts'] != null &&
+                    homeList['posts'].isNotEmpty)
+                    ? homeList['posts'].length
+                    : 1, // Ensure there's at least one item if posts are empty or homeList is null
                 itemBuilder: (BuildContext context, int index) {
                   if ((homeList == null ||
-                          homeList['posts'] == null ||
-                          homeList['posts'].isEmpty) &&
+                      homeList['posts'] == null ||
+                      homeList['posts'].isEmpty) &&
                       index == 0) {
                     // Show suggestFollow list if there are no posts
                     return Column(
@@ -294,8 +293,7 @@ class _homepageState extends State<homepage> {
                               "New People",
                               style: TextStyle(
                                 fontWeight: FontWeight.w500,
-                                color:
-                                    buttoncolor, // Assuming bluetext is defined
+                                color: buttoncolor, // Assuming buttoncolor is defined
                               ),
                             ),
                           ),
@@ -312,117 +310,47 @@ class _homepageState extends State<homepage> {
                                   name: suggestFollow[index]['firstName'],
                                   id: suggestFollow[index]['_id'],
                                   status: suggestFollow[index]['isFollowing'],
-                                  img:
-                                      suggestFollow[index]['profilePic'] != null
-                                          ? suggestFollow[index]['profilePic']
-                                              ['filePath']
-                                          : '',
+                                  img: suggestFollow[index]['profilePic'] != null
+                                      ? suggestFollow[index]['profilePic']['filePath']
+                                      : '',
                                   onFollowToggled: () => toggleFollow(index),
                                 );
                               },
                             ),
                           ),
                         ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                      ],
-                    );
-                  } else if ((index + 1) % 4 == 0) {
-                    // Show suggestFollow list after every 5 posts
-                    return Column(
-                      children: [
-                        // Align(
-                        //   alignment: Alignment.topLeft,
-                        //   child: Padding(
-                        //     padding: const EdgeInsets.symmetric(horizontal: 20),
-                        //     child: Text(
-                        //       "New People",
-                        //       style: TextStyle(
-                        //         fontWeight: FontWeight.w500,
-                        //         color:
-                        //             buttoncolor, // Assuming bluetext is defined
-                        //       ),
-                        //     ),
-                        //   ),
-                        // ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: SizedBox(
-                            height: 160,
-                            child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              itemCount: suggestFollow.length,
-                              itemBuilder: (BuildContext context, int index) {
-                                return MembersListing(
-                                  name: suggestFollow[index]['firstName'],
-                                  id: suggestFollow[index]['_id'],
-                                  status: suggestFollow[index]['isFollowing'],
-                                  img:
-                                      suggestFollow[index]['profilePic'] != null
-                                          ? suggestFollow[index]['profilePic']
-                                              ['filePath']
-                                          : '',
-                                  onFollowToggled: () => toggleFollow(index),
-                                );
-                              },
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
+                        SizedBox(height: 10),
                       ],
                     );
                   } else {
-                    int postIndex = index - (index ~/ 6);
+                    // Show posts
                     if (homeList != null &&
                         homeList['posts'] != null &&
-                        postIndex < homeList['posts'].length) {
+                        index < homeList['posts'].length) {
                       return Column(
                         children: [
                           ProductCard(
                             createdTime: _calculateTimeDifference(
-                                homeList['posts'][postIndex]['createdAt']),
-                            name:
-                                homeList['posts'][postIndex]['username'] ?? '',
-                            description: homeList['posts'][postIndex]
-                                    ['description'] ??
-                                '',
-                            likes: homeList['posts'][postIndex]['likeCount']
-                                    ?.toString() ??
-                                '',
-                            img: homeList['posts'][postIndex]['filePath'] ?? '',
-                            profilepic: homeList['posts'][postIndex]
-                                    ['profilePic'] ??
-                                '',
-                            likedby: homeList['posts'][postIndex]
-                                    ['lastLikedUserName'] ??
-                                '',
-                            commentby: homeList['posts'][postIndex]
-                                    ['lastCommentedUser'] ??
-                                '',
-                            commentcount: homeList['posts'][postIndex]
-                                        ['commentCount']
-                                    .toString() ??
-                                '',
-                            id: homeList['posts'][postIndex]['_id'] ?? '',
-                            userId:
-                                homeList['posts'][postIndex]['userId'] ?? '',
-                            likeCount: homeList['posts'][postIndex]
-                                    ['isLiked'] ??
-                                false,
+                                homeList['posts'][index]['createdAt']),
+                            name: homeList['posts'][index]['username'] ?? '',
+                            description: homeList['posts'][index]['description'] ?? '',
+                            likes: homeList['posts'][index]['likeCount']?.toString() ?? '',
+                            img: homeList['posts'][index]['filePath'] ?? '',
+                            profilepic: homeList['posts'][index]['profilePic'] ?? '',
+                            likedby: homeList['posts'][index]['lastLikedUserName'] ?? '',
+                            commentby: homeList['posts'][index]['lastCommentedUser'] ?? '',
+                            commentcount: homeList['posts'][index]['commentCount'].toString() ?? '',
+                            id: homeList['posts'][index]['_id'] ?? '',
+                            userId: homeList['posts'][index]['userId'] ?? '',
+                            likeCount: homeList['posts'][index]['isLiked'] ?? false,
                             onLikePressed: () {
-                              _toggleLikePost(
-                                  homeList['posts'][postIndex]['_id']);
+                              _toggleLikePost(homeList['posts'][index]['_id']);
                             },
                             onDoubleTapLike: () {
-                              _toggleLikePost(
-                                  homeList['posts'][postIndex]['_id']);
+                              _toggleLikePost(homeList['posts'][index]['_id']);
                             },
                           ),
-                          if (isLoading &&
-                              postIndex == homeList['posts'].length - 1)
+                          if (isLoading && index == homeList['posts'].length - 1)
                             Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: CircularProgressIndicator(),
@@ -430,11 +358,11 @@ class _homepageState extends State<homepage> {
                         ],
                       );
                     }
-                    return SizedBox
-                        .shrink(); // Return an empty widget for out of bounds indices
+                    return SizedBox.shrink(); // Return an empty widget for out of bounds indices
                   }
                 },
               )
+
             ],
           ),
         ),

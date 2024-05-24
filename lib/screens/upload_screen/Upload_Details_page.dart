@@ -9,7 +9,7 @@ import '../../commonpage/filters.dart';
 import '../../navigation/bottom_navigation.dart';
 import '../../services/upload_image.dart';
 import 'dart:typed_data';
-import 'dart:ui' as ui; // Add this import for the Image class
+import 'dart:ui' as ui;
 import 'package:flutter/rendering.dart';
 import 'package:easy_debounce/easy_debounce.dart';
 
@@ -27,10 +27,9 @@ class _uploadedetailsState extends State<uploadedetails> {
   String? imageUrl;
   String? description;
   bool showIndicator = false;
-  bool uploading = false; // Flag to track if upload is in progress
+  bool uploading = false;
   bool isLoading = false;
 
-  // Define selectedFilterIndex variable
   int selectedFilterIndex = 0;
   WidgetsToImageController controller = WidgetsToImageController();
   late String userId;
@@ -50,20 +49,20 @@ class _uploadedetailsState extends State<uploadedetails> {
   }
 
   Future<void> uploadImage() async {
+    if (uploading) return;
+
     setState(() {
-      uploading = true; // Set uploading flag to true when upload starts
+      uploading = true;
+      isLoading = true;
     });
 
     try {
-      // Get the rendered image
       RenderRepaintBoundary boundary =
       imageKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
       ui.Image image = await boundary.toImage(pixelRatio: 5.0);
-      ByteData? byteData =
-      await image.toByteData(format: ui.ImageByteFormat.png);
+      ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
       Uint8List uint8List = byteData!.buffer.asUint8List();
 
-      // Create FormData
       FormData formData = FormData.fromMap({
         'media': MultipartFile.fromBytes(
           uint8List,
@@ -72,48 +71,61 @@ class _uploadedetailsState extends State<uploadedetails> {
         'description': description,
       });
 
-      // Upload image
       var response = await UploadService.uploadimage(formData);
       if (response['sts'] == "01") {
         print("Image uploaded successfully");
         Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (context) => Bottomnav()),
-                (route) => false);
+          MaterialPageRoute(builder: (context) => Bottomnav(initialPageIndex: 4)),
+              (route) => false,
+        );
+
         print(response['msg']);
-        // Handle success
       } else {
         print(response['sts']);
         print(response['msg']);
-        // Handle failure
       }
+    } on DioException catch (e) {
+      print("Exception during image upload: $e");
+      String errorMessage = "Connection error. Please try again.";
+      if (e.type == DioErrorType.connectionError) {
+        errorMessage = "No Internet connection. Please check your network.";
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(errorMessage),
+          backgroundColor: Colors.red,
+        ),
+      );
     } catch (e) {
       print("Exception during image upload: $e");
-      // Handle exception
     } finally {
       setState(() {
-        uploading =
-        false; // Set uploading flag to false when upload completes or encounters an error
+        uploading = false;
+        isLoading = false;
       });
     }
   }
 
   void _handleTap() {
+    if (isLoading) return;
+
     setState(() {
-      isLoading = true; // Show loading indicator
+      isLoading = true;
     });
 
     EasyDebounce.debounce(
-        'deductbalance', // unique ID for debounce
-        Duration(milliseconds: 2000),
-            () {
-          uploadImage().then((_) {
-            setState(() {
-              isLoading = false; // Hide loading indicator after upload completes
-            });
+      'deductbalance',
+      Duration(milliseconds: 3000),
+          () {
+        uploadImage().then((_) {
+          setState(() {
+            isLoading = false;
           });
         });
+      },
+    );
 
-    Future.delayed(Duration(seconds: 25), () {
+    Future.delayed(Duration(seconds: 15), () {
       setState(() {
         isLoading = false;
       });
@@ -140,7 +152,6 @@ class _uploadedetailsState extends State<uploadedetails> {
                 alignment: Alignment.center,
                 padding: EdgeInsets.fromLTRB(30, 3, 20, 0),
                 margin: EdgeInsets.only(left: 10, right: 10),
-                // height: 120,
                 width: 400,
                 decoration: BoxDecoration(
                   color: white,
@@ -153,7 +164,6 @@ class _uploadedetailsState extends State<uploadedetails> {
                   cursorColor: Colors.black,
                   textInputAction: TextInputAction.search,
                   maxLength: 500,
-                  // Set max length to 150 characters
                   decoration: InputDecoration(
                     border: InputBorder.none,
                     hintText: 'Description...',
@@ -168,31 +178,26 @@ class _uploadedetailsState extends State<uploadedetails> {
                 ),
               ),
             ),
-
             Divider(
               color: Colors.black,
               thickness: .1,
             ),
-
             SizedBox(
               height: 10,
             ),
-
             Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: RepaintBoundary(
-                  key: imageKey,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(0.0),
-                    // Adjust the value as per your requirement
-                    child: widget.imageUrl,
-                  ),
-                )),
-
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: RepaintBoundary(
+                key: imageKey,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(0.0),
+                  child: widget.imageUrl,
+                ),
+              ),
+            ),
             SizedBox(
               height: 20,
             ),
-
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               child: Align(
@@ -202,12 +207,10 @@ class _uploadedetailsState extends State<uploadedetails> {
                     style: TextStyle(fontSize: 15, fontWeight: FontWeight.w400),
                   )),
             ),
-
             Divider(
               color: Colors.black,
               thickness: .1,
             ),
-
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               child: Align(
@@ -217,12 +220,10 @@ class _uploadedetailsState extends State<uploadedetails> {
                     style: TextStyle(fontSize: 15, fontWeight: FontWeight.w400),
                   )),
             ),
-
             Divider(
               color: Colors.black,
               thickness: .1,
             ),
-
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               child: Align(
@@ -231,8 +232,7 @@ class _uploadedetailsState extends State<uploadedetails> {
                     children: [
                       Text(
                         "Audience",
-                        style: TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.w400),
+                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w400),
                       ),
                       Expanded(child: SizedBox()),
                       Text(
@@ -250,12 +250,10 @@ class _uploadedetailsState extends State<uploadedetails> {
                     ],
                   )),
             ),
-
             Divider(
               color: Colors.black,
               thickness: .1,
             ),
-
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               child: Align(
@@ -265,35 +263,30 @@ class _uploadedetailsState extends State<uploadedetails> {
                     style: TextStyle(fontSize: 15, fontWeight: FontWeight.w400),
                   )),
             ),
-
             Divider(
               color: Colors.black,
               thickness: .1,
             ),
-
             SizedBox(
               height: 20,
             ),
-
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10),
               child: InkWell(
                 onTap: isLoading ? null : _handleTap,
-                // Prevent tapping when loading
                 child: Container(
                   height: 36,
                   width: 400,
                   decoration: BoxDecoration(
-                    color: bluetext, // Change to your desired color
+                    color: bluetext,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Center(
                     child: isLoading
                         ? LinearProgressIndicator(
                       backgroundColor: Colors.transparent,
-                      valueColor:
-                      AlwaysStoppedAnimation<Color>(Colors.white),
-                    ) // Show loading indicator
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    )
                         : Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -310,7 +303,6 @@ class _uploadedetailsState extends State<uploadedetails> {
                 ),
               ),
             ),
-
             SizedBox(
               height: 50,
             ),

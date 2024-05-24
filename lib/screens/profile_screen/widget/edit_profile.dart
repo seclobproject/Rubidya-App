@@ -148,7 +148,9 @@ class _editprofileState extends State<editprofile> {
       );
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => Bottomnav()),
+        MaterialPageRoute(builder: (context) => Bottomnav(
+          initialPageIndex: 4,
+        )),
       );
 
     } catch (error) {

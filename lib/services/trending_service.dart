@@ -94,7 +94,7 @@ class TrendingService {
   }
 
 
-  static Future trendingapiThisday() async {
+  static Future trendingapiThisday({int page = 1, int limit = 10}) async {
     try {
       var dio = await DioHelper.getInstance();
       var response = await dio.get('$baseURL/api/posts/this-day-all-users');
@@ -107,10 +107,20 @@ class TrendingService {
 
 
 
-  static Future trendingapiThisall({int page = 1, int limit = 10}) async {
+  static Future trendingapiThisall() async {
     try {
       var dio = await DioHelper.getInstance();
-      var response = await dio.get('$baseURL/api/posts/this-day-all-users', queryParameters: {
+      var response = await dio.get('$baseURL/api/posts/all-time-all-users', );
+      return response.data;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  static Future trendingapiThisallmore({int page = 1, int limit = 10}) async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.get('$baseURL/api/posts/all-time-all-users', queryParameters: {
         'page': page,
         'limit': limit,
       },);
@@ -126,6 +136,16 @@ class TrendingService {
     try {
       var dio = await DioHelper.getInstance();
       var response = await dio.get('$baseURL/api/posts/this-day/$id');
+      return response.data;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  static Future trendingallpointsthisall(id) async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.get('$baseURL/api/posts/all-time/$id');
       return response.data;
     } catch (e) {
       rethrow;
@@ -165,6 +185,8 @@ class TrendingService {
 
 
 
+
+
   static Future TrendingDayinnerpage(id) async {
     try {
       var dio = await DioHelper.getInstance();
@@ -178,20 +200,7 @@ class TrendingService {
 
 
 
-// static Future trendingapiThisweek(String status) async {
-//   try {
-//     var queryParameters = {
 
-//     };
-//     var dio = await DioHelper.getInstance();
-//     var response = await dio.get('$baseURL/api/posts/top-six', queryParameters: queryParameters);
-//     return response.data;
-//   } catch (e) {
-//     print('Error occurred: $e');
-//     // Handle the error appropriately here
-//     throw e; // Or handle it in another way
-//   }
-// }
 
 
 }

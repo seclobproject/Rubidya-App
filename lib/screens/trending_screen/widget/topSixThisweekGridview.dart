@@ -266,7 +266,7 @@ class _TopSixGridviewday extends State<TopSixGridviewweek> {
 
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => trendinginnerpage(id: trendingthisweektopsix['response'][index]['_id'],)),);
+              MaterialPageRoute(builder: (context) => TrendingInnerPage(id: trendingthisweektopsix['response'][index]['_id'],dayidentifier: "thisweek")),);
           },
 
           child: Padding(

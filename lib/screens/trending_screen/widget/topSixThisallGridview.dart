@@ -23,7 +23,7 @@ class _TopSixGridviewall extends State<TopSixGridviewall> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? userid = prefs.getString('userid');
     try {
-      var response = await TrendingService.trendingapiThisall();
+      var response = await TrendingService.trendingapiThisallmore();
       log.i('tranding by all .. $response');
       setState(() {
         trendingthisalltopsix = response;
@@ -33,6 +33,12 @@ class _TopSixGridviewall extends State<TopSixGridviewall> {
       print('Error in _trendingtopSixapi: $e');
     }
   }
+
+
+
+
+
+
 
   Future _initLoad() async {
     try {
@@ -81,7 +87,7 @@ class _TopSixGridviewall extends State<TopSixGridviewall> {
 
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => trendinginnerpage(id: trendingthisalltopsix['response'][index]['_id'],)),);
+              MaterialPageRoute(builder: (context) => TrendingInnerPage(id: trendingthisalltopsix['response'][index]['_id'],dayidentifier: 'thisall')),);
           },
 
           child: Padding(

@@ -11,16 +11,19 @@ import '../screens/upload_screen/uploadscreen.dart';
 
 
 class Bottomnav extends StatefulWidget {
-  const Bottomnav({super.key});
+  final int initialPageIndex;
+
+  const Bottomnav({Key? key, this.initialPageIndex = 0}) : super(key: key);
 
   @override
   State<Bottomnav> createState() => _BottomnavState();
 }
 
 class _BottomnavState extends State<Bottomnav> {
+  late int _selectedPageIndex;
 
 
-  int _selectedPageIndex = 0;
+  // int _selectedPageIndex = 0;
 
   final LinearGradient gradient = LinearGradient(
     colors: [buttoncolor, bluetext], // Change these colors to your desired gradient
@@ -34,9 +37,9 @@ class _BottomnavState extends State<Bottomnav> {
 
   final List<Map<String, Object>> _pages = [
     {'page': homepage(), 'title': 'Home'},
-    {'page': TrendingPage(), 'title': 'Search'},
+    {'page': TrendingPage(id: '',), 'title': 'Search'},
     {'page': UploadScreen(), 'title': 'Upload'},
-    {'page': chatpage(), 'title': 'Chat pgae'},
+    {'page': chatpage(), 'title': 'Chat page'},
     {'page': ProfileView(), 'title': 'Profile'},
   ];
 
@@ -50,6 +53,12 @@ class _BottomnavState extends State<Bottomnav> {
     return _pages[_selectedPageIndex];
   }
 
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedPageIndex = widget.initialPageIndex;
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -90,7 +90,7 @@ class _MyWalletState extends State<MyWallet> {
           color: white,
           previousPageTitle: "", // Optional: Specify the previous page title
           onPressed: () {
-            Navigator.of(context).push(MaterialPageRoute(builder: (context) => Bottomnav()));
+            Navigator.of(context).push(MaterialPageRoute(builder: (context) => Bottomnav(initialPageIndex: 4)));
           },
         ),
       ),

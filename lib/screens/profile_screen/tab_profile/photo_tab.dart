@@ -39,7 +39,8 @@ class _PhotoTabState extends State<PhotoTab> {
   }
 
   void _scrollListener() {
-    if (_scrollController.offset >= _scrollController.position.maxScrollExtent &&
+    if (_scrollController.offset >=
+            _scrollController.position.maxScrollExtent &&
         !_scrollController.position.outOfRange) {
       _loadMore();
     }
@@ -58,8 +59,6 @@ class _PhotoTabState extends State<PhotoTab> {
       }
     });
   }
-
-
 
   Future<void> _addLike(String postId, bool isLiked) async {
     var reqData = {
@@ -88,88 +87,93 @@ class _PhotoTabState extends State<PhotoTab> {
     });
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     return profileList != null && profileList['media'] != null
         ? GridView.builder(
-      controller: _scrollController,
-      physics: AlwaysScrollableScrollPhysics(),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        mainAxisSpacing: 5,
-      ),
-      itemCount: profileList['media'].length,
-      itemBuilder: (BuildContext context, int index) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-          child: GestureDetector(
-            onTap: () {
-              List<dynamic> imageUrls =
-              profileList['media'].map((item) => item['filePath']).toList();
-              int selectedIndex = index;
-              _showFullScreenImage(context, imageUrls, selectedIndex, profileList,homeList);
-            },
-            child: Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: Container(
-                    width: 112,
-                    height: 300,
-                    child: Image.network(
-                      profileList['media'][index]['filePath'],
-                      fit: BoxFit.fill,
-                    ),
-                  ),
-                ),
-                Positioned(
-                  top: 78,
-                  left: 30,
-                  child: Column(
-                    children: [
-                      SvgPicture.asset(
-                        "assets/svg/heart.svg",
-                        height: 18,
-                      ),
-                      Text(
-                        profileList['media'][index]['likeCount'].toString(),
-                        style: TextStyle(fontSize: 10, color: Colors.white),
-                      ),
-                    ],
-                  ),
-                ),
-                Positioned(
-                  top: 78,
-                  right: 30,
-                  child: Column(
-                    children: [
-                      SvgPicture.asset(
-                        "assets/svg/coment2.svg",
-                        height: 18,
-                      ),
-                      Text(
-                        profileList['media'][index]['commentCount'].toString(),
-                        style: TextStyle(fontSize: 10, color: Colors.white),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+            controller: _scrollController,
+            physics: AlwaysScrollableScrollPhysics(),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              mainAxisSpacing: 5,
             ),
-          ),
-        );
-      },
-    )
+            itemCount: profileList['media'].length,
+            itemBuilder: (BuildContext context, int index) {
+              return Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                child: GestureDetector(
+                  onTap: () {
+                    List<dynamic> imageUrls = profileList['media']
+                        .map((item) => item['filePath'])
+                        .toList();
+                    int selectedIndex = index;
+                    _showFullScreenImage(context, imageUrls, selectedIndex,
+                        profileList, homeList);
+                  },
+                  child: Stack(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Container(
+                          width: 112,
+                          height: 300,
+                          child: Image.network(
+                            profileList['media'][index]['filePath'],
+                            fit: BoxFit.fill,
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        top: 78,
+                        left: 30,
+                        child: Column(
+                          children: [
+                            SvgPicture.asset(
+                              "assets/svg/heart.svg",
+                              height: 18,
+                            ),
+                            Text(
+                              profileList['media'][index]['likeCount']
+                                  .toString(),
+                              style:
+                                  TextStyle(fontSize: 10, color: Colors.white),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Positioned(
+                        top: 78,
+                        right: 30,
+                        child: Column(
+                          children: [
+                            SvgPicture.asset(
+                              "assets/svg/coment2.svg",
+                              height: 18,
+                            ),
+                            Text(
+                              profileList['media'][index]['commentCount']
+                                  .toString(),
+                              style:
+                                  TextStyle(fontSize: 10, color: Colors.white),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          )
         : Center(
-      child: isLoading
-          ? CircularProgressIndicator()
-          : Text(
-        "No images available",
-        style: TextStyle(color: Colors.black),
-      ),
-    );
+            child: isLoading
+                ? CircularProgressIndicator()
+                : Text(
+                    "No images available",
+                    style: TextStyle(color: Colors.black),
+                  ),
+          );
   }
 
 // void _showFullScreenImage(BuildContext context, List<dynamic> imageUrls, int initialIndex, dynamic profileList) {
@@ -330,10 +334,6 @@ class _PhotoTabState extends State<PhotoTab> {
 // }
 }
 
-
-
-
-
 class FullScreenImageDialog extends StatefulWidget {
   final List<dynamic> imageUrls;
   final int initialIndex;
@@ -358,23 +358,28 @@ class _FullScreenImageDialogState extends State<FullScreenImageDialog> {
   @override
   void initState() {
     super.initState();
-    scrollController = ScrollController(initialScrollOffset: widget.initialIndex * 650.0);
+    scrollController =
+        ScrollController(initialScrollOffset: widget.initialIndex * 650.0);
   }
 
   void _toggleLikePost(int index, String postId) {
     setState(() {
       // Find the post once and store it in a variable
-      var post = widget.profileList['media'].firstWhere((post) => post['_id'] == postId, orElse: () => null);
+      var post = widget.profileList['media']
+          .firstWhere((post) => post['_id'] == postId, orElse: () => null);
 
       if (post != null) {
-        bool isLiked = post['isLiked'] ?? false; // Ensure isLiked is treated as a bool and not null
+        bool isLiked = post['isLiked'] ??
+            false; // Ensure isLiked is treated as a bool and not null
         post['isLiked'] = !isLiked;
-        post['likeCount'] = (post['likeCount'] ?? 0) + (post['isLiked'] ? 1 : -1);
+        post['likeCount'] =
+            (post['likeCount'] ?? 0) + (post['isLiked'] ? 1 : -1);
       }
     });
 
     // Call _addLike only if the post exists
-    var post = widget.profileList['media'].firstWhere((post) => post['_id'] == postId, orElse: () => null);
+    var post = widget.profileList['media']
+        .firstWhere((post) => post['_id'] == postId, orElse: () => null);
     if (post != null) {
       _addLike(postId, post['isLiked']);
     }
@@ -396,7 +401,8 @@ class _FullScreenImageDialogState extends State<FullScreenImageDialog> {
       isScrollControlled: true,
       builder: (BuildContext context) {
         return Padding(
-          padding: const EdgeInsets.all(20.0).copyWith(bottom: MediaQuery.of(context).viewInsets.bottom),
+          padding: const EdgeInsets.all(20.0)
+              .copyWith(bottom: MediaQuery.of(context).viewInsets.bottom),
           child: CommentBottomSheet(id: postId),
         );
       },
@@ -418,7 +424,8 @@ class _FullScreenImageDialogState extends State<FullScreenImageDialog> {
               itemBuilder: (BuildContext context, int index) {
                 return GestureDetector(
                   onDoubleTap: () {
-                    _toggleLikePost(index, widget.profileList['media'][index]['_id']);
+                    _toggleLikePost(
+                        index, widget.profileList['media'][index]['_id']);
                   },
                   child: Container(
                     child: Column(
@@ -432,7 +439,8 @@ class _FullScreenImageDialogState extends State<FullScreenImageDialog> {
                                     // Navigate to profile inner page
                                   },
                                   child: Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10),
                                     child: Stack(
                                       children: [
                                         Container(
@@ -443,9 +451,11 @@ class _FullScreenImageDialogState extends State<FullScreenImageDialog> {
                                             color: Colors.transparent,
                                           ),
                                           child: ClipRRect(
-                                            borderRadius: BorderRadius.all(Radius.circular(100)),
+                                            borderRadius: BorderRadius.all(
+                                                Radius.circular(100)),
                                             child: Image.network(
-                                              widget.profileList['media'][index]['profilePic'],
+                                              widget.profileList['media'][index]
+                                                  ['profilePic'],
                                               height: 51,
                                               fit: BoxFit.cover,
                                             ),
@@ -454,7 +464,8 @@ class _FullScreenImageDialogState extends State<FullScreenImageDialog> {
                                         Positioned(
                                           top: 28,
                                           left: 28,
-                                          child: Image.asset('assets/image/verificationlogo.png'),
+                                          child: Image.asset(
+                                              'assets/image/verificationlogo.png'),
                                         ),
                                       ],
                                     ),
@@ -465,15 +476,20 @@ class _FullScreenImageDialogState extends State<FullScreenImageDialog> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      widget.profileList['media'][index]['firstName'],
-                                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                                      widget.profileList['media'][index]
+                                          ['firstName'],
+                                      style: TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w500),
                                     ),
                                   ],
                                 ),
                                 Expanded(child: SizedBox()),
                                 Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                                  child: Icon(Icons.more_vert, color: Colors.grey),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10),
+                                  child:
+                                      Icon(Icons.more_vert, color: Colors.grey),
                                 ),
                               ],
                             ),
@@ -481,43 +497,39 @@ class _FullScreenImageDialogState extends State<FullScreenImageDialog> {
                         ),
                         SizedBox(height: 10),
                         Container(
-                          decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(0))),
+                          decoration: BoxDecoration(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(0))),
                           child: Image.network(
                             widget.imageUrls[index],
                             fit: BoxFit.scaleDown,
                           ),
                         ),
                         Padding(
-                          padding: const EdgeInsets.only(right: 23, top: 10, left: 15),
+                          padding: const EdgeInsets.only(
+                              right: 23, top: 10, left: 15),
                           child: Column(
                             children: [
                               Row(
                                 children: [
                                   GestureDetector(
                                     onTap: () {
-                                      _toggleLikePost(index, widget.profileList['media'][index]['_id']);
+                                      _toggleLikePost(
+                                          index,
+                                          widget.profileList['media'][index]
+                                              ['_id']);
                                     },
-                                    child: Icon(
-                                      size: 30,
-                                      widget.profileList['media'][index]['isLiked'] ?? false
-                                          ? Icons.favorite
-                                          : Icons.favorite_border,
-                                      color: widget.profileList['media'][index]['isLiked'] ?? false
-                                          ? Colors.red
-                                          : Colors.grey,
+                                    child: Image.asset(
+                                      widget.profileList['media'][index]
+                                                  ['isLiked'] ??
+                                              false
+                                          ? 'assets/image/rubred.png'
+                                          : 'assets/image/rubblack.png',
+                                      width: 30,
+                                      height: 30,
                                     ),
                                   ),
                                   SizedBox(width: 20),
-                                  // InkWell(
-                                  //   onTap: () {
-                                  //     _showComments(context, widget.profileList['media'][index]['_id']);
-                                  //   },
-                                  //   child: SvgPicture.asset(
-                                  //     "assets/svg/comment.svg",
-                                  //     height: 20,
-                                  //   ),
-                                  // ),
-
                                   InkWell(
                                     onTap: () {
                                       showModalBottomSheet<void>(
@@ -527,10 +539,15 @@ class _FullScreenImageDialogState extends State<FullScreenImageDialog> {
                                         builder: (BuildContext context) {
                                           late Map<String, dynamic>? homeList;
                                           return Padding(
-                                            padding: const EdgeInsets.all(20.0).copyWith(
-                                                bottom: MediaQuery.of(context).viewInsets.bottom
-                                            ),
-                                            child: CommentBottomSheet(id:widget.profileList['media'][index]['_id']),
+                                            padding: const EdgeInsets.all(20.0)
+                                                .copyWith(
+                                                    bottom:
+                                                        MediaQuery.of(context)
+                                                            .viewInsets
+                                                            .bottom),
+                                            child: CommentBottomSheet(
+                                                id: widget.profileList['media']
+                                                    [index]['_id']),
                                           );
                                         },
                                       );
@@ -540,8 +557,6 @@ class _FullScreenImageDialogState extends State<FullScreenImageDialog> {
                                       height: 20,
                                     ),
                                   ),
-
-
                                   SizedBox(width: 20),
                                   SvgPicture.asset(
                                     "assets/svg/save.svg",
@@ -554,20 +569,27 @@ class _FullScreenImageDialogState extends State<FullScreenImageDialog> {
                                   ),
                                 ],
                               ),
-                              Row(
-                                children: [
-                                  Text("Likes", style: TextStyle(color: Colors.blue, fontSize: 10)),
-                                  Text(
-                                    widget.profileList['media'][index]['likeCount'].toString(),
-                                    style: TextStyle(
-                                      color: Colors.blue,
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                  SizedBox(width: 2),
-                                ],
-                              ),
+                              // Row(
+                              //   children: [
+                              //     Text("Likes",
+                              //         style: TextStyle(
+                              //             color: Colors.blue, fontSize: 10)),
+                              //     Text(
+                              //       widget.profileList['media'][index]
+                              //               ['likeCount']
+                              //           .toString(),
+                              //       style: TextStyle(
+                              //         color: Colors.blue,
+                              //         fontSize: 13,
+                              //         fontWeight: FontWeight.w700,
+                              //       ),
+                              //     ),
+                              //     SizedBox(width: 2),
+                              //   ],
+                              // ),
+
+                              SizedBox(height: 10,),
+
 
                               Row(
                                 children: [
@@ -580,18 +602,16 @@ class _FullScreenImageDialogState extends State<FullScreenImageDialog> {
                                       children: [
                                         TextSpan(
                                           text: "Liked by ",
-                                          style: TextStyle(
-
-                                          ),
+                                          style: TextStyle(),
                                         ),
                                         TextSpan(
-                                          text: "${widget.profileList['media'][index]['likeCount'].toString()}",
+                                          text:
+                                              "${widget.profileList['media'][index]['likeCount'].toString()}",
                                           style: TextStyle(
                                             color: bluetext,
                                             fontWeight: FontWeight.w800,
                                           ),
                                         ),
-
                                         TextSpan(
                                           text: " and",
                                           style: TextStyle(
@@ -602,57 +622,110 @@ class _FullScreenImageDialogState extends State<FullScreenImageDialog> {
                                       ],
                                     ),
                                   ),
-
                                   SizedBox(width: 2),
-                                  Text( "${widget.profileList['media'][index]['lastLikedUserName'].toString()} Others ",
+                                  Text(
+                                      "${widget.profileList['media'][index]['lastLikedUserName'].toString()} Others ",
                                       style: TextStyle(
                                           color: bluetext,
                                           fontSize: 13,
                                           fontWeight: FontWeight.w700)),
                                   SizedBox(width: 2),
-
                                 ],
+                              ),
+
+                              InkWell(
+
+                                  onTap: () {
+                                    showModalBottomSheet<void>(
+                                      backgroundColor: white,
+                                      context: context,
+                                      isScrollControlled: true,
+                                      builder: (BuildContext context) {
+                                        late Map<String, dynamic>? homeList;
+                                        return Padding(
+                                          padding: const EdgeInsets.all(20.0)
+                                              .copyWith(
+                                              bottom:
+                                              MediaQuery.of(context)
+                                                  .viewInsets
+                                                  .bottom),
+                                          child: CommentBottomSheet(
+                                              id: widget.profileList['media']
+                                              [index]['_id']),
+                                        );
+                                      },
+                                    );
+                                  },
+                                child: Row(
+                                  children: [
+                                    RichText(
+                                      text: TextSpan(
+                                        style: TextStyle(
+                                          color: bluetext,
+                                          fontSize: 12,
+                                        ),
+                                        children: [
+                                          TextSpan(
+                                            text: "View All",
+                                            style: TextStyle(),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    SizedBox(width: 2),
+                                    Text("${widget.profileList['media'][index]['commentCount'].toString()} Comments ",
+                                        style: TextStyle(
+                                          color: bluetext,
+                                          fontSize: 13,
+                                        )),
+                                  ],
+                                ),
                               ),
                             ],
                           ),
-
                         ),
                         SizedBox(height: 5),
-
                         Align(
                           alignment: Alignment.topLeft,
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 15),
                             child: Container(
-                              height: isExpanded ? null : 40, // Adjust height when expanded
+                              height: isExpanded ? null : 40,
+                              // Adjust height when expanded
                               child: Text(
-                                widget.profileList['media'][index]['description'],
+                                widget.profileList['media'][index]
+                                    ['description'],
                                 maxLines: isExpanded ? null : 2,
-                                style: TextStyle(fontSize: 12,fontWeight: FontWeight.w700),
+                                style: TextStyle(
+                                    fontSize: 12, fontWeight: FontWeight.w700),
                               ),
                             ),
                           ),
                         ),
-
-                        if ( widget.profileList['media'][index]['description'].split('\n').length > 2) // Check for multiline
+                        if (widget.profileList['media'][index]['description']
+                                .split('\n')
+                                .length >
+                            2) // Check for multiline
                           GestureDetector(
                             onTap: () {
                               setState(() {
-                                isExpanded = !isExpanded; // Toggle the isExpanded state
+                                isExpanded =
+                                    !isExpanded; // Toggle the isExpanded state
                               });
                             },
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 10),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 10),
                               child: Align(
                                 alignment: Alignment.bottomRight,
                                 child: Text(
                                   isExpanded ? 'See Less' : 'See More',
-                                  style: TextStyle(color: bluetext, fontSize: 8),
+                                  style:
+                                      TextStyle(color: bluetext, fontSize: 8),
                                 ),
                               ),
                             ),
                           ),
-
                       ],
                     ),
                   ),
@@ -666,7 +739,8 @@ class _FullScreenImageDialogState extends State<FullScreenImageDialog> {
   }
 }
 
-void _showFullScreenImage(BuildContext context, List<dynamic> imageUrls, int initialIndex, dynamic profileList, dynamic homeList) {
+void _showFullScreenImage(BuildContext context, List<dynamic> imageUrls,
+    int initialIndex, dynamic profileList, dynamic homeList) {
   showDialog(
     context: context,
     builder: (BuildContext context) {

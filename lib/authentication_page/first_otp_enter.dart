@@ -57,7 +57,9 @@ class _firstotpenterState extends State<firstotpenter> {
       var response = await AuthService.forgotpasswordotp(reqData);
       log.i('Otp Verification create . $response');
       Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => Bottomnav()),
+          MaterialPageRoute(builder: (context) => Bottomnav(
+
+          )),
               (route) => false);
 
       if (response['msg'] == 'User Add Successfully') {
