@@ -21,6 +21,9 @@ class _TrendingListState extends State<TrendingListmonth> {
   int _pageNumber = 1;
   bool _hasMore = true;
   var trendingthisalltopsix;
+  var trendingthisalltopthree;
+
+
   String _selectedDropdownValue = 'Thismonth';
   List<Map<String, dynamic>> trendinglist = [];
 
@@ -32,6 +35,21 @@ class _TrendingListState extends State<TrendingListmonth> {
       log.i('tranding by all .. $response');
       setState(() {
         trendingthisalltopsix = response;
+      });
+    } catch (e) {
+      // Handle error appropriately here
+      print('Error in _trendingtopSixapi: $e');
+    }
+  }
+
+  Future _trendingtopThreeapithisall(String status) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? userid = prefs.getString('userid');
+    try {
+      var response = await TrendingService.trendingapiThismonththree();
+      log.i('tranding by all .. $response');
+      setState(() {
+        trendingthisalltopthree = response;
       });
     } catch (e) {
       // Handle error appropriately here
@@ -74,6 +92,7 @@ class _TrendingListState extends State<TrendingListmonth> {
       _trendingdetailsapi(),
       _trendingcarddetailsapi(),
       _trendingtopSixapithisall(_selectedDropdownValue),
+      _trendingtopThreeapithisall(_selectedDropdownValue)
     ]);
     setState(() {
       _isLoading = false;
@@ -143,7 +162,7 @@ class _TrendingListState extends State<TrendingListmonth> {
                     onTap: () async {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => TrendingInnerPage(id: trendingthisalltopsix['response'][index]['_id'],dayidentifier: 'thismonth')),);
+                        MaterialPageRoute(builder: (context) => TrendingInnerPage(id: trendingthisalltopthree['response'][index]['_id'],dayidentifier: 'thismonth')),);
                     },
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
