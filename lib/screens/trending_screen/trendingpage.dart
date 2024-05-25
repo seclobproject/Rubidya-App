@@ -6,15 +6,12 @@ import 'package:rubidya/screens/trending_screen/widget/topSixThisallGridview.dar
 import 'package:rubidya/screens/trending_screen/widget/topSixThisdayGridview.dart';
 import 'package:rubidya/screens/trending_screen/widget/topSixThismonthGridview.dart';
 import 'package:rubidya/screens/trending_screen/widget/topSixThisweekGridview.dart';
-import 'package:rubidya/screens/trending_screen/widget/trending_Inner_Details.dart';
 import 'package:rubidya/screens/trending_screen/widget/trending_list_all.dart';
 import 'package:rubidya/screens/trending_screen/widget/trending_list_day.dart';
 import 'package:rubidya/screens/trending_screen/widget/trending_list_month.dart';
 import 'package:rubidya/screens/trending_screen/widget/trending_list_week.dart';
-
 import 'package:rubidya/services/trending_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../../support/logger.dart';
 import '../home_screen/widgets/referral_page.dart';
 

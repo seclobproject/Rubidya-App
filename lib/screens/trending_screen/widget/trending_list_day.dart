@@ -21,6 +21,7 @@ class _TrendingListState extends State<TrendingListDay> {
   int _pageNumber = 1;
   bool _hasMore = true;
   var trendingthisalltopsix;
+  var trendingthisalltopthree;
   String _selectedDropdownValue = 'Thisday';
   List<Map<String, dynamic>> trendinglist = [];
 
@@ -57,6 +58,21 @@ class _TrendingListState extends State<TrendingListDay> {
     }
   }
 
+  Future _trendingtopThreeapithisall(String status) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? userid = prefs.getString('userid');
+    try {
+      var response = await TrendingService.trendingapiThisdaythree();
+      log.i('tranding by all .. $response');
+      setState(() {
+        trendingthisalltopsix = response;
+      });
+    } catch (e) {
+      // Handle error appropriately here
+      print('Error in _trendingtopSixapi: $e');
+    }
+  }
+
   Future<void> _trendingdetailsapi() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     userid = prefs.getString('userid');
@@ -75,7 +91,8 @@ class _TrendingListState extends State<TrendingListDay> {
     await Future.wait([
       _trendingdetailsapi(),
       _trendingcarddetailsapi(),
-      _trendingtopSixapithisall(_selectedDropdownValue)
+      _trendingtopSixapithisall(_selectedDropdownValue),
+      _trendingtopThreeapithisall(_selectedDropdownValue)
     ]);
     setState(() {
       _isLoading = false;
@@ -148,7 +165,7 @@ class _TrendingListState extends State<TrendingListDay> {
 
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => TrendingInnerPage(id: trendingcardprice['response'][index]['_id'],dayidentifier: 'thisday')),);
+                        MaterialPageRoute(builder: (context) => TrendingInnerPage(id: trendingthisalltopsix['response'][index]['_id'],dayidentifier: 'thisday')),);
                     },
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),

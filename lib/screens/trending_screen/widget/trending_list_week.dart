@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:rubidya/resources/color.dart';
-import 'package:rubidya/screens/trending_screen/trendingpage.dart';
 import 'package:rubidya/screens/trending_screen/widget/trending_Inner_Details.dart';
 import 'package:rubidya/services/trending_service.dart';
 import 'package:rubidya/support/logger.dart';
@@ -21,6 +20,8 @@ class _TrendingListState extends State<TrendingListWeek> {
   int _pageNumber = 1;
   bool _hasMore = true;
   var trendingthisalltopsix;
+  var trendingthisalltopthree;
+
   String _selectedDropdownValue = 'thisweek';
   List<Map<String, dynamic>> trendinglist = [];
 
@@ -46,10 +47,26 @@ class _TrendingListState extends State<TrendingListWeek> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? userid = prefs.getString('userid');
     try {
-      var response = await TrendingService.trendingapiThismonth();
+      var response = await TrendingService.trendingapiThisweek();
       log.i('tranding by all .. $response');
       setState(() {
         trendingthisalltopsix = response;
+      });
+    } catch (e) {
+      // Handle error appropriately here
+      print('Error in _trendingtopSixapi: $e');
+    }
+  }
+
+
+  Future _trendingtopThreeapithisall(String status) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? userid = prefs.getString('userid');
+    try {
+      var response = await TrendingService.trendingapiThisweekthree();
+      log.i('tranding by all .. $response');
+      setState(() {
+        trendingthisalltopthree = response;
       });
     } catch (e) {
       // Handle error appropriately here
@@ -75,7 +92,8 @@ class _TrendingListState extends State<TrendingListWeek> {
     await Future.wait([
       _trendingdetailsapi(),
       _trendingcarddetailsapi(),
-      _trendingtopSixapithisall(_selectedDropdownValue)
+      _trendingtopSixapithisall(_selectedDropdownValue),
+      _trendingtopThreeapithisall(_selectedDropdownValue)
     ]);
     setState(() {
       _isLoading = false;
@@ -96,7 +114,7 @@ class _TrendingListState extends State<TrendingListWeek> {
     });
 
     try {
-      final response = await TrendingService.trendingapicardThismonth(page: _pageNumber + 1);
+      final response = await TrendingService.trendingapiThisweekcard(page: _pageNumber + 1);
       final List<Map<String, dynamic>> newTrendingList = List<Map<String, dynamic>>.from(response['response']);
       setState(() {
         _pageNumber++;
@@ -146,7 +164,7 @@ class _TrendingListState extends State<TrendingListWeek> {
 
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => TrendingInnerPage(id: trendingthisalltopsix['response'][index]['_id'],dayidentifier: 'thisweek')),);
+                        MaterialPageRoute(builder: (context) => TrendingInnerPage(id: trendingthisalltopthree['response'][index]['_id'],dayidentifier: 'thisweek')),);
                     },
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),

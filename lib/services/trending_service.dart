@@ -33,6 +33,19 @@ class TrendingService {
     }
   }
 
+  static Future trendingapiThisweekcard({int page = 1, int limit = 10}) async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.get('$baseURL/api/posts/this-week-all-users', queryParameters: {
+        'page': page,
+        'limit': limit,
+      },);
+      return response.data;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   static Future trendingapicardThismonth({int page = 1, int limit = 10}) async {
     try {
       var dio = await DioHelper.getInstance();
@@ -197,7 +210,42 @@ class TrendingService {
   }
 
 
+///Top 3 In Listview
 
+  static Future trendingapiThisweekthree({int page = 1, int limit = 10}) async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.get('$baseURL/api/posts/this-week-all-users', queryParameters: {
+        'page': page,
+        'limit': limit,
+      },);
+      return response.data;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+
+  static Future trendingapiThismonththree({int page = 1, int limit = 10}) async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.get('$baseURL/api/posts/this-month-all-users');
+      return response.data;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+
+  static Future trendingapiThisdaythree({int page = 1, int limit = 10}) async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.get('$baseURL/api/posts/this-day-all-users');
+      return response.data;
+    } catch (e) {
+      rethrow;
+    }
+  }
 
 
 
