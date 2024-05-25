@@ -94,7 +94,7 @@ class _TrendingListState extends State<TrendingListmonth> {
     });
 
     try {
-      final response = await TrendingService.tendingcard(page: _pageNumber + 1);
+      final response = await TrendingService.trendingapiThismonth(page: _pageNumber + 1);
       final List<Map<String, dynamic>> newTrendingList = List<Map<String, dynamic>>.from(response['response']);
       setState(() {
         _pageNumber ++;

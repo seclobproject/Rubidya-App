@@ -96,7 +96,7 @@ class _TrendingListState extends State<TrendingListWeek> {
     });
 
     try {
-      final response = await TrendingService.tendingcard(page: _pageNumber + 1);
+      final response = await TrendingService.trendingapiThisweek(page: _pageNumber + 1);
       final List<Map<String, dynamic>> newTrendingList = List<Map<String, dynamic>>.from(response['response']);
       setState(() {
         _pageNumber ++;
