@@ -14,41 +14,7 @@ class TrendingService {
     }
   }
 
-  // static Future tendingcard() async {
-  //   try {
-  //     var dio = await DioHelper.getInstance();
-  //     var response = await dio.get('$baseURL/api/posts/this-day-all-users');
-  //     return response.data;
-  //   } catch (e) {
-  //     rethrow;
-  //   }
-  // }
-
-
-  // static Future TrendingtopSix(status) async {
-  //   var queryParameters = {
-  //     'type': status
-  //   };
-  //   var dio = await DioHelper.getInstance();
-  //   var response = await dio.get('$baseURL/api/posts/top-six',queryParameters:queryParameters);
-  //   return response.data;
-  // }
-
-
-  static Future TrendingtopSix(String status) async {
-    try {
-      var queryParameters = {
-        'type': status
-      };
-      var dio = await DioHelper.getInstance();
-      var response = await dio.get('$baseURL/api/posts/top-six', queryParameters: queryParameters);
-      return response.data;
-    } catch (e) {
-      print('Error occurred: $e');
-      // Handle the error appropriately here
-      throw e; // Or handle it in another way
-    }
-  }
+////pagination listview Api
 
 
   static Future tendingcard({int page = 1, int limit = 10}) async {
@@ -66,6 +32,38 @@ class TrendingService {
       rethrow;
     }
   }
+
+  static Future trendingapicardThismonth({int page = 1, int limit = 10}) async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.get('$baseURL/api/posts/this-month-all-users',
+        queryParameters: {
+          'page': page,
+          'limit': limit,
+        },);
+      return response.data;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  static Future TrendingtopSix(String status) async {
+    try {
+      var queryParameters = {
+        'type': status
+      };
+      var dio = await DioHelper.getInstance();
+      var response = await dio.get('$baseURL/api/posts/top-six', queryParameters: queryParameters);
+      return response.data;
+    } catch (e) {
+      print('Error occurred: $e');
+      // Handle the error appropriately here
+      throw e; // Or handle it in another way
+    }
+  }
+
+
+
 
 
 

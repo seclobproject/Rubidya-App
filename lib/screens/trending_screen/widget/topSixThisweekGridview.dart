@@ -336,12 +336,18 @@ class _TopSixGridviewday extends State<TopSixGridviewweek> {
                             borderRadius: BorderRadius.all(Radius.circular(100)),
                           ),
                           child: Center(
-                            child: Text(
+                            child: trendingthisweektopsix != null && trendingthisweektopsix['response'] != null && trendingthisweektopsix['response'][index] != null
+                                ? Text(
                               trendingthisweektopsix['response'][index]['rank'].toString(),
+                              style: TextStyle(color: Colors.white, fontSize: 8),
+                            )
+                                : Text(
+                              '-',  // Display a placeholder or handle the null case
                               style: TextStyle(color: Colors.white, fontSize: 8),
                             ),
                           ),
                         ),
+
                       ),
                     ],
                   ),

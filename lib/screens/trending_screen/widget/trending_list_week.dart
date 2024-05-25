@@ -21,7 +21,7 @@ class _TrendingListState extends State<TrendingListWeek> {
   int _pageNumber = 1;
   bool _hasMore = true;
   var trendingthisalltopsix;
-  String _selectedDropdownValue = 'Thisweek';
+  String _selectedDropdownValue = 'thisweek';
   List<Map<String, dynamic>> trendinglist = [];
 
   Future<void> _trendingcarddetailsapi() async {
@@ -142,113 +142,121 @@ class _TrendingListState extends State<TrendingListWeek> {
                   childAspectRatio: 0.6,
                 ),
                 itemBuilder: (BuildContext context, int index) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                    child: Container(
-                      height: 190,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.all(Radius.circular(10)),
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              Container(
-                                padding: EdgeInsets.all(2.0),
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Image.asset(
-                                  "assets/image/congratulation.png",
-                                  height: 90,
-                                  width: 90,
-                                ),
-                              ),
-                              Positioned(
-                                top: 20,
-                                child: Container(
-                                  width: 20,
-                                  height: 20,
+                  return InkWell(
+                    onTap: () async {
+
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => TrendingInnerPage(id: trendingthisalltopsix['response'][index]['_id'],dayidentifier: 'thisweek')),);
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                      child: Container(
+                        height: 190,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(10)),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Container(
+                                  padding: EdgeInsets.all(2.0),
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                   ),
-                                ),
-                              ),
-                              Container(
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: blueshade,
-                                  border: Border.all(width: 5, color: blueshade),
-                                ),
-                                child: CircleAvatar(
-                                  radius: 30,
-                                  backgroundColor: bluetext,
-                                  backgroundImage: NetworkImage(
-                                      trendinglist[index]['profilePic'] ?? ''),
-                                ),
-                              ),
-                              Positioned(
-                                top: 70,
-                                child: Container(
-                                  height: 20,
-                                  width: 20,
-                                  decoration: BoxDecoration(
-                                    color: gradnew,
-                                    borderRadius: BorderRadius.all(Radius.circular(100)),
+                                  child: Image.asset(
+                                    "assets/image/congratulation.png",
+                                    height: 90,
+                                    width: 90,
                                   ),
-                                  child: Center(
-                                    child: Text(
-                                      trendinglist[index]['rank'].toString(),
-                                      style: TextStyle(color: Colors.white, fontSize: 8),
+                                ),
+                                Positioned(
+                                  top: 20,
+                                  child: Container(
+                                    width: 20,
+                                    height: 20,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
                                     ),
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 0),
-                          Container(
-                            height: 15,
-                            child: Text(
-                              trendinglist != null && trendinglist[index] != null && trendinglist[index].containsKey('userName')
-                                  ? trendinglist[index]['userName'] ?? ''
-                                  : '',
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.white,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
+                                Container(
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: blueshade,
+                                    border: Border.all(width: 5, color: blueshade),
+                                  ),
+                                  child: CircleAvatar(
+                                    radius: 30,
+                                    backgroundColor: bluetext,
+                                    backgroundImage: NetworkImage(
+                                        trendinglist[index]['profilePic'] ?? ''),
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 70,
+                                  child: Container(
+                                    height: 20,
+                                    width: 20,
+                                    decoration: BoxDecoration(
+                                      color: gradnew,
+                                      borderRadius: BorderRadius.all(Radius.circular(100)),
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        trendinglist[index]['rank'].toString(),
+                                        style: TextStyle(color: Colors.white, fontSize: 8),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
+                            SizedBox(height: 0),
+                            Container(
+                              height: 15,
+                              child: Text(
+                                trendinglist != null && trendinglist[index] != null && trendinglist[index].containsKey('userName')
+                                    ? trendinglist[index]['userName'] ?? ''
+                                    : '',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.white,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                              ),
 
-                          ),
-                          SizedBox(height: 5),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'Points:',
-                                style: TextStyle(
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.white,
+                            ),
+                            SizedBox(height: 5),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  'Points:',
+                                  style: TextStyle(
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.white,
+                                  ),
                                 ),
-                              ),
-                              Text(
-                                trendinglist[index]['totalPoints'].toString(),
-                                style: TextStyle(
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.white,
+                                Text(
+                                  trendinglist[index]['totalPoints'].toString(),
+                                  style: TextStyle(
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.white,
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 10),
-                        ],
+                              ],
+                            ),
+                            SizedBox(height: 10),
+                          ],
+                        ),
                       ),
                     ),
                   );
@@ -276,7 +284,7 @@ class _TrendingListState extends State<TrendingListWeek> {
                         onTap: () async {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => TrendingInnerPage(id: trendingthisalltopsix['response'][index]['_id'],dayidentifier: 'thisall')),);
+                            MaterialPageRoute(builder: (context) => TrendingInnerPage(id: trendingthisalltopsix['response'][index]['_id'],dayidentifier: 'thisweek')),);
                         },
                         child: Container(
                           color: Color(0xFFE6E8F4),

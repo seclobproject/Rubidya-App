@@ -25,7 +25,6 @@ class _TrendingInnerPageState extends State<TrendingInnerPage> {
     var response;
     if (widget.dayidentifier == 'thisday') {
       response = await TrendingService.trendingallpointsthisday(widget.id);
-
     } else if (widget.dayidentifier == 'thisweek') {
       response = await TrendingService.trendingallpointsthisweek(widget.id);
     } else if (widget.dayidentifier == 'thismonth') {
@@ -36,7 +35,6 @@ class _TrendingInnerPageState extends State<TrendingInnerPage> {
     else if (widget.dayidentifier == 'thisall') {
       response = await TrendingService.trendingallpointsthisall(widget.id);
     }else {
-
       throw Exception('Invalid day identifier: ${widget.dayidentifier}');
     }
 
@@ -126,6 +124,8 @@ class _TrendingInnerPageState extends State<TrendingInnerPage> {
           ),
 
           SizedBox(height: 10),
+
+
           Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),

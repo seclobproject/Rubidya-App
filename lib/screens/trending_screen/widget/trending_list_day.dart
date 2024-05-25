@@ -7,14 +7,12 @@ import 'package:rubidya/services/trending_service.dart';
 import 'package:rubidya/support/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
 class TrendingListDay extends StatefulWidget {
   @override
   State<TrendingListDay> createState() => _TrendingListState();
 }
 
 class _TrendingListState extends State<TrendingListDay> {
-  String _selectedDropdownValue = 'Thisday';
   String? userid;
   var trendingprice;
   var trendingcardprice;
@@ -23,23 +21,8 @@ class _TrendingListState extends State<TrendingListDay> {
   int _pageNumber = 1;
   bool _hasMore = true;
   var trendingthisalltopsix;
+  String _selectedDropdownValue = 'Thisday';
   List<Map<String, dynamic>> trendinglist = [];
-
-
-  Future _trendingtopSixapithisall(String status) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? userid = prefs.getString('userid');
-    try {
-      var response = await TrendingService.trendingapiThisday();
-      log.i('tranding by all .. $response');
-      setState(() {
-        trendingthisalltopsix = response;
-      });
-    } catch (e) {
-      // Handle error appropriately here
-      print('Error in _trendingtopSixapi: $e');
-    }
-  }
 
   Future<void> _trendingcarddetailsapi() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -54,6 +37,23 @@ class _TrendingListState extends State<TrendingListDay> {
       });
     } else {
       log.e('User ID is null');
+    }
+  }
+
+
+
+  Future _trendingtopSixapithisall(String status) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? userid = prefs.getString('userid');
+    try {
+      var response = await TrendingService.trendingapiThisday();
+      log.i('tranding by all .. $response');
+      setState(() {
+        trendingthisalltopsix = response;
+      });
+    } catch (e) {
+      // Handle error appropriately here
+      print('Error in _trendingtopSixapi: $e');
     }
   }
 
@@ -75,7 +75,7 @@ class _TrendingListState extends State<TrendingListDay> {
     await Future.wait([
       _trendingdetailsapi(),
       _trendingcarddetailsapi(),
-      _trendingtopSixapithisall(_selectedDropdownValue),
+      _trendingtopSixapithisall(_selectedDropdownValue)
     ]);
     setState(() {
       _isLoading = false;
@@ -96,7 +96,7 @@ class _TrendingListState extends State<TrendingListDay> {
     });
 
     try {
-      final response = await TrendingService.trendingapiThisday(page: _pageNumber + 1);
+      final response = await TrendingService.tendingcard(page: _pageNumber + 1);
       final List<Map<String, dynamic>> newTrendingList = List<Map<String, dynamic>>.from(response['response']);
       setState(() {
         _pageNumber ++;
@@ -111,6 +111,9 @@ class _TrendingListState extends State<TrendingListDay> {
       });
     }
   }
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -139,14 +142,12 @@ class _TrendingListState extends State<TrendingListDay> {
                   childAspectRatio: 0.6,
                 ),
                 itemBuilder: (BuildContext context, int index) {
-
-
-                  return GestureDetector(
+                  return InkWell(
                     onTap: () async {
 
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => TrendingInnerPage(id: trendingthisalltopsix['response'][index]['_id'],dayidentifier: 'thisall')),);
+                        MaterialPageRoute(builder: (context) => TrendingInnerPage(id: trendingthisalltopsix['response'][index]['_id'],dayidentifier: 'thisday')),);
                     },
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
@@ -275,18 +276,15 @@ class _TrendingListState extends State<TrendingListDay> {
                 child: ListView.builder(
 
 
-
+                  // itemCount: trendinglist.length - 3 + (_isLoadingMore ? 1 : 0),
                   itemCount: 100,
                   itemBuilder: (BuildContext context, int index) {
-
-
-                    if (index < trendinglist.length - 3) {
-                      return GestureDetector(
+                    if (index < trendinglist.length ) {
+                      return InkWell(
                         onTap: () async {
-
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => TrendingInnerPage(id: trendingthisalltopsix['response'][index]['_id'],dayidentifier: 'thisall')),);
+                            MaterialPageRoute(builder: (context) => TrendingInnerPage(id: trendingthisalltopsix['response'][index]['_id'],dayidentifier: 'thisday')),);
                         },
                         child: Container(
                           color: Color(0xFFE6E8F4),
@@ -301,7 +299,7 @@ class _TrendingListState extends State<TrendingListDay> {
                                 children: [
                                   SizedBox(width: 10),
                                   Text(
-                                    trendinglist[index ]['rank'].toString(),
+                                    trendinglist[index]['rank'].toString(),
                                     style: TextStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.w500,
@@ -339,7 +337,7 @@ class _TrendingListState extends State<TrendingListDay> {
                           ),
                         ),
                       );
-                    } else
+                    } else {
                       return _isLoadingMore
                           ? Padding(
                         padding: const EdgeInsets.all(8.0),
@@ -348,7 +346,7 @@ class _TrendingListState extends State<TrendingListDay> {
                         ),
                       )
                           : Container(); // Adjust loading widget as needed
-
+                    }
                   },
                 ),
               ),

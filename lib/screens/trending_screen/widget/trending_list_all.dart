@@ -28,7 +28,7 @@ class _TrendingListAllState extends State<TrendingListAll> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     userid = prefs.getString('userid');
     if (userid != null) {
-      var response = await TrendingService.trendingapiThisweek(page: _pageNumber);
+      var response = await TrendingService.trendingapiThisallmore(page: _pageNumber);
       log.i('trending card details show.. $response');
       setState(() {
         trendingthisalltopsix = response;
