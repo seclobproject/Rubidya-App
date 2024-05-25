@@ -118,7 +118,7 @@ class TrendingService {
   static Future trendingapiThisallmore({int page = 1, int limit = 10}) async {
     try {
       var dio = await DioHelper.getInstance();
-      var response = await dio.get('$baseURL/api/posts/all-time-all-users', queryParameters: {
+      var response = await dio.get('$baseURL/api/posts/all-time-all-users',queryParameters: {
         'page': page,
         'limit': limit,
       },);
@@ -127,6 +127,7 @@ class TrendingService {
       rethrow;
     }
   }
+
 
 
 

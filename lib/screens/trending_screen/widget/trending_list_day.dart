@@ -100,6 +100,7 @@ class _TrendingListState extends State<TrendingListDay> {
       final List<Map<String, dynamic>> newTrendingList = List<Map<String, dynamic>>.from(response['response']);
       setState(() {
         _pageNumber ++;
+        trendingcardprice = response;
         _isLoadingMore = false;
         trendinglist.addAll(newTrendingList);
         _hasMore = _pageNumber < response['totalPages'];
@@ -147,7 +148,7 @@ class _TrendingListState extends State<TrendingListDay> {
 
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => TrendingInnerPage(id: trendingthisalltopsix['response'][index]['_id'],dayidentifier: 'thisday')),);
+                        MaterialPageRoute(builder: (context) => TrendingInnerPage(id: trendingcardprice['response'][index]['_id'],dayidentifier: 'thisday')),);
                     },
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
@@ -274,17 +275,20 @@ class _TrendingListState extends State<TrendingListDay> {
                   return true;
                 },
                 child: ListView.builder(
-
-
-                  // itemCount: trendinglist.length - 3 + (_isLoadingMore ? 1 : 0),
-                  itemCount: 100,
+                  itemCount: trendinglist.length + 1, // Add 1 to show the loading indicator at the end
                   itemBuilder: (BuildContext context, int index) {
-                    if (index < trendinglist.length ) {
-                      return InkWell(
+                    if (index < trendinglist.length) {
+                      return GestureDetector(
                         onTap: () async {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => TrendingInnerPage(id: trendingthisalltopsix['response'][index]['_id'],dayidentifier: 'thisday')),);
+                            MaterialPageRoute(
+                              builder: (context) => TrendingInnerPage(
+                                id: trendinglist[index]['_id'],
+                                dayidentifier: 'thisday',
+                              ),
+                            ),
+                          );
                         },
                         child: Container(
                           color: Color(0xFFE6E8F4),
@@ -330,7 +334,7 @@ class _TrendingListState extends State<TrendingListDay> {
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
-                                  SizedBox(width: 20)
+                                  SizedBox(width: 20),
                                 ],
                               ),
                             ),

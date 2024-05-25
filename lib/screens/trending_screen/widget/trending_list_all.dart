@@ -16,7 +16,7 @@ class _TrendingListAllState extends State<TrendingListAll> {
   String? userid;
   var trendingprice;
   var trendingcardprice;
-  var trendingthisalltopsix;
+  var trendingallday;
   bool _isLoading = true;
   bool _isLoadingMore = false;
   int _pageNumber = 1;
@@ -31,7 +31,7 @@ class _TrendingListAllState extends State<TrendingListAll> {
       var response = await TrendingService.trendingapiThisallmore(page: _pageNumber);
       log.i('trending card details show.. $response');
       setState(() {
-        trendingthisalltopsix = response;
+        trendingallday = response;
         trendinglist = List<Map<String, dynamic>>.from(response['response']);
         _hasMore = _pageNumber < response['totalPages'];
       });
@@ -83,8 +83,10 @@ class _TrendingListAllState extends State<TrendingListAll> {
       final List<Map<String, dynamic>> newTrendingList = List<Map<String, dynamic>>.from(response['response']);
       setState(() {
         _pageNumber ++;
+        trendingcardprice = response;
         _isLoadingMore = false;
         trendinglist.addAll(newTrendingList);
+        trendingallday = response;
         _hasMore = _pageNumber < response['totalPages'];
       });
     } catch (e) {
@@ -94,6 +96,7 @@ class _TrendingListAllState extends State<TrendingListAll> {
       });
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -129,7 +132,7 @@ class _TrendingListAllState extends State<TrendingListAll> {
 
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => TrendingInnerPage(id: trendingthisalltopsix['response'][index]['_id'],dayidentifier: 'thisall')),);
+                          MaterialPageRoute(builder: (context) => TrendingInnerPage(id: trendingprice['response'][index]['_id'],dayidentifier: 'thisall')),);
                       },
                       child: Container(
                         height: 190,
@@ -254,23 +257,25 @@ class _TrendingListAllState extends State<TrendingListAll> {
                   return true;
                 },
                 child: ListView.builder(
-
-
-
-                  itemCount: 100,
+                  itemCount: trendinglist.length + 1, // Add 1 to show the loading indicator at the end
                   itemBuilder: (BuildContext context, int index) {
                     if (index < trendinglist.length) {
-                      return Container(
-                        color: Color(0xFFE6E8F4),
-                        child: ListTile(
-                          title: InkWell(
-                            onTap: () async {
-
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => TrendingInnerPage(id: trendingthisalltopsix['response'][index]['_id'],dayidentifier: 'thisall')),);
-                            },
-                            child: Container(
+                      return GestureDetector(
+                        onTap: () async {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => TrendingInnerPage(
+                                id: trendinglist[index]['_id'],
+                                dayidentifier: 'thisall',
+                              ),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          color: Color(0xFFE6E8F4),
+                          child: ListTile(
+                            title: Container(
                               height: 50,
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.all(Radius.circular(10)),
@@ -280,7 +285,7 @@ class _TrendingListAllState extends State<TrendingListAll> {
                                 children: [
                                   SizedBox(width: 10),
                                   Text(
-                                    trendinglist[index ]['rank'].toString(),
+                                    trendinglist[index]['rank'].toString(),
                                     style: TextStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.w500,
@@ -295,7 +300,7 @@ class _TrendingListAllState extends State<TrendingListAll> {
                                   ),
                                   SizedBox(width: 10),
                                   Text(
-                                    trendinglist[index ]['userName'] ?? '',
+                                    trendinglist[index]['userName'] ?? '',
                                     style: TextStyle(
                                       fontSize: 12,
                                       color: bluetext,
@@ -304,14 +309,14 @@ class _TrendingListAllState extends State<TrendingListAll> {
                                   ),
                                   Spacer(),
                                   Text(
-                                    trendinglist[index ]['totalPoints'].toString() + " Pts ",
+                                    trendinglist[index]['totalPoints'].toString() + " Pts ",
                                     style: TextStyle(
                                       fontSize: 12,
                                       color: bluetext,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
-                                  SizedBox(width: 20)
+                                  SizedBox(width: 20),
                                 ],
                               ),
                             ),

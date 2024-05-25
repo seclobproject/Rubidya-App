@@ -97,10 +97,11 @@ class _TrendingListState extends State<TrendingListmonth> {
       final response = await TrendingService.trendingapicardThismonth(page: _pageNumber + 1);
       final List<Map<String, dynamic>> newTrendingList = List<Map<String, dynamic>>.from(response['response']);
       setState(() {
-        _pageNumber ++;
+        _pageNumber++;
         _isLoadingMore = false;
         trendinglist.addAll(newTrendingList);
         _hasMore = _pageNumber < response['totalPages'];
+        trendingthisalltopsix = response;
       });
     } catch (e) {
       // Handle error
@@ -140,7 +141,6 @@ class _TrendingListState extends State<TrendingListmonth> {
 
                   return InkWell(
                     onTap: () async {
-
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => TrendingInnerPage(id: trendingthisalltopsix['response'][index]['_id'],dayidentifier: 'thismonth')),);
@@ -270,20 +270,21 @@ class _TrendingListState extends State<TrendingListmonth> {
                   return true;
                 },
                 child: ListView.builder(
-
-
-
-                  itemCount: 100,
+                  itemCount: trendinglist.length + 1, // Add 1 to show the loading indicator at the end
                   itemBuilder: (BuildContext context, int index) {
-                    if (index < trendinglist.length ) {
+                    if (index < trendinglist.length) {
                       return GestureDetector(
                         onTap: () async {
-
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => TrendingInnerPage(id: trendingthisalltopsix['response'][index]['_id'],dayidentifier: 'thismonth')),);
+                            MaterialPageRoute(
+                              builder: (context) => TrendingInnerPage(
+                                id: trendinglist[index]['_id'],
+                                dayidentifier: 'thismonth',
+                              ),
+                            ),
+                          );
                         },
-
                         child: Container(
                           color: Color(0xFFE6E8F4),
                           child: ListTile(
@@ -328,7 +329,7 @@ class _TrendingListState extends State<TrendingListmonth> {
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
-                                  SizedBox(width: 20)
+                                  SizedBox(width: 20),
                                 ],
                               ),
                             ),
