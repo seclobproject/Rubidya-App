@@ -753,7 +753,7 @@ class _ProductCardState extends State<ProductCard> {
                 child: Align(
                   alignment: Alignment.bottomRight,
                   child: Text(
-                    isExpanded ? 'See Less' : 'See More',
+                    isExpanded ? 'See Less' : 'See More ',
                     style: TextStyle(color: bluetext, fontSize: 8),
                   ),
                 ),
