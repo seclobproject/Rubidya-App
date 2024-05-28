@@ -1,74 +1,112 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_linkify/flutter_linkify.dart';
-import 'package:url_launcher/url_launcher.dart';
 
-class ExpandableTextWidget extends StatefulWidget {
-  final String description;
 
-  const ExpandableTextWidget({Key? key, required this.description}) : super(key: key);
 
+class ChatScreen extends StatefulWidget {
   @override
-  _ExpandableTextWidgetState createState() => _ExpandableTextWidgetState();
+  State createState() => ChatScreenState();
 }
 
-class _ExpandableTextWidgetState extends State<ExpandableTextWidget> {
-  bool isExpanded = false;
+class ChatScreenState extends State<ChatScreen> {
+  final TextEditingController _controller = TextEditingController();
+  final List<String> _messages = [];
+
+  void _handleSubmitted(String text) {
+    _controller.clear();
+    setState(() {
+      _messages.add(text);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text('Friendlychat'),
+      ),
       body: Column(
-        children: [
-      Center(
-      child: Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          SizedBox(height: 150,),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: Container(
-              height: isExpanded ? null : 40, // Adjust height when expanded
-              child: Linkify(
-                onOpen: _onOpen,
-                text: widget.description,
-                maxLines: isExpanded ? null : 2,
-                overflow: isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
-                linkStyle: TextStyle(color: Colors.blue),
-              ),
+        children: <Widget>[
+          Expanded(
+            child: ListView.builder(
+              padding: EdgeInsets.all(8.0),
+              reverse: true,
+              itemBuilder: (_, index) => ChatMessage(_messages[index]),
+              itemCount: _messages.length,
             ),
           ),
-          if (widget.description.split('\n').length > 2) // Check for multiline
-            GestureDetector(
-              onTap: () {
-                setState(() {
-                  isExpanded = !isExpanded; // Toggle the isExpanded state
-                });
-              },
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: Align(
-                  alignment: Alignment.bottomRight,
-                  child: Text(
-                    isExpanded ? 'See Less' : 'See More ',
-                    style: TextStyle(color: Colors.blue, fontSize: 8),
-                  ),
-                ),
-              ),
+          Divider(height: 1.0),
+          Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
             ),
-        ],
-      ),
-    ),
+            child: _buildTextComposer(),
+          ),
         ],
       ),
     );
   }
 
-  Future<void> _onOpen(LinkableElement link) async {
-    if (await canLaunch(link.url)) {
-      await launch(link.url);
-    } else {
-      throw 'Could not launch ${link.url}';
-    }
+  Widget _buildTextComposer() {
+    return IconTheme(
+      data: IconThemeData(color: Theme.of(context).focusColor),
+      child: Container(
+        margin: EdgeInsets.symmetric(horizontal: 8.0),
+        child: Row(
+          children: <Widget>[
+            Flexible(
+              child: TextField(
+                controller: _controller,
+                onSubmitted: _handleSubmitted,
+                decoration: InputDecoration.collapsed(
+                  hintText: "Send a message",
+                ),
+                maxLines: null, // To allow multiline input
+              ),
+            ),
+            Container(
+              margin: EdgeInsets.symmetric(horizontal: 4.0),
+              child: IconButton(
+                icon: Icon(Icons.send),
+                onPressed: () => _handleSubmitted(_controller.text),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class ChatMessage extends StatelessWidget {
+  final String text;
+
+  ChatMessage(this.text);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 10.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Container(
+            margin: EdgeInsets.only(right: 16.0),
+            child: CircleAvatar(child: Text('Y')),
+          ),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text('Your Name', style: Theme.of(context).textTheme.subtitle1),
+                Container(
+                  margin: EdgeInsets.only(top: 5.0),
+                  child: Text(text),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

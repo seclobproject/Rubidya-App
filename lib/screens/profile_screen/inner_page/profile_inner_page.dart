@@ -632,7 +632,7 @@ class _FullScreenImageDialogState extends State<FullScreenImageDialog> {
                                     ),
                                   ),
                                 ),
-                                SizedBox(width: 20),
+                                SizedBox(width: 5),
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -892,15 +892,19 @@ class _FullScreenImageDialogState extends State<FullScreenImageDialog> {
 
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 10),
-                          child: Container(
-                            height: isExpanded ? null : 40, // Adjust height when expanded
-                            child: Linkify(
-                              onOpen: _onOpen,
-                              text: widget.profileList['media'][index]['description'],
-                              maxLines: isExpanded ? null : 2,
-                              overflow: isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
-                              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
-                              linkStyle: TextStyle(color: Colors.blue),
+                          child: Align(
+                            alignment: Alignment.topLeft,
+                            child: Container(
+
+                              height: isExpanded ? null : 40, // Adjust height when expanded
+                              child: Linkify(
+                                onOpen: _onOpen,
+                                text: widget.profileList['media'][index]['description'],
+                                maxLines: isExpanded ? null : 2,
+                                overflow: isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
+                                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                                linkStyle: TextStyle(color: Colors.blue),
+                              ),
                             ),
                           ),
                         ),

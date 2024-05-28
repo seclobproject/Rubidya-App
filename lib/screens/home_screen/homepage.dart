@@ -45,7 +45,7 @@ class _homepageState extends State<homepage> {
 
   void _scrollListener() {
     if (_scrollController.offset >=
-            _scrollController.position.maxScrollExtent &&
+        _scrollController.position.maxScrollExtent &&
         !_scrollController.position.outOfRange) {
       _loadMore();
     }
@@ -66,7 +66,7 @@ class _homepageState extends State<homepage> {
   Future<void> toggleFollow(int index) async {
     setState(() {
       suggestFollow[index]['isFollowing'] =
-          !suggestFollow[index]['isFollowing'];
+      !suggestFollow[index]['isFollowing'];
     });
 
     var followerId = suggestFollow[index]['_id'];
@@ -149,8 +149,8 @@ class _homepageState extends State<homepage> {
       int likeCount = homeList['posts']
           .firstWhere((post) => post['_id'] == postId)['likeCount'];
       homeList['posts']
-              .firstWhere((post) => post['_id'] == postId)['likeCount'] =
-          isLiked ? likeCount + 1 : likeCount - 1;
+          .firstWhere((post) => post['_id'] == postId)['likeCount'] =
+      isLiked ? likeCount + 1 : likeCount - 1;
     });
     _addLike(
         postId,
@@ -506,18 +506,18 @@ class _ProductCardState extends State<ProductCard> {
                         child: ClipRRect(
                           borderRadius: BorderRadius.all(Radius.circular(100)),
                           child: widget.profilepic != null &&
-                                  widget.profilepic.isNotEmpty
+                              widget.profilepic.isNotEmpty
                               ? Image.network(
-                                  widget.profilepic,
-                                  height: 51,
-                                  width: 51,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Text('Failed to load image');
-                                  },
-                                )
+                            widget.profilepic,
+                            height: 51,
+                            width: 51,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Text('Failed to load image');
+                            },
+                          )
                               : Image.network(
-                                  'https://play-lh.googleusercontent.com/4HZhLFCcIjgfbXoVj3mgZdQoKO2A_z-uX2gheF5yNCkb71wzGqwobr9muj8I05Nc8u8'),
+                              'https://play-lh.googleusercontent.com/4HZhLFCcIjgfbXoVj3mgZdQoKO2A_z-uX2gheF5yNCkb71wzGqwobr9muj8I05Nc8u8'),
                         ),
                       ),
                       Positioned(
@@ -591,9 +591,9 @@ class _ProductCardState extends State<ProductCard> {
                         onPressed: widget.onLikePressed,
                         icon: ImageIcon(
                           AssetImage(
-                            widget.likeCount
-                                ?  'assets/image/rubred.png'
-                                : 'assets/image/rubblack.png'
+                              widget.likeCount
+                                  ?  'assets/image/rubred.png'
+                                  : 'assets/image/rubblack.png'
                           ),
                           size: 30.0,
                           color: widget.likeCount ? Colors.red : Colors.black26,
@@ -614,7 +614,7 @@ class _ProductCardState extends State<ProductCard> {
                             return Padding(
                               padding: const EdgeInsets.all(20.0).copyWith(
                                   bottom:
-                                      MediaQuery.of(context).viewInsets.bottom),
+                                  MediaQuery.of(context).viewInsets.bottom),
                               child: CommentBottomSheet(id: widget.id),
                             );
                           },
@@ -729,15 +729,18 @@ class _ProductCardState extends State<ProductCard> {
 
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: Container(
-              height: isExpanded ? null : 40, // Adjust height when expanded
-              child: Linkify(
-                onOpen: _onOpen,
-                text: widget.description,
-                maxLines: isExpanded ? null : 2,
-                overflow: isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
-                linkStyle: TextStyle(color: Colors.blue),
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: Container(
+                height: isExpanded ? null : 40, // Adjust height when expanded
+                child: Linkify(
+                  onOpen: _onOpen,
+                  text: widget.description,
+                  maxLines: isExpanded ? null : 2,
+                  overflow: isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                  linkStyle: TextStyle(color: Colors.blue),
+                ),
               ),
             ),
           ),
@@ -801,8 +804,8 @@ class MembersListing extends StatelessWidget {
           context,
           MaterialPageRoute(
               builder: (context) => profileinnerpage(
-                    id: id,
-                  )),
+                id: id,
+              )),
         );
       },
       child: Padding(
@@ -831,17 +834,17 @@ class MembersListing extends StatelessWidget {
                 borderRadius: BorderRadius.all(Radius.circular(100)),
                 child: img.isNotEmpty
                     ? Image.network(
-                        img,
-                        height: 65,
-                        fit: BoxFit.cover,
-                      )
+                  img,
+                  height: 65,
+                  fit: BoxFit.cover,
+                )
                     : Container(
-                        width: 60,
-                        height: 60,
-                        child: Image.network(
-                          'https://play-lh.googleusercontent.com/4HZhLFCcIjgfbXoVj3mgZdQoKO2A_z-uX2gheF5yNCkb71wzGqwobr9muj8I05Nc8u8',
-                        ),
-                      ),
+                  width: 60,
+                  height: 60,
+                  child: Image.network(
+                    'https://play-lh.googleusercontent.com/4HZhLFCcIjgfbXoVj3mgZdQoKO2A_z-uX2gheF5yNCkb71wzGqwobr9muj8I05Nc8u8',
+                  ),
+                ),
               ),
               SizedBox(
                 height: 5,

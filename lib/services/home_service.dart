@@ -1,4 +1,3 @@
-
 import '../networking/constant.dart';
 import '../support/dio_helper.dart';
 
@@ -150,7 +149,7 @@ class HomeService {
   //   }
   // }
 
-  static Future<Map<String, dynamic>> getFeed({int page = 1, int limit = 7}) async {
+  static Future<Map<String, dynamic>> getFeed({int page = 1, int limit = 3}) async {
     try {
       var dio = await DioHelper.getInstance();
       var response = await dio.get('$baseURL/api/posts/get-latest-posts?page=$page&limit=$limit');
@@ -174,15 +173,19 @@ class HomeService {
   }
 
 
-  static Future comment(id) async {
+  static Future comment(String id, {int page = 1, int limit = 10}) async {
     try {
       var dio = await DioHelper.getInstance();
-      var response = await dio.get('$baseURL/api/posts/get-comment-details/$id');
+      var response = await dio.get('$baseURL/api/posts/get-comment-details/$id', queryParameters: {
+        'page': page,
+        'limit': limit,
+      });
       return response.data;
     } catch (e) {
       rethrow;
     }
   }
+
 
 
 

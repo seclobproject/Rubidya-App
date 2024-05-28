@@ -2,6 +2,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_linkify/flutter_linkify.dart';
+import 'package:url_launcher/url_launcher.dart';
+
 import '../../../networking/constant.dart';
 import '../../../resources/color.dart';
 import '../../../services/home_service.dart';
@@ -40,7 +43,7 @@ class _PhotoTabState extends State<PhotoTab> {
 
   void _scrollListener() {
     if (_scrollController.offset >=
-            _scrollController.position.maxScrollExtent &&
+        _scrollController.position.maxScrollExtent &&
         !_scrollController.position.outOfRange) {
       _loadMore();
     }
@@ -91,89 +94,89 @@ class _PhotoTabState extends State<PhotoTab> {
   Widget build(BuildContext context) {
     return profileList != null && profileList['media'] != null
         ? GridView.builder(
-            controller: _scrollController,
-            physics: AlwaysScrollableScrollPhysics(),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              mainAxisSpacing: 5,
-            ),
-            itemCount: profileList['media'].length,
-            itemBuilder: (BuildContext context, int index) {
-              return Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                child: GestureDetector(
-                  onTap: () {
-                    List<dynamic> imageUrls = profileList['media']
-                        .map((item) => item['filePath'])
-                        .toList();
-                    int selectedIndex = index;
-                    _showFullScreenImage(context, imageUrls, selectedIndex,
-                        profileList, homeList);
-                  },
-                  child: Stack(
+      controller: _scrollController,
+      physics: AlwaysScrollableScrollPhysics(),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        mainAxisSpacing: 5,
+      ),
+      itemCount: profileList['media'].length,
+      itemBuilder: (BuildContext context, int index) {
+        return Padding(
+          padding:
+          const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+          child: GestureDetector(
+            onTap: () {
+              List<dynamic> imageUrls = profileList['media']
+                  .map((item) => item['filePath'])
+                  .toList();
+              int selectedIndex = index;
+              _showFullScreenImage(context, imageUrls, selectedIndex,
+                  profileList, homeList);
+            },
+            child: Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: Container(
+                    width: 112,
+                    height: 300,
+                    child: Image.network(
+                      profileList['media'][index]['filePath'],
+                      fit: BoxFit.fill,
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 78,
+                  left: 30,
+                  child: Column(
                     children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: Container(
-                          width: 112,
-                          height: 300,
-                          child: Image.network(
-                            profileList['media'][index]['filePath'],
-                            fit: BoxFit.fill,
-                          ),
-                        ),
+                      SvgPicture.asset(
+                        "assets/svg/heart.svg",
+                        height: 18,
                       ),
-                      Positioned(
-                        top: 78,
-                        left: 30,
-                        child: Column(
-                          children: [
-                            SvgPicture.asset(
-                              "assets/svg/heart.svg",
-                              height: 18,
-                            ),
-                            Text(
-                              profileList['media'][index]['likeCount']
-                                  .toString(),
-                              style:
-                                  TextStyle(fontSize: 10, color: Colors.white),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Positioned(
-                        top: 78,
-                        right: 30,
-                        child: Column(
-                          children: [
-                            SvgPicture.asset(
-                              "assets/svg/coment2.svg",
-                              height: 18,
-                            ),
-                            Text(
-                              profileList['media'][index]['commentCount']
-                                  .toString(),
-                              style:
-                                  TextStyle(fontSize: 10, color: Colors.white),
-                            ),
-                          ],
-                        ),
+                      Text(
+                        profileList['media'][index]['likeCount']
+                            .toString(),
+                        style:
+                        TextStyle(fontSize: 10, color: Colors.white),
                       ),
                     ],
                   ),
                 ),
-              );
-            },
-          )
-        : Center(
-            child: isLoading
-                ? CircularProgressIndicator()
-                : Text(
-                    "No images available",
-                    style: TextStyle(color: Colors.black),
+                Positioned(
+                  top: 78,
+                  right: 30,
+                  child: Column(
+                    children: [
+                      SvgPicture.asset(
+                        "assets/svg/coment2.svg",
+                        height: 18,
+                      ),
+                      Text(
+                        profileList['media'][index]['commentCount']
+                            .toString(),
+                        style:
+                        TextStyle(fontSize: 10, color: Colors.white),
+                      ),
+                    ],
                   ),
-          );
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    )
+        : Center(
+      child: isLoading
+          ? CircularProgressIndicator()
+          : Text(
+        "No images available",
+        style: TextStyle(color: Colors.black),
+      ),
+    );
   }
 
 }
@@ -299,7 +302,7 @@ class _FullScreenImageDialogState extends State<FullScreenImageDialog> {
                                                 Radius.circular(100)),
                                             child: Image.network(
                                               widget.profileList['media'][index]
-                                                  ['profilePic'],
+                                              ['profilePic'],
                                               height: 51,
                                               fit: BoxFit.cover,
                                             ),
@@ -315,13 +318,13 @@ class _FullScreenImageDialogState extends State<FullScreenImageDialog> {
                                     ),
                                   ),
                                 ),
-                                SizedBox(width: 20),
+                                SizedBox(width: 5),
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
                                       widget.profileList['media'][index]
-                                          ['firstName'],
+                                      ['firstName'],
                                       style: TextStyle(
                                           fontSize: 15,
                                           fontWeight: FontWeight.w500),
@@ -333,7 +336,7 @@ class _FullScreenImageDialogState extends State<FullScreenImageDialog> {
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 10),
                                   child:
-                                      Icon(Icons.more_vert, color: Colors.grey),
+                                  Icon(Icons.more_vert, color: Colors.grey),
                                 ),
                               ],
                             ),
@@ -343,7 +346,7 @@ class _FullScreenImageDialogState extends State<FullScreenImageDialog> {
                         Container(
                           decoration: BoxDecoration(
                               borderRadius:
-                                  BorderRadius.all(Radius.circular(0))),
+                              BorderRadius.all(Radius.circular(0))),
                           child: Image.network(
                             widget.imageUrls[index],
                             fit: BoxFit.scaleDown,
@@ -361,12 +364,12 @@ class _FullScreenImageDialogState extends State<FullScreenImageDialog> {
                                       _toggleLikePost(
                                           index,
                                           widget.profileList['media'][index]
-                                              ['_id']);
+                                          ['_id']);
                                     },
                                     child: Image.asset(
                                       widget.profileList['media'][index]
-                                                  ['isLiked'] ??
-                                              false
+                                      ['isLiked'] ??
+                                          false
                                           ? 'assets/image/rubred.png'
                                           : 'assets/image/rubblack.png',
                                       width: 30,
@@ -385,13 +388,13 @@ class _FullScreenImageDialogState extends State<FullScreenImageDialog> {
                                           return Padding(
                                             padding: const EdgeInsets.all(20.0)
                                                 .copyWith(
-                                                    bottom:
-                                                        MediaQuery.of(context)
-                                                            .viewInsets
-                                                            .bottom),
+                                                bottom:
+                                                MediaQuery.of(context)
+                                                    .viewInsets
+                                                    .bottom),
                                             child: CommentBottomSheet(
                                                 id: widget.profileList['media']
-                                                    [index]['_id']),
+                                                [index]['_id']),
                                           );
                                         },
                                       );
@@ -450,7 +453,7 @@ class _FullScreenImageDialogState extends State<FullScreenImageDialog> {
                                         ),
                                         TextSpan(
                                           text:
-                                              "${widget.profileList['media'][index]['likeCount'].toString()}",
+                                          "${widget.profileList['media'][index]['likeCount'].toString()}",
                                           style: TextStyle(
                                             color: bluetext,
                                             fontWeight: FontWeight.w800,
@@ -479,27 +482,27 @@ class _FullScreenImageDialogState extends State<FullScreenImageDialog> {
 
                               InkWell(
 
-                                  onTap: () {
-                                    showModalBottomSheet<void>(
-                                      backgroundColor: white,
-                                      context: context,
-                                      isScrollControlled: true,
-                                      builder: (BuildContext context) {
-                                        late Map<String, dynamic>? homeList;
-                                        return Padding(
-                                          padding: const EdgeInsets.all(20.0)
-                                              .copyWith(
-                                              bottom:
-                                              MediaQuery.of(context)
-                                                  .viewInsets
-                                                  .bottom),
-                                          child: CommentBottomSheet(
-                                              id: widget.profileList['media']
-                                              [index]['_id']),
-                                        );
-                                      },
-                                    );
-                                  },
+                                onTap: () {
+                                  showModalBottomSheet<void>(
+                                    backgroundColor: white,
+                                    context: context,
+                                    isScrollControlled: true,
+                                    builder: (BuildContext context) {
+                                      late Map<String, dynamic>? homeList;
+                                      return Padding(
+                                        padding: const EdgeInsets.all(20.0)
+                                            .copyWith(
+                                            bottom:
+                                            MediaQuery.of(context)
+                                                .viewInsets
+                                                .bottom),
+                                        child: CommentBottomSheet(
+                                            id: widget.profileList['media']
+                                            [index]['_id']),
+                                      );
+                                    },
+                                  );
+                                },
                                 child: Row(
                                   children: [
                                     RichText(
@@ -534,38 +537,36 @@ class _FullScreenImageDialogState extends State<FullScreenImageDialog> {
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 15),
                             child: Container(
-                              height: isExpanded ? null : 40,
-                              // Adjust height when expanded
-                              child: Text(
-                                widget.profileList['media'][index]
-                                    ['description'],
+                              height: isExpanded ? null : 40, // Adjust height when expanded
+                              child: Linkify(
+                                onOpen: _onOpen,
+                                text: widget.profileList['media'][index]['description'],
                                 maxLines: isExpanded ? null : 2,
-                                style: TextStyle(
-                                    fontSize: 12, fontWeight: FontWeight.w700),
+                                overflow: isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
+                                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                                linkStyle: TextStyle(color: Colors.blue),
                               ),
                             ),
                           ),
                         ),
-                        if (widget.profileList['media'][index]['description']
-                                .split('\n')
-                                .length >
-                            2) // Check for multiline
+                        if (widget.profileList['media'][index]['description'].split('\n').length > 2) // Check for multiline
+                        // Check for multiline
                           GestureDetector(
                             onTap: () {
                               setState(() {
                                 isExpanded =
-                                    !isExpanded; // Toggle the isExpanded state
+                                !isExpanded; // Toggle the isExpanded state
                               });
                             },
                             child: Padding(
                               padding:
-                                  const EdgeInsets.symmetric(horizontal: 10),
+                              const EdgeInsets.symmetric(horizontal: 10),
                               child: Align(
                                 alignment: Alignment.bottomRight,
                                 child: Text(
                                   isExpanded ? 'See Less' : 'See More',
                                   style:
-                                      TextStyle(color: bluetext, fontSize: 8),
+                                  TextStyle(color: bluetext, fontSize: 8),
                                 ),
                               ),
                             ),
@@ -581,7 +582,16 @@ class _FullScreenImageDialogState extends State<FullScreenImageDialog> {
       ),
     );
   }
+  Future<void> _onOpen(LinkableElement link) async {
+    if (await canLaunch(link.url)) {
+      await launch(link.url);
+    } else {
+      throw 'Could not launch ${link.url}';
+    }
+  }
 }
+
+
 
 void _showFullScreenImage(BuildContext context, List<dynamic> imageUrls,
     int initialIndex, dynamic profileList, dynamic homeList) {
