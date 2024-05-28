@@ -6,6 +6,7 @@ import 'package:rubidya/screens/trending_screen/widget/topSixThisallGridview.dar
 import 'package:rubidya/screens/trending_screen/widget/topSixThisdayGridview.dart';
 import 'package:rubidya/screens/trending_screen/widget/topSixThismonthGridview.dart';
 import 'package:rubidya/screens/trending_screen/widget/topSixThisweekGridview.dart';
+import 'package:rubidya/screens/trending_screen/widget/trending_Inner_Details.dart';
 import 'package:rubidya/screens/trending_screen/widget/trending_list_all.dart';
 import 'package:rubidya/screens/trending_screen/widget/trending_list_day.dart';
 import 'package:rubidya/screens/trending_screen/widget/trending_list_month.dart';
@@ -33,6 +34,7 @@ class _TrendingPageState extends State<TrendingPage> {
   var trendingcardprice;
   var trendingpoint;
   var trendingthisalltopsix;
+  var trendingpersoninner;
   bool _isLoading = true;
 
   Future<void> _trendingdetailsapi() async {
@@ -90,6 +92,20 @@ class _TrendingPageState extends State<TrendingPage> {
     }
   }
 
+  Future<void> _trendingpersonInnerpge() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    userid = prefs.getString('userid');
+    if (userid != null) {
+      var response = await TrendingService.trendingallpointsthisday(widget.id);
+      log.i('trending card details show.. $response');
+      setState(() {
+        trendingpersoninner = response;
+      });
+    } else {
+      log.e('User ID is null');
+    }
+  }
+
   Future<void> _initLoad() async {
     try {
       await Future.wait([
@@ -97,6 +113,7 @@ class _TrendingPageState extends State<TrendingPage> {
         _trendingcarddetailsapi(),
         _trendingcarddetailsapis(),
         _trendingpoint(),
+        _trendingpersonInnerpge()
       ]);
       setState(() {
         _isLoading = false;
@@ -182,9 +199,9 @@ class _TrendingPageState extends State<TrendingPage> {
             InkWell(
               onTap: () async {
 
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(builder: (context) => TrendingInnerPage(id: trendingthisalltopsix['response'][0]['_id'],dayidentifier: "thisday")),);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => TrendingInnerPage(id: trendingpoint['userId'],dayidentifier: "thisday")),);
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),

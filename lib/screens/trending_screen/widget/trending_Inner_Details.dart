@@ -44,6 +44,10 @@ class _TrendingInnerPageState extends State<TrendingInnerPage> {
     });
   }
 
+
+
+
+
   Future _initLoad() async {
     await _profileInner();
     setState(() {

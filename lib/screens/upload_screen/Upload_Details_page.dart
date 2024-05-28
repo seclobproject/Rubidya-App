@@ -158,6 +158,7 @@ class _uploadedetailsState extends State<uploadedetails> {
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: TextField(
+
                   keyboardType: TextInputType.multiline,
                   minLines: 1,
                   maxLines: 5,

@@ -4,12 +4,11 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:rubidya/resources/color.dart';
 import 'package:rubidya/screens/home_screen/widgets/comment_home.dart';
-
+import 'package:flutter_linkify/flutter_linkify.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:rubidya/screens/home_screen/widgets/home_story.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../../services/home_service.dart';
-
 import '../../support/logger.dart';
 import '../profile_screen/inner_page/profile_inner_page.dart';
 import '../search_screen/searchpage.dart';
@@ -103,6 +102,8 @@ class _homepageState extends State<homepage> {
       }
     });
   }
+
+
 
   Future<void> _initLoad() async {
     await _homeFeed();
@@ -726,21 +727,20 @@ class _ProductCardState extends State<ProductCard> {
             ),
           ),
 
-          Align(
-            alignment: Alignment.topLeft,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: Container(
-                height: isExpanded ? null : 40, // Adjust height when expanded
-                child: Text(
-                  widget.description,
-                  maxLines: isExpanded ? null : 2,
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
-                ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: Container(
+              height: isExpanded ? null : 40, // Adjust height when expanded
+              child: Linkify(
+                onOpen: _onOpen,
+                text: widget.description,
+                maxLines: isExpanded ? null : 2,
+                overflow: isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                linkStyle: TextStyle(color: Colors.blue),
               ),
             ),
           ),
-
           if (widget.description.split('\n').length > 2) // Check for multiline
             GestureDetector(
               onTap: () {
@@ -754,7 +754,7 @@ class _ProductCardState extends State<ProductCard> {
                   alignment: Alignment.bottomRight,
                   child: Text(
                     isExpanded ? 'See Less' : 'See More ',
-                    style: TextStyle(color: bluetext, fontSize: 8),
+                    style: TextStyle(color: Colors.blue, fontSize: 8),
                   ),
                 ),
               ),
@@ -766,6 +766,14 @@ class _ProductCardState extends State<ProductCard> {
         ],
       ),
     );
+  }
+
+  Future<void> _onOpen(LinkableElement link) async {
+    if (await canLaunch(link.url)) {
+      await launch(link.url);
+    } else {
+      throw 'Could not launch ${link.url}';
+    }
   }
 }
 
@@ -873,4 +881,5 @@ class MembersListing extends StatelessWidget {
       ),
     );
   }
+
 }

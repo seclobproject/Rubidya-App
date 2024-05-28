@@ -300,8 +300,10 @@ class _UploadScreenState extends State<UploadScreen> {
                         borderRadius: BorderRadius.circular(5),
                         child: ColorFiltered(
                           colorFilter: ColorFilter.matrix(filters[index]),
-                          child: Image.network(
-                            'https://cdn.britannica.com/45/5645-050-B9EC0205/head-treasure-flower-disk-flowers-inflorescence-ray.jpg',
+
+                          ///Replace the Image Network With Uploaded Image
+                          child: Image.file(
+                            File(imageUrl!),
                             fit: BoxFit.cover,
                           ),
                         ),

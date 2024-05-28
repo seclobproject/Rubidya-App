@@ -1,4 +1,3 @@
-
 import '../networking/constant.dart';
 import '../support/dio_helper.dart';
 
@@ -207,15 +206,14 @@ class ProfileService {
     }
   }
 
-  static Future Profileinnerpage(id) async {
+  static Future Profileinnerpage(id, {int page = 1, int limit = 12}) async {
     try {
       var dio = await DioHelper.getInstance();
-      var response = await dio.get('$baseURL/api/users/get-user/$id');
+      var response = await dio.get('$baseURL/api/users/get-user/$id?page=$page&limit=$limit');
       return response.data;
     } catch (e) {
       rethrow;
     }
   }
-
 
 }
