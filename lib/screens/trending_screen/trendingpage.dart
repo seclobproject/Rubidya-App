@@ -34,7 +34,6 @@ class _TrendingPageState extends State<TrendingPage> {
   var trendingcardprice;
   var trendingpoint;
   var trendingthisalltopsix;
-  var trendingpersoninner;
   bool _isLoading = true;
 
   Future<void> _trendingdetailsapi() async {
@@ -92,20 +91,6 @@ class _TrendingPageState extends State<TrendingPage> {
     }
   }
 
-  Future<void> _trendingpersonInnerpge() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    userid = prefs.getString('userid');
-    if (userid != null) {
-      var response = await TrendingService.trendingallpointsthisday(widget.id);
-      log.i('trending card details show.. $response');
-      setState(() {
-        trendingpersoninner = response;
-      });
-    } else {
-      log.e('User ID is null');
-    }
-  }
-
   Future<void> _initLoad() async {
     try {
       await Future.wait([
@@ -113,7 +98,6 @@ class _TrendingPageState extends State<TrendingPage> {
         _trendingcarddetailsapi(),
         _trendingcarddetailsapis(),
         _trendingpoint(),
-        _trendingpersonInnerpge()
       ]);
       setState(() {
         _isLoading = false;

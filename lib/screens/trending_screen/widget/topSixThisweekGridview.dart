@@ -13,7 +13,6 @@ class TopSixGridviewweek extends StatefulWidget {
 class _TopSixGridviewday extends State<TopSixGridviewweek> {
   String _selectedDropdownValue = 'Thisday';
   var trendingthisweektopsix;
-  var trendingthisweektopthree;
   bool _isLoading = true;
 
   var trendingalltimepoints;
@@ -26,21 +25,6 @@ class _TopSixGridviewday extends State<TopSixGridviewweek> {
       log.i('tranding by days .. $response');
       setState(() {
         trendingthisweektopsix = response;
-      });
-    } catch (e) {
-      print('Error in _trendingtopSixapi: $e');
-    }
-  }
-
-
-  Future _trendingtopThreeapithisweek(String status) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? userid = prefs.getString('userid');
-    try {
-      var response = await TrendingService.trendingapiThisweekthree();
-      log.i('tranding by days .. $response');
-      setState(() {
-        trendingthisweektopthree = response;
       });
     } catch (e) {
       print('Error in _trendingtopSixapi: $e');

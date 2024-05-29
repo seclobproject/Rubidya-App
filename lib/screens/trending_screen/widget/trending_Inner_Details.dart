@@ -29,8 +29,8 @@ class _TrendingInnerPageState extends State<TrendingInnerPage> {
       response = await TrendingService.trendingallpointsthisweek(widget.id);
     } else if (widget.dayidentifier == 'thismonth') {
       response = await TrendingService.trendingallpointsthismonth(widget.id);
-    } else if (widget.dayidentifier == 'myprofile') {
-      response = await TrendingService.trendingallpointsthisday(widget.id);
+    } else if (widget.dayidentifier == 'thisyear') {
+      response = await TrendingService.trendingallpointsthismonth(widget.id);
     }
     else if (widget.dayidentifier == 'thisall') {
       response = await TrendingService.trendingallpointsthisall(widget.id);
@@ -43,10 +43,6 @@ class _TrendingInnerPageState extends State<TrendingInnerPage> {
       trendingdayInner = response;
     });
   }
-
-
-
-
 
   Future _initLoad() async {
     await _profileInner();
