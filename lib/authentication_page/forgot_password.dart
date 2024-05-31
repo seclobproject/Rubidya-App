@@ -17,6 +17,15 @@ class forgotpassword extends StatefulWidget {
 class _forgotpasswordState extends State<forgotpassword> {
 
 
+  bool isButtonEnabled = true;
+
+  void toggleButtonState() {
+    setState(() {
+      isButtonEnabled = !isButtonEnabled;
+    });
+  }
+
+
   bool hidePassword = true;
 
 
@@ -37,6 +46,9 @@ class _forgotpasswordState extends State<forgotpassword> {
 
   Future forgetPassword() async {
     try {
+
+      toggleButtonState();
+
       setState(() {});
       SharedPreferences prefs = await SharedPreferences.getInstance();
       userid = prefs.getString('userid');
@@ -69,13 +81,12 @@ class _forgotpasswordState extends State<forgotpassword> {
       }
       else {
         (response['msg'] == 'Email does not exist');
-
         SnackBar(
           content: Text('Email does not exist'), // Add $userId here
           duration: Duration(seconds: 3),
         );
       }
-      
+
     } catch (error) {
       if (error.toString().contains("User Already Exist")) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -85,6 +96,7 @@ class _forgotpasswordState extends State<forgotpassword> {
           ),
         );
       } else {
+        toggleButtonState();
         print('Error: $error');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -106,31 +118,31 @@ class _forgotpasswordState extends State<forgotpassword> {
 
             SizedBox(height: 150,),
             Center(
-              child: Image.asset(
-                "assets/image/forgottpng.png",
-                height: 200,
-              )
+                child: Image.asset(
+                  "assets/image/forgottpng.png",
+                  height: 200,
+                )
             ),
-        
+
             SizedBox(height: 50,),
-            
+
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Align(
                   alignment: Alignment.topLeft,
                   child: Text("Forget Password",style: TextStyle(fontSize: 22,fontWeight: FontWeight.w700,color: bluetext),)),
             ),
-            
+
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Align(
                   alignment: Alignment.topLeft,
                   child: Text("To reset your password, enter your Email-ID and verify",style: TextStyle(fontSize: 12),)),
             ),
-        
+
             SizedBox(height: 20,),
-        
-        
+
+
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: TextField(
@@ -152,25 +164,25 @@ class _forgotpasswordState extends State<forgotpassword> {
                     color: bordercolor,
                   ),
                 ),
-        
+
                 onChanged: (text) {
                   setState(() {
-                   email=text;
-        
+                    email=text;
+
                   });
                 },
                 style: TextStyle(color: textblack,fontSize: 14),
               ),
             ),
-        
-        
+
+
             SizedBox(height: 20,),
-        
-        
-        
+
+
+
             InkWell(
               onTap: (){
-                forgetPassword();
+                isButtonEnabled ? forgetPassword() : null;
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -178,22 +190,22 @@ class _forgotpasswordState extends State<forgotpassword> {
                   height: 48,
                   width: 400,
                   decoration: BoxDecoration(
-                      color: buttoncolor,
+                      color: isButtonEnabled ? buttoncolor : Colors.grey,
                       borderRadius: BorderRadius.all(Radius.circular(10))),
                   child: Center(
                     child: Text("Submit",style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,color: white),),
                   ),
-        
+
                 ),
               ),
             ),
-        
+
             SizedBox(height: 40,),
-        
-        
-        
+
+
+
           ],
         ),
       ),

@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import '../commonpage/reelspage.dart';
 import '../resources/color.dart';
 import '../screens/chat_screen/chatpage.dart';
 import '../screens/home_screen/homepage.dart';
@@ -39,7 +40,7 @@ class _BottomnavState extends State<Bottomnav> {
     {'page': homepage(), 'title': 'Home'},
     {'page': TrendingPage(id: '',), 'title': 'Search'},
     {'page': UploadScreen(), 'title': 'Upload'},
-    {'page': chatpage(), 'title': 'Chat page'},
+    {'page': reelpage(), 'title': 'Chat page'},
     {'page': ProfileView(), 'title': 'Profile'},
   ];
 

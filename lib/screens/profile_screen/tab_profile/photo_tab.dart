@@ -12,7 +12,6 @@ import '../../../services/profile_service.dart';
 import '../../../support/logger.dart';
 import '../../home_screen/widgets/comment_home.dart';
 
-
 class PhotoTab extends StatefulWidget {
   const PhotoTab({super.key});
 
@@ -324,19 +323,28 @@ class _FullScreenImageDialogState extends State<FullScreenImageDialog> {
                                             borderRadius: BorderRadius.all(
                                                 Radius.circular(100)),
                                             child: CachedNetworkImage(
-                                              imageUrl: widget.profileList['media'][index]['profilePic'],
+                                              imageUrl:
+                                              widget.profileList['media']
+                                              [index]['profilePic'],
                                               height: 51,
                                               fit: BoxFit.cover,
-                                              httpHeaders: {'Cache-Control': 'no-cache'},
-                                              progressIndicatorBuilder: (context, url, downloadProgress) =>
+                                              httpHeaders: {
+                                                'Cache-Control': 'no-cache'
+                                              },
+                                              progressIndicatorBuilder:
+                                                  (context, url,
+                                                  downloadProgress) =>
                                                   Center(
-                                                    child: CupertinoActivityIndicator(),
+                                                    child:
+                                                    CupertinoActivityIndicator(),
                                                   ),
-                                              errorWidget: (context, url, error) =>
+                                              errorWidget:
+                                                  (context, url, error) =>
                                                   Center(
                                                     child: Text(
                                                       'Failed to load image',
-                                                      style: TextStyle(color: Colors.red),
+                                                      style: TextStyle(
+                                                          color: Colors.red),
                                                     ),
                                                   ),
                                             ),
@@ -387,7 +395,7 @@ class _FullScreenImageDialogState extends State<FullScreenImageDialog> {
                                                     topLeft:
                                                     Radius.circular(40),
                                                   )),
-                                              height: 400.0,
+                                              height: MediaQuery.of(context).size.height * 0.25,
                                               child: ConstrainedBox(
                                                 constraints: BoxConstraints(
                                                     maxWidth:
@@ -411,100 +419,177 @@ class _FullScreenImageDialogState extends State<FullScreenImageDialog> {
                                                                   (BuildContext
                                                               context) {
                                                                 return AlertDialog(
+                                                                  backgroundColor: Colors.white,
+                                                                  surfaceTintColor: Colors.white,
+                                                                  shape: RoundedRectangleBorder(
+                                                                      borderRadius: BorderRadius.circular(20)
+                                                                  ),
+
                                                                   title: Text(
-                                                                      "Delete Confirmation"),
+                                                                    "Delete Confirmation", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),),
                                                                   content: Text(
                                                                       "Are you sure you want to delete this Post?"),
                                                                   actions: [
-                                                                    TextButton(
-                                                                      onPressed:
-                                                                          () {
-                                                                        Navigator.of(context)
-                                                                            .pop(); // Close the dialog
-                                                                      },
-                                                                      child: Text(
-                                                                          "Cancel"),
-                                                                    ),
-                                                                    TextButton(
-                                                                      onPressed: () {
-                                                                        // Show circular progress indicator
-                                                                        showDialog(
-                                                                          context: context,
-                                                                          builder: (BuildContext context) {
-                                                                            return Center(
-                                                                              child: CircularProgressIndicator(),
-                                                                            );
-                                                                          },
-                                                                        );
 
-                                                                        // Wait for 3 seconds before navigating
-                                                                        Future.delayed(Duration(seconds: 3), () {
-                                                                          _deletePost(widget.profileList['media'][index]['_id']);
-                                                                          Navigator.of(context).pushAndRemoveUntil(
-                                                                            MaterialPageRoute(builder: (context) => Bottomnav(initialPageIndex: 4)),
-                                                                                (route) => false,
-                                                                          );
-                                                                        });
-                                                                      },
-                                                                      child: Text("Delete"),
-                                                                    ),
+                                                                    Padding(
+                                                                      padding: const EdgeInsets.only(left: 20, right: 10),
+                                                                      child: Row(
 
+                                                                        children: [
+                                                                          GestureDetector(
+                                                                            onTap: (){
+
+                                                                              Navigator.pop(context);
+                                                                            },
+
+                                                                            child: Container(
+                                                                              height: 40,
+                                                                              width: 100,
+                                                                              decoration: BoxDecoration(
+                                                                                  color: Colors.white,
+                                                                                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                                                                                  border: Border.all(color: Colors.redAccent,width: 1.5)
+                                                                              ),
+                                                                              child: Center(
+                                                                                  child: Text("Cancel",style: TextStyle(fontSize: 15,color: Colors.redAccent,fontWeight: FontWeight.w500),)),
+                                                                            ),
+
+                                                                          ),
+                                                                          // SizedBox(width: 20,),
+                                                                          Spacer(),
+                                                                          GestureDetector(
+                                                                            onTap: () {
+                                                                              // Show circular progress indicator
+                                                                              showDialog(
+                                                                                context:
+                                                                                context,
+                                                                                builder:
+                                                                                    (BuildContext context) {
+                                                                                  return Center(
+                                                                                    child: CircularProgressIndicator(),
+                                                                                  );
+                                                                                },
+                                                                              );
+
+                                                                              // Wait for 3 seconds before navigating
+                                                                              Future.delayed(
+                                                                                  Duration(seconds: 5),
+                                                                                      () {
+                                                                                    _deletePost(widget.profileList['media'][index]
+                                                                                    [
+                                                                                    '_id']);
+                                                                                    Navigator.of(context)
+                                                                                        .pushAndRemoveUntil(
+                                                                                      MaterialPageRoute(builder: (context) => Bottomnav(initialPageIndex: 4)),
+                                                                                          (route) =>
+                                                                                      false,
+                                                                                    );
+                                                                                  });
+                                                                            },
+
+                                                                            child: Container(
+                                                                              height: 40,
+                                                                              width: 100,
+                                                                              decoration: BoxDecoration(
+                                                                                  color: Colors.redAccent,
+                                                                                  borderRadius: BorderRadius.all(Radius.circular(10))
+                                                                              ),
+                                                                              child: Center(
+                                                                                  child: Text("Delete",style: TextStyle(fontSize: 15,color: Colors.white),)),
+                                                                            ),
+
+                                                                          ),
+                                                                        ],
+                                                                      ),
+                                                                    ),
+                                                                    //
+                                                                    // TextButton(
+                                                                    //   onPressed:
+                                                                    //       () {
+                                                                    //     Navigator.of(context)
+                                                                    //         .pop(); // Close the dialog
+                                                                    //   },
+                                                                    //   child: Text(
+                                                                    //       "Cancel"),
+                                                                    // ),
+                                                                    // TextButton(
+                                                                    //   onPressed:
+                                                                    //       () {
+                                                                    //     // Show circular progress indicator
+                                                                    //     showDialog(
+                                                                    //       context:
+                                                                    //           context,
+                                                                    //       builder:
+                                                                    //           (BuildContext context) {
+                                                                    //         return Center(
+                                                                    //           child: CircularProgressIndicator(),
+                                                                    //         );
+                                                                    //       },
+                                                                    //     );
+                                                                    //
+                                                                    //     // Wait for 3 seconds before navigating
+                                                                    //     Future.delayed(
+                                                                    //         Duration(seconds: 3),
+                                                                    //         () {
+                                                                    //       _deletePost(widget.profileList['media'][index]
+                                                                    //           [
+                                                                    //           '_id']);
+                                                                    //       Navigator.of(context)
+                                                                    //           .pushAndRemoveUntil(
+                                                                    //         MaterialPageRoute(builder: (context) => Bottomnav(initialPageIndex: 4)),
+                                                                    //         (route) =>
+                                                                    //             false,
+                                                                    //       );
+                                                                    //     });
+                                                                    //   },
+                                                                    //   child: Text(
+                                                                    //       "Delete"),
+                                                                    // ),
                                                                   ],
                                                                 );
                                                               },
                                                             );
                                                           },
-                                                          child:
-                                                          Padding(
-                                                            padding: const EdgeInsets.all(8.0),
-                                                            child: Row(
-                                                              mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .center,
-                                                              crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .center,
-                                                              children: [
-                                                                Icon(
-                                                                  Icons.delete,
-                                                                  color: Colors
-                                                                      .redAccent,
-                                                                  size: 14.0,
-                                                                  semanticLabel:
-                                                                  'Text to announce in accessibility modes',
-                                                                ),
-                                                                SizedBox(
-                                                                  width: 5,
-                                                                ),
-                                                                Text(
-                                                                  'Delete Post',
-                                                                  style: TextStyle(
-                                                                      fontSize:
-                                                                      14.0,
-                                                                      color:
-                                                                      bluetext,
-                                                                      fontWeight:
-                                                                      FontWeight
-                                                                          .w200),
-                                                                ),
-                                                              ],
-                                                            ),
-                                                          ),
-
-                                                        ),
-                                                        GestureDetector(
                                                           child: Padding(
                                                             padding:
                                                             const EdgeInsets
-                                                                .symmetric(
-                                                                vertical:
-                                                                150),
-                                                            child: Row(
-
+                                                                .all(20).copyWith(top:10),
+                                                            child: Column(
+                                                              mainAxisAlignment: MainAxisAlignment.start,
                                                               children: [
-
-
-
+                                                                SizedBox(height: 10,),
+                                                                Row(
+                                                                  mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .start,
+                                                                  crossAxisAlignment:
+                                                                  CrossAxisAlignment
+                                                                      .center,
+                                                                  children: [
+                                                                    Icon(
+                                                                      Icons.delete,
+                                                                      color: Colors
+                                                                          .redAccent,
+                                                                      size: 20,
+                                                                      semanticLabel:
+                                                                      'Text to announce in accessibility modes',
+                                                                    ),
+                                                                    SizedBox(
+                                                                      width: 15,
+                                                                    ),
+                                                                    Text(
+                                                                      'Delete Post',
+                                                                      style: TextStyle(
+                                                                          fontSize:
+                                                                          20,
+                                                                          color:
+                                                                          bluetext,
+                                                                          fontWeight:
+                                                                          FontWeight
+                                                                              .w300),
+                                                                    ),
+                                                                  ],
+                                                                ),
                                                               ],
                                                             ),
                                                           ),

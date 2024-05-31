@@ -8,6 +8,8 @@ import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:rubidya/screens/home_screen/widgets/home_story.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../commonpage/messagepage.dart';
+import '../../commonpage/notification.dart';
 import '../../services/home_service.dart';
 import '../../support/logger.dart';
 import '../profile_screen/inner_page/profile_inner_page.dart';
@@ -219,10 +221,10 @@ class _homepageState extends State<homepage> {
                     ),
                     InkWell(
                       onTap: () {
-                        // Navigator.push(
-                        //   context,
-                        //   MaterialPageRoute(builder: (context) => TrendingPage()),
-                        // );
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => messagepage()),
+                        );
                       },
                       child: SvgPicture.asset(
                         "assets/svg/massage.svg",
@@ -230,7 +232,13 @@ class _homepageState extends State<homepage> {
                     ),
                     SizedBox(width: 20),
                     IconButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => notificationpage()),
+                          );
+
+                        },
                         icon: Badge(
                             textColor: Colors.white,
                             label: Text("5"),

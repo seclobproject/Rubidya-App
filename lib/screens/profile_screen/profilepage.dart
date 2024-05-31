@@ -8,6 +8,7 @@ import 'package:rubidya/screens/profile_screen/widget/followers_list.dart';
 import 'package:rubidya/screens/profile_screen/widget/following_list.dart';
 import 'package:rubidya/screens/profile_screen/widget/rubidium_widget/my_wallet.dart';
 import 'package:rubidya/screens/profile_screen/widget/rubidium_widget/verification_page.dart';
+import '../../commonpage/contactpage.dart';
 import '../../resources/color.dart';
 import '../home_screen/widgets/referral_page.dart';
 import 'package:flutter/cupertino.dart';
@@ -722,19 +723,27 @@ class _ProfileViewState extends State<ProfileView> {
                       SizedBox(
                         width: 10,
                       ),
-                      Container(
-                        height: 31,
-                        width: 110,
-                        decoration: BoxDecoration(
-                            color: conainer220,
-                            borderRadius:
-                            BorderRadius.all(Radius.circular(10))),
-                        child: Center(
-                            child: Text(
-                              "Contact",
-                              style:
-                              TextStyle(fontSize: 10, color: bluetext),
-                            )),
+                      InkWell(
+                        onTap: (){
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => contactpage()),
+                          );
+                        },
+                        child: Container(
+                          height: 31,
+                          width: 110,
+                          decoration: BoxDecoration(
+                              color: conainer220,
+                              borderRadius:
+                              BorderRadius.all(Radius.circular(10))),
+                          child: Center(
+                              child: Text(
+                                "Contact",
+                                style:
+                                TextStyle(fontSize: 10, color: bluetext),
+                              )),
+                        ),
                       ),
 
                       SizedBox(
