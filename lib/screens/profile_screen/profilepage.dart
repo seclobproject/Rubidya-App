@@ -1,7 +1,6 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:rubidya/authentication_page/terms_and_conditions.dart';
 import 'package:rubidya/screens/profile_screen/tab_profile/photo_tab.dart';
 import 'package:rubidya/screens/profile_screen/tab_profile/vedio_tab.dart';
 import 'package:rubidya/screens/profile_screen/widget/edit_profile.dart';
@@ -289,87 +288,123 @@ class _ProfileViewState extends State<ProfileView> {
                                 SizedBox(
                                   height: 40,
                                 ),
+                                // Padding(
+                                //   padding: const EdgeInsets.symmetric(horizontal: 40),
+                                //   child: Align(
+                                //     alignment: Alignment.topLeft,
+                                //     child: Row(
+                                //       children: [
+                                //         SvgPicture.asset(
+                                //           "assets/svg/settings.svg",
+                                //           height: 14,
+                                //         ),
+                                //         SizedBox(
+                                //           width: 10,
+                                //         ),
+                                //         Text(
+                                //           'Setting and privacy',
+                                //           style: TextStyle(
+                                //               fontSize: 14.0,
+                                //               color: bluetext,
+                                //               fontWeight: FontWeight.w200),
+                                //         ),
+                                //       ],
+                                //     ),
+                                //   ),
+                                // ),
+                                // SizedBox(
+                                //   height: 25,
+                                // ),
+
                                 Padding(
                                   padding: const EdgeInsets.symmetric(horizontal: 40),
                                   child: Align(
                                     alignment: Alignment.topLeft,
-                                    child: Row(
-                                      children: [
-                                        SvgPicture.asset(
-                                          "assets/svg/settings.svg",
-                                          height: 14,
-                                        ),
-                                        SizedBox(
-                                          width: 10,
-                                        ),
-                                        Text(
-                                          'Setting and privacy',
-                                          style: TextStyle(
-                                              fontSize: 14.0,
-                                              color: bluetext,
-                                              fontWeight: FontWeight.w200),
-                                        ),
-                                      ],
+                                    child: InkWell(
+                                      onTap: (){
+                                        Navigator.of(context).push(MaterialPageRoute(builder: (context) => TermsAndConditions()));
+                                      },
+                                      child: Row(
+                                        children: [
+                                          SvgPicture.asset(
+                                            "assets/svg/settings.svg",
+                                            height: 14,
+                                          ),
+                                          SizedBox(
+                                            width: 10,
+                                          ),
+                                          Text(
+                                            'Terms and Conditions',
+                                            style: TextStyle(
+                                                fontSize: 14.0,
+                                                color: bluetext,
+                                                fontWeight: FontWeight.w200),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ),
                                 SizedBox(
                                   height: 25,
                                 ),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 40),
-                                  child: Align(
-                                    alignment: Alignment.topLeft,
-                                    child: Row(
-                                      children: [
-                                        SvgPicture.asset(
-                                          "assets/svg/saved.svg",
-                                          height: 14,
-                                        ),
-                                        SizedBox(
-                                          width: 10,
-                                        ),
-                                        Text(
-                                          'Saved',
-                                          style: TextStyle(
-                                              fontSize: 14.0,
-                                              color: bluetext,
-                                              fontWeight: FontWeight.w200),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(
-                                  height: 25,
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 40),
-                                  child: Align(
-                                    alignment: Alignment.topLeft,
-                                    child: Row(
-                                      children: [
-                                        SvgPicture.asset(
-                                          "assets/svg/ads.svg",
-                                          height: 14,
-                                        ),
-                                        SizedBox(
-                                          width: 10,
-                                        ),
-                                        Text(
-                                          'Ads',
-                                          style: TextStyle(
-                                              fontSize: 14.0,
-                                              color: bluetext,
-                                              fontWeight: FontWeight.w200),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(
-                                  height: 25,
-                                ),
+                                //
+                                //
+                                // Padding(
+                                //   padding: const EdgeInsets.symmetric(horizontal: 40),
+                                //   child: Align(
+                                //     alignment: Alignment.topLeft,
+                                //     child: Row(
+                                //       children: [
+                                //         SvgPicture.asset(
+                                //           "assets/svg/saved.svg",
+                                //           height: 14,
+                                //         ),
+                                //         SizedBox(
+                                //           width: 10,
+                                //         ),
+                                //         Text(
+                                //           'Saved',
+                                //           style: TextStyle(
+                                //               fontSize: 14.0,
+                                //               color: bluetext,
+                                //               fontWeight: FontWeight.w200),
+                                //         ),
+                                //       ],
+                                //     ),
+                                //   ),
+                                // ),
+                                // SizedBox(
+                                //   height: 25,
+                                // ),
+                                // Padding(
+                                //   padding: const EdgeInsets.symmetric(horizontal: 40),
+                                //   child: Align(
+                                //     alignment: Alignment.topLeft,
+                                //     child: Row(
+                                //       children: [
+                                //         SvgPicture.asset(
+                                //           "assets/svg/ads.svg",
+                                //           height: 14,
+                                //         ),
+                                //         SizedBox(
+                                //           width: 10,
+                                //         ),
+                                //         Text(
+                                //           'Ads',
+                                //           style: TextStyle(
+                                //               fontSize: 14.0,
+                                //               color: bluetext,
+                                //               fontWeight: FontWeight.w200),
+                                //         ),
+                                //       ],
+                                //     ),
+                                //   ),
+                                // ),
+                                // SizedBox(
+                                //   height: 25,
+                                // ),
+                                Spacer(),
 
                                 SizedBox(
                                   height: 100,
@@ -407,7 +442,9 @@ class _ProfileViewState extends State<ProfileView> {
                                           )),
                                     ),
                                   ),
-                                )
+                                ),
+
+                                SizedBox(height: 40,),
                               ],
                             ),
                           );
@@ -837,10 +874,3 @@ class _ProfileViewState extends State<ProfileView> {
     );
   }
 }
-
-
-
-
-
-
-

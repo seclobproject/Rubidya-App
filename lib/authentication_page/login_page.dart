@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rubidya/authentication_page/registration_page.dart';
+import 'package:rubidya/authentication_page/terms_and_conditions.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../navigation/bottom_navigation.dart';
 import '../resources/color.dart';
@@ -53,22 +54,22 @@ class _loginState extends State<login> {
         // _saveAndRedirectToHome(response['access_token'], response['name']);
         _saveAndRedirectToHome(response['access_token'], response['_id']);
 
-    //     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-    //       content: Text('Login Success'),
-    //     ));
-    //     gotoHome();
-    //   } else {
-    //     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-    //       content: Text('Login failed: ${response['msg']}'),
-    //     ));
-    //     // Uncomment the line below if you want to prevent the page refresh on login failure
-    //     // login();
-    //   }
-    // } catch (error) {
-    //   setState(() {
-    //     _isLoading = false;
-    //     _isLoader = false;
-    //   });
+        //     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        //       content: Text('Login Success'),
+        //     ));
+        //     gotoHome();
+        //   } else {
+        //     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        //       content: Text('Login failed: ${response['msg']}'),
+        //     ));
+        //     // Uncomment the line below if you want to prevent the page refresh on login failure
+        //     // login();
+        //   }
+        // } catch (error) {
+        //   setState(() {
+        //     _isLoading = false;
+        //     _isLoader = false;
+        //   });
 
         if (response['isOTPVerified'] == false) {
           // Navigate to firstotppassword page
@@ -350,14 +351,20 @@ class _loginState extends State<login> {
                   height:40,
                   width: 400,
                   decoration: BoxDecoration(
-                    color: bluetext,
+                      color: bluetext,
                       borderRadius: BorderRadius.all(Radius.circular(10))),
 
                   child: Center(child: Text("Create new account",style: TextStyle(fontSize: 12,color: white),)),
 
                 ),
               ),
-            )
+            ),
+
+            SizedBox(height: 15,),
+
+            TextButton(onPressed: (){
+              Navigator.of(context).push(MaterialPageRoute(builder: (context) => TermsAndConditions()));
+            }, child: Text('Terms & Condition' , style: TextStyle(color: Color.fromRGBO(66, 123, 189, 1)),))
 
           ],
         ),

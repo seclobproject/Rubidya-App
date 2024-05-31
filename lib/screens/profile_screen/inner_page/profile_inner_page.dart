@@ -169,7 +169,7 @@ class _profileinnerpageState extends State<profileinnerpage>
       backgroundColor: white,
       body: _isLoading
           ? Center(
-        child: CircularProgressIndicator(),
+        child: CupertinoActivityIndicator(),
       )
           : SingleChildScrollView(
         controller: _scrollController,

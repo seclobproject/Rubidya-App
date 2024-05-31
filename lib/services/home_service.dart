@@ -172,6 +172,17 @@ class HomeService {
     }
   }
 
+  static Future postlikecomment(data) async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.post('$baseURL/api/posts/like-comment',data: data);
+      return response.data;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+
 
   static Future comment(String id, {int page = 1, int limit = 10}) async {
     try {
@@ -226,6 +237,16 @@ class HomeService {
     try {
       var dio = await DioHelper.getInstance();
       var response = await dio.delete('$baseURL/api/posts/delete-comment/$id');
+      return response.data;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  static Future deletemypost(id) async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.delete('$baseURL/api/users/delete-image?imageId=$id');
       return response.data;
     } catch (e) {
       rethrow;

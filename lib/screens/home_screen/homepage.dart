@@ -12,6 +12,7 @@ import '../../services/home_service.dart';
 import '../../support/logger.dart';
 import '../profile_screen/inner_page/profile_inner_page.dart';
 import '../search_screen/searchpage.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class homepage extends StatefulWidget {
   const homepage({Key? key}) : super(key: key);
@@ -21,20 +22,21 @@ class homepage extends StatefulWidget {
 }
 
 class _homepageState extends State<homepage> {
-  var userId;
-  var profileDetails;
-  var homeList;
+  late SharedPreferences prefs;
   bool isLoading = false;
   bool _isLoading = true;
   bool isExpanded = false;
   int _pageNumber = 1;
-  ScrollController _scrollController = ScrollController();
+  String? userId;
+  Map<String, dynamic>? homeList;
+  List<Map<String, dynamic>> suggestFollow = [];
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
+    super.initState();
     _initLoad();
     _scrollController.addListener(_scrollListener);
-    super.initState();
   }
 
   @override
@@ -44,23 +46,22 @@ class _homepageState extends State<homepage> {
   }
 
   void _scrollListener() {
-    if (_scrollController.offset >=
-        _scrollController.position.maxScrollExtent &&
-        !_scrollController.position.outOfRange) {
+    if (_scrollController.position.atEdge &&
+        _scrollController.position.pixels != 0) {
       _loadMore();
     }
   }
 
-  late SharedPreferences prefs;
-
-  late List<Map<String, dynamic>> suggestFollow = [];
-
   Future<void> _suggestFollowList() async {
-    var response = await HomeService.usersuggetionlistfollow();
-    log.i('refferal details show.. $response');
-    setState(() {
-      suggestFollow = List<Map<String, dynamic>>.from(response['result']);
-    });
+    try {
+      var response = await HomeService.usersuggetionlistfollow();
+      log.i('Referral details show: $response');
+      setState(() {
+        suggestFollow = List<Map<String, dynamic>>.from(response['result']);
+      });
+    } catch (e) {
+      log.e('Failed to load suggestions: $e');
+    }
   }
 
   Future<void> toggleFollow(int index) async {
@@ -70,48 +71,44 @@ class _homepageState extends State<homepage> {
     });
 
     var followerId = suggestFollow[index]['_id'];
-    if (suggestFollow[index]['isFollowing']) {
-      await follow(followerId);
-    } else {
-      await unfollow(followerId);
+    try {
+      if (suggestFollow[index]['isFollowing']) {
+        await HomeService.follow({'followerId': followerId});
+      } else {
+        await HomeService.unfollow({'followerId': followerId});
+      }
+    } catch (e) {
+      log.e('Failed to toggle follow: $e');
     }
   }
 
-  Future<void> follow(String followerId) async {
-    var reqData = {'followerId': followerId};
-    var response = await HomeService.follow(reqData);
-    log.i('add to follow. $response');
-  }
-
-  Future<void> unfollow(String followerId) async {
-    var reqData = {'followerId': followerId};
-    var response = await HomeService.unfollow(reqData);
-    log.i('removed from follow. $response');
-  }
-
   Future<void> _homeFeed({int page = 1}) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    userId = prefs.getString('userId');
-    var response = await HomeService.getFeed(page: page);
-    log.i('Home feed data: $response');
-    setState(() {
-      if (homeList == null) {
-        homeList = response;
-      } else {
-        homeList['posts'].addAll(response['posts']);
-      }
-    });
+    try {
+      var response = await HomeService.getFeed(page: page);
+      log.i('Home feed data: $response');
+      setState(() {
+        if (homeList == null) {
+          homeList = response;
+        } else {
+          homeList!['posts'].addAll(response['posts']);
+        }
+      });
+    } catch (e) {
+      log.e('Failed to load home feed: $e');
+    }
   }
-
-
 
   Future<void> _initLoad() async {
-    await _homeFeed();
-    prefs = await SharedPreferences.getInstance();
-    await _suggestFollowList();
-    setState(() {
-      _isLoading = false;
-    });
+    try {
+      prefs = await SharedPreferences.getInstance();
+      userId = prefs.getString('userId');
+      await _homeFeed();
+      await _suggestFollowList();
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   Future<void> _loadMore() async {
@@ -142,39 +139,43 @@ class _homepageState extends State<homepage> {
 
   void _toggleLikePost(String postId) {
     setState(() {
-      bool isLiked = !homeList['posts']
+      bool isLiked = !homeList!['posts']
           .firstWhere((post) => post['_id'] == postId)['isLiked'];
-      homeList['posts'].firstWhere((post) => post['_id'] == postId)['isLiked'] =
+      homeList!['posts'].firstWhere((post) => post['_id'] == postId)['isLiked'] =
           isLiked;
-      int likeCount = homeList['posts']
+      int likeCount = homeList!['posts']
           .firstWhere((post) => post['_id'] == postId)['likeCount'];
-      homeList['posts']
+      homeList!['posts']
           .firstWhere((post) => post['_id'] == postId)['likeCount'] =
       isLiked ? likeCount + 1 : likeCount - 1;
     });
     _addLike(
         postId,
-        homeList['posts']
+        homeList!['posts']
             .firstWhere((post) => post['_id'] == postId)['isLiked']);
   }
 
   Future<void> _addLike(String postId, bool isLiked) async {
-    var reqData = {
-      'postId': postId,
-      'isLiked': isLiked,
-    };
-    var response = await HomeService.like(reqData);
-    log.i('Add to Like: $response');
+    try {
+      var response = await HomeService.like({
+        'postId': postId,
+        'isLiked': isLiked,
+      });
+      log.i('Add to Like: $response');
+    } catch (e) {
+      log.e('Failed to like post: $e');
+    }
   }
 
   Future<void> _refresh() async {
     setState(() {
       _pageNumber = 1;
       homeList = null; // Clear existing data
+      _isLoading = true; // Set loading state to true during refresh
     });
-    await _homeFeed(page: 1);
-    await _suggestFollowList();
+    await _initLoad();
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -201,7 +202,6 @@ class _homepageState extends State<homepage> {
                       width: 150,
                     ),
                     Spacer(),
-
                     InkWell(
                         onTap: () {
                           Navigator.push(
@@ -229,10 +229,6 @@ class _homepageState extends State<homepage> {
                       ),
                     ),
                     SizedBox(width: 20),
-                    // SvgPicture.asset(
-                    //   "assets/svg/notification.svg",
-                    // ),
-
                     IconButton(
                         onPressed: () {},
                         icon: Badge(
@@ -269,101 +265,83 @@ class _homepageState extends State<homepage> {
                 ),
               ),
               SizedBox(height: 20),
-              SizedBox(height: 15),
-              ListView.builder(
-                physics: NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                itemCount: (homeList != null &&
-                    homeList['posts'] != null &&
-                    homeList['posts'].isNotEmpty)
-                    ? homeList['posts'].length
-                    : 1, // Ensure there's at least one item if posts are empty or homeList is null
-                itemBuilder: (BuildContext context, int index) {
-                  if ((homeList == null ||
-                      homeList['posts'] == null ||
-                      homeList['posts'].isEmpty) &&
-                      index == 0) {
-                    // Show suggestFollow list if there are no posts
+              if (_isLoading) // Show loading indicator if data is loading
+                Center(child: CupertinoActivityIndicator())
+              else if (homeList != null &&
+                  homeList!['posts'] != null &&
+                  homeList!['posts'].isNotEmpty)
+                ListView.builder(
+                  physics: NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
+                  itemCount: homeList!['posts'].length + 1,
+                  itemBuilder: (BuildContext context, int index) {
+                    if (index == homeList!['posts'].length) {
+                      return isLoading
+                          ? Center(child: CupertinoActivityIndicator())
+                          : SizedBox.shrink();
+                    }
                     return Column(
                       children: [
-                        Align(
-                          alignment: Alignment.topLeft,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 20),
-                            child: Text(
-                              "New People",
-                              style: TextStyle(
-                                fontWeight: FontWeight.w500,
-                                color: buttoncolor, // Assuming buttoncolor is defined
-                              ),
-                            ),
-                          ),
+                        ProductCard(
+                          createdTime: _calculateTimeDifference(
+                              homeList!['posts'][index]['createdAt']),
+                          name: homeList!['posts'][index]['username'] ?? '',
+                          description: homeList!['posts'][index]['description'] ?? '',
+                          likes: homeList!['posts'][index]['likeCount']?.toString() ?? '',
+                          img: homeList!['posts'][index]['filePath'] ?? '',
+                          profilepic: homeList!['posts'][index]['profilePic'] ?? '',
+                          likedby: homeList!['posts'][index]['lastLikedUserName'] ?? '',
+                          commentby: homeList!['posts'][index]['lastCommentedUser'] ?? '',
+                          commentcount: homeList!['posts'][index]['commentCount'].toString() ?? '',
+                          id: homeList!['posts'][index]['_id'] ?? '',
+                          userId: homeList!['posts'][index]['userId'] ?? '',
+                          likeCount: homeList!['posts'][index]['isLiked'] ?? false,
+                          onLikePressed: () {
+                            _toggleLikePost(homeList!['posts'][index]['_id']);
+                          },
+                          onDoubleTapLike: () {
+                            _toggleLikePost(homeList!['posts'][index]['_id']);
+                          },
                         ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: SizedBox(
-                            height: 160,
-                            child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              itemCount: suggestFollow.length,
-                              itemBuilder: (BuildContext context, int index) {
-                                return MembersListing(
-                                  name: suggestFollow[index]['firstName'],
-                                  id: suggestFollow[index]['_id'],
-                                  status: suggestFollow[index]['isFollowing'],
-                                  img: suggestFollow[index]['profilePic'] != null
-                                      ? suggestFollow[index]['profilePic']['filePath']
-                                      : '',
-                                  onFollowToggled: () => toggleFollow(index),
-                                );
-                              },
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: 10),
                       ],
                     );
-                  } else {
-                    // Show posts
-                    if (homeList != null &&
-                        homeList['posts'] != null &&
-                        index < homeList['posts'].length) {
-                      return Column(
-                        children: [
-                          ProductCard(
-                            createdTime: _calculateTimeDifference(
-                                homeList['posts'][index]['createdAt']),
-                            name: homeList['posts'][index]['username'] ?? '',
-                            description: homeList['posts'][index]['description'] ?? '',
-                            likes: homeList['posts'][index]['likeCount']?.toString() ?? '',
-                            img: homeList['posts'][index]['filePath'] ?? '',
-                            profilepic: homeList['posts'][index]['profilePic'] ?? '',
-                            likedby: homeList['posts'][index]['lastLikedUserName'] ?? '',
-                            commentby: homeList['posts'][index]['lastCommentedUser'] ?? '',
-                            commentcount: homeList['posts'][index]['commentCount'].toString() ?? '',
-                            id: homeList['posts'][index]['_id'] ?? '',
-                            userId: homeList['posts'][index]['userId'] ?? '',
-                            likeCount: homeList['posts'][index]['isLiked'] ?? false,
-                            onLikePressed: () {
-                              _toggleLikePost(homeList['posts'][index]['_id']);
-                            },
-                            onDoubleTapLike: () {
-                              _toggleLikePost(homeList['posts'][index]['_id']);
-                            },
-                          ),
-                          if (isLoading && index == homeList['posts'].length - 1)
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: CircularProgressIndicator(),
-                            ),
-                        ],
-                      );
-                    }
-                    return SizedBox.shrink(); // Return an empty widget for out of bounds indices
-                  }
-                },
-              )
-
+                  },
+                )
+              else
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "New People",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w500,
+                          color: buttoncolor,
+                        ),
+                      ),
+                      SizedBox(
+                        height: 160,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: suggestFollow.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            return MembersListing(
+                              name: suggestFollow[index]['firstName'],
+                              id: suggestFollow[index]['_id'],
+                              status: suggestFollow[index]['isFollowing'],
+                              img: suggestFollow[index]['profilePic'] != null
+                                  ? suggestFollow[index]['profilePic']['filePath']
+                                  : '',
+                              onFollowToggled: () => toggleFollow(index),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              SizedBox(height: 10),
             ],
           ),
         ),
@@ -371,6 +349,8 @@ class _homepageState extends State<homepage> {
     );
   }
 }
+
+
 
 class ProductCard extends StatefulWidget {
   const ProductCard({
@@ -539,29 +519,21 @@ class _ProductCardState extends State<ProductCard> {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.all(Radius.circular(20)),
               ),
-              child: Image.network(
-                currentImg,
+              child: CachedNetworkImage(
+                imageUrl: currentImg,
                 fit: BoxFit.fill,
-                headers: {'Cache-Control': 'no-cache'},
-                loadingBuilder: (BuildContext context, Widget child,
-                    ImageChunkEvent? loadingProgress) {
-                  if (loadingProgress == null) {
-                    return child;
-                  } else {
-                    return Center(
+                httpHeaders: {'Cache-Control': 'no-cache'},
+                progressIndicatorBuilder: (context, url, downloadProgress) =>
+                    Center(
                       child: CupertinoActivityIndicator(),
-                    );
-                  }
-                },
-                errorBuilder: (BuildContext context, Object exception,
-                    StackTrace? stackTrace) {
-                  return Center(
-                    child: Text(
-                      'Failed to load image',
-                      style: TextStyle(color: Colors.red),
                     ),
-                  );
-                },
+                errorWidget: (context, url, error) =>
+                    Center(
+                      child: Text(
+                        'Failed to load image',
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ),
               ),
             ),
           ),

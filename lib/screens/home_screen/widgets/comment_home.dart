@@ -16,6 +16,9 @@ class CommentBottomSheet extends StatefulWidget {
   State<CommentBottomSheet> createState() => _CommentBottomSheetState();
 }
 
+
+
+
 class _CommentBottomSheetState extends State<CommentBottomSheet> {
   bool isExpanded = false;
   var userid;
@@ -25,12 +28,43 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
   bool _isLoading = false;
   bool showReplies = false;
   List<bool> showRepliesList = [];
-  bool _showReplyText = false;
+  var likeCount;
+
+  bool isLiked = true;
 
   // Pagination variables
   int _currentPage = 1;
   bool _isLastPage = false;
   bool _isFetchingMore = false;
+
+  Future<void> _likecomment(String commentId) async {
+    var reqData = {
+      'commentId': commentId,
+    };
+
+    try {
+      var response = await HomeService.postlikecomment(reqData);
+      log.i('Comment Like: $response');
+
+      // Update the local state of the specific comment
+      setState(() {
+        for (var comment in commentList) {
+          if (comment['commentId'] == commentId) {
+            if (comment['isLiked']) {
+              comment['isLiked'] = false;
+              comment['likesOfComment'] = (comment['likesOfComment'] ?? 1) - 1;
+            } else {
+              comment['isLiked'] = true;
+              comment['likesOfComment'] = (comment['likesOfComment'] ?? 0) + 1;
+            }
+            break; // Break the loop once the comment is found and updated
+          }
+        }
+      });
+    } catch (e) {
+      log.e('Error liking comment: $e');
+    }
+  }
 
   Future<void> _addComment() async {
     if (comment?.isNotEmpty ?? false) {
@@ -77,7 +111,7 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
       } catch (e) {
         setState(() {
           _isLoading = false;
-          _showReplyText = commentList.isNotEmpty;
+
         });
       }
     }
@@ -111,6 +145,8 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
     }
   }
 
+
+
   Future<void> _fetchComments({bool reset = false}) async {
     if (_isFetchingMore) return;
     if (reset) {
@@ -135,9 +171,21 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
         setState(() {
           List<dynamic> newComments = response['results'] ?? [];
           commentList.addAll(newComments);
+
+          // Assuming there's a field named 'likeCount' in each comment object
+          likeCount = 0; // Initialize likeCount
+          for (var comment in newComments) {
+            likeCount += comment['likesOfComment'] ?? 0;
+          }
+
+          for (var comment in newComments) {
+            isLiked = comment['isLiked'] ?? false;
+            comment['isLiked'] = isLiked; // Ensure the field exists in comment object
+            comment['isLiked'] = isLiked; // Ensure the field exists in comment object
+          }
+
           showRepliesList = List<bool>.filled(commentList.length, false);
-          _isLastPage =
-              newComments.length < 10; // Assuming 10 comments per page
+          _isLastPage = newComments.length < 10; // Assuming 10 comments per page
           _currentPage++;
         });
       } else {
@@ -151,6 +199,8 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
       });
     }
   }
+
+
 
   @override
   void initState() {
@@ -207,6 +257,8 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
                   bool isMyComment = commentItem['isMyComment'] ?? false;
                   String profilePicUrl =
                   (commentItem['profilePic'] ?? '').toString();
+                  likeCount = commentItem['likesOfComment'] ?? 0;
+                  isLiked = commentItem['isLiked'] ?? false;
 
                   bool isValidUrl =
                       Uri.tryParse(profilePicUrl)?.isAbsolute ?? false;
@@ -219,141 +271,178 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           if (isValidUrl)
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              GestureDetector(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => profileinnerpage(
-                                        id: commentItem['userId'],
-                                      ),
-                                    ),
-                                  );
-                                },
-                                child: Container(
-                                  margin: EdgeInsets.only(right: 16.0),
-                                  child: CircleAvatar(
-                                    backgroundImage: isValidUrl && commentItem['profilePic'] != null
-                                        ? NetworkImage(commentItem['profilePic'])
-                                        : null,
-                                    child: !isValidUrl || commentItem['profilePic'] == null
-                                        ? Image.network("https://play-lh.googleusercontent.com/4HZhLFCcIjgfbXoVj3mgZdQoKO2A_z-uX2gheF5yNCkb71wzGqwobr9muj8I05Nc8u8")
-                                        : null,
-                                    radius: 20,
-                                  ),
-                                ),
-                              ),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    Text(commentItem['firstName'] ?? '', style: Theme.of(context).textTheme.subtitle1),
-                                    Container(
-                                      margin: EdgeInsets.only(top: 5.0),
-                                      child: Text(commentItem['comment'] ?? ''),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              if (isMyComment)
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
                                 GestureDetector(
                                   onTap: () {
-                                    showDialog(
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return AlertDialog(
-                                          title: Text('Delete Comment?'),
-                                          content: Text('Delete this comment?'),
-                                          actions: <Widget>[
-                                            TextButton(
-                                              onPressed: () {
-                                                _deleteComment(commentItem['commentId']);
-                                                Navigator.pop(context);
-                                              },
-                                              child: Text('Delete'),
-                                            ),
-                                          ],
-                                        );
-                                      },
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => profileinnerpage(
+                                          id: commentItem['userId'],
+                                        ),
+                                      ),
                                     );
                                   },
-                                  child: Icon(Icons.delete, size: 20, color: Colors.red),
+                                  child: Container(
+                                    margin: EdgeInsets.only(right: 16.0),
+                                    child: CircleAvatar(
+                                      backgroundImage: isValidUrl && commentItem['profilePic'] != null
+                                          ? NetworkImage(commentItem['profilePic'])
+                                          : null,
+                                      child: !isValidUrl || commentItem['profilePic'] == null
+                                          ? Image.network("https://play-lh.googleusercontent.com/4HZhLFCcIjgfbXoVj3mgZdQoKO2A_z-uX2gheF5yNCkb71wzGqwobr9muj8I05Nc8u8")
+                                          : null,
+                                      radius: 20,
+                                    ),
+                                  ),
                                 ),
-                            ],
-                          ),
-                          SizedBox(height: 4),
-                          if (isValidUrl)
-                          InkWell(
-                            onTap: () {
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return AlertDialog(
-                                    content: SizedBox(
-                                      width: 300,
-                                      height: 50,
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      Text(commentItem['firstName'] ?? '', style: Theme.of(context).textTheme.subtitle1),
+                                      Container(
+                                        margin: EdgeInsets.only(top: 5.0),
+                                        child: Text(commentItem['comment'] ?? ''),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                if (isValidUrl)
+                                  Expanded(
+                                    child: Align(
+                                      alignment: Alignment.centerRight,
+                                      child: Stack(
+                                        alignment: Alignment.center,
                                         children: [
-                                          _isLoading
-                                              ? Center(
-                                              child:
-                                              CupertinoActivityIndicator())
-                                              : SizedBox(),
-                                          !_isLoading
-                                              ? TextField(
-                                            decoration:
-                                            InputDecoration(
-                                              hintText:
-                                              'Write your reply here...',
-                                              hintStyle: TextStyle(
-                                                  fontSize: 12,
-                                                  fontWeight:
-                                                  FontWeight
-                                                      .w600),
-                                              suffixIcon:
-                                              IconButton(
-                                                icon: Icon(
-                                                    Icons.send,
-                                                    color:
-                                                    buttoncolor),
-                                                onPressed:
-                                                    () async {
-                                                  if (replaycomment
-                                                      ?.isNotEmpty ??
-                                                      false) {
-                                                    await _addreplayComment(
-                                                        commentItem[
-                                                        'commentId']);
-                                                    Navigator.pop(
-                                                        context);
-                                                  }
-                                                },
+                                          IconButton(
+                                            onPressed: () async{
+                                              await _likecomment(commentItem['commentId']);
+
+                                            },
+                                            icon: Icon(
+                                              isLiked ? Icons.favorite : Icons.favorite_border,
+                                              color: isLiked ? Colors.red : Colors.grey, size: 20, // Set color based on isLiked state
+                                            ),
+                                          ),
+                                          Positioned(
+                                            bottom: 0,
+
+                                            child: Text(
+                                              likeCount.toString(), // Replace with the actual like count variable
+                                              style: TextStyle(
+                                                fontSize: 10, // Adjust the font size as needed
+                                                color: Colors.grey, // Adjust the color as needed
                                               ),
                                             ),
-                                            onChanged: (text) {
-                                              setState(() {
-                                                replaycomment =
-                                                    text;
-                                              });
-                                            },
-                                          )
-                                              : SizedBox(),
+                                          ),
                                         ],
                                       ),
                                     ),
-                                  );
-                                },
-                              );
-                            },
-                            child: Text(
-                              "Reply",
-                              style: TextStyle(fontSize: 10),
+                                  ),
+                                if (isMyComment)
+                                  GestureDetector(
+                                    onTap: () {
+                                      showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return AlertDialog(
+                                            title: Text('Delete Comment?'),
+                                            content: Text('Delete this comment?'),
+                                            actions: <Widget>[
+                                              TextButton(
+                                                onPressed: () {
+                                                  _deleteComment(commentItem['commentId']);
+                                                  Navigator.pop(context);
+                                                },
+                                                child: Text('Delete'),
+                                              ),
+
+                                            ],
+                                          );
+                                        },
+                                      );
+                                    },
+
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(vertical: 13.0),
+                                      child: Icon(Icons.delete, size: 20, color: Colors.red),
+                                    ),
+                                  ),
+                              ],
                             ),
-                          ),
+                          SizedBox(height: 4),
+                          if (isValidUrl)
+                            InkWell(
+                              onTap: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      content: SizedBox(
+                                        width: 300,
+                                        height: 50,
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            _isLoading
+                                                ? Center(
+                                                child:
+                                                CupertinoActivityIndicator())
+                                                : SizedBox(),
+                                            !_isLoading
+                                                ? TextField(
+                                              decoration:
+                                              InputDecoration(
+                                                hintText:
+                                                'Write your reply here...',
+                                                hintStyle: TextStyle(
+                                                    fontSize: 12,
+                                                    fontWeight:
+                                                    FontWeight
+                                                        .w600),
+                                                suffixIcon:
+                                                IconButton(
+                                                  icon: Icon(
+                                                      Icons.send,
+                                                      color:
+                                                      buttoncolor),
+                                                  onPressed:
+                                                      () async {
+                                                    if (replaycomment
+                                                        ?.isNotEmpty ??
+                                                        false) {
+                                                      await _addreplayComment(
+                                                          commentItem[
+                                                          'commentId']);
+                                                      Navigator.pop(
+                                                          context);
+                                                    }
+                                                  },
+                                                ),
+                                              ),
+                                              onChanged: (text) {
+                                                setState(() {
+                                                  replaycomment =
+                                                      text;
+                                                });
+                                              },
+                                            )
+                                                : SizedBox(),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                );
+                              },
+                              child: Text(
+                                "Reply",
+                                style: TextStyle(fontSize: 10),
+                              ),
+                            ),
                           GestureDetector(
                             onTap: () {
                               setState(() {

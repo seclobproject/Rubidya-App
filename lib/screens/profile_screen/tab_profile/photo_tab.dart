@@ -4,13 +4,14 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-import '../../../networking/constant.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import '../../../navigation/bottom_navigation.dart';
 import '../../../resources/color.dart';
 import '../../../services/home_service.dart';
 import '../../../services/profile_service.dart';
 import '../../../support/logger.dart';
 import '../../home_screen/widgets/comment_home.dart';
+
 
 class PhotoTab extends StatefulWidget {
   const PhotoTab({super.key});
@@ -171,14 +172,13 @@ class _PhotoTabState extends State<PhotoTab> {
     )
         : Center(
       child: isLoading
-          ? CircularProgressIndicator()
+          ? CupertinoActivityIndicator()
           : Text(
         "No images available",
         style: TextStyle(color: Colors.black),
       ),
     );
   }
-
 }
 
 class FullScreenImageDialog extends StatefulWidget {
@@ -207,6 +207,23 @@ class _FullScreenImageDialogState extends State<FullScreenImageDialog> {
     super.initState();
     scrollController =
         ScrollController(initialScrollOffset: widget.initialIndex * 650.0);
+  }
+
+  Future<bool> _deletePost(String postId) async {
+    try {
+      var response = await HomeService.deletemypost(postId);
+      log.i('Delete Post: $response');
+      if (response['sts'] == '01') {
+        // Check for the correct key and value in response
+        return true;
+      } else {
+        print("Something Went Wrong");
+        return false;
+      }
+    } catch (e) {
+      print("Exception occurred: $e");
+      return false;
+    }
   }
 
   void _toggleLikePost(int index, String postId) {
@@ -297,14 +314,31 @@ class _FullScreenImageDialogState extends State<FullScreenImageDialog> {
                                             shape: BoxShape.circle,
                                             color: Colors.transparent,
                                           ),
+
+                                          //
+                                          // imageUrl: widget.profileList['media'][index]['profilePic'],
+                                          // height: 51,
+                                          // fit: BoxFit.cover,
+
                                           child: ClipRRect(
                                             borderRadius: BorderRadius.all(
                                                 Radius.circular(100)),
-                                            child: Image.network(
-                                              widget.profileList['media'][index]
-                                              ['profilePic'],
+                                            child: CachedNetworkImage(
+                                              imageUrl: widget.profileList['media'][index]['profilePic'],
                                               height: 51,
                                               fit: BoxFit.cover,
+                                              httpHeaders: {'Cache-Control': 'no-cache'},
+                                              progressIndicatorBuilder: (context, url, downloadProgress) =>
+                                                  Center(
+                                                    child: CupertinoActivityIndicator(),
+                                                  ),
+                                              errorWidget: (context, url, error) =>
+                                                  Center(
+                                                    child: Text(
+                                                      'Failed to load image',
+                                                      style: TextStyle(color: Colors.red),
+                                                    ),
+                                                  ),
                                             ),
                                           ),
                                         ),
@@ -333,11 +367,158 @@ class _FullScreenImageDialogState extends State<FullScreenImageDialog> {
                                 ),
                                 Expanded(child: SizedBox()),
                                 Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 10),
-                                  child:
-                                  Icon(Icons.more_vert, color: Colors.grey),
-                                ),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10),
+                                    child: IconButton(
+                                      icon: Icon(Icons.more_vert,
+                                          color: Colors.grey),
+                                      onPressed: () {
+                                        // Show the bottom sheet when the icon button is pressed
+                                        showModalBottomSheet(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return Container(
+                                              decoration: BoxDecoration(
+                                                  color: Colors.white,
+                                                  borderRadius:
+                                                  BorderRadius.only(
+                                                    topRight:
+                                                    Radius.circular(40),
+                                                    topLeft:
+                                                    Radius.circular(40),
+                                                  )),
+                                              height: 400.0,
+                                              child: ConstrainedBox(
+                                                constraints: BoxConstraints(
+                                                    maxWidth:
+                                                    400), // Set the maximum width here
+                                                child: Container(
+                                                  height: MediaQuery.of(context)
+                                                      .size
+                                                      .height *
+                                                      0.6,
+                                                  child: Padding(
+                                                    padding:
+                                                    const EdgeInsets.all(
+                                                        8.0),
+                                                    child: Column(
+                                                      children: <Widget>[
+                                                        TextButton(
+                                                          onPressed: () {
+                                                            showDialog(
+                                                              context: context,
+                                                              builder:
+                                                                  (BuildContext
+                                                              context) {
+                                                                return AlertDialog(
+                                                                  title: Text(
+                                                                      "Delete Confirmation"),
+                                                                  content: Text(
+                                                                      "Are you sure you want to delete this Post?"),
+                                                                  actions: [
+                                                                    TextButton(
+                                                                      onPressed:
+                                                                          () {
+                                                                        Navigator.of(context)
+                                                                            .pop(); // Close the dialog
+                                                                      },
+                                                                      child: Text(
+                                                                          "Cancel"),
+                                                                    ),
+                                                                    TextButton(
+                                                                      onPressed: () {
+                                                                        // Show circular progress indicator
+                                                                        showDialog(
+                                                                          context: context,
+                                                                          builder: (BuildContext context) {
+                                                                            return Center(
+                                                                              child: CircularProgressIndicator(),
+                                                                            );
+                                                                          },
+                                                                        );
+
+                                                                        // Wait for 3 seconds before navigating
+                                                                        Future.delayed(Duration(seconds: 3), () {
+                                                                          _deletePost(widget.profileList['media'][index]['_id']);
+                                                                          Navigator.of(context).pushAndRemoveUntil(
+                                                                            MaterialPageRoute(builder: (context) => Bottomnav(initialPageIndex: 4)),
+                                                                                (route) => false,
+                                                                          );
+                                                                        });
+                                                                      },
+                                                                      child: Text("Delete"),
+                                                                    ),
+
+                                                                  ],
+                                                                );
+                                                              },
+                                                            );
+                                                          },
+                                                          child:
+                                                          Padding(
+                                                            padding: const EdgeInsets.all(8.0),
+                                                            child: Row(
+                                                              mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .center,
+                                                              crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .center,
+                                                              children: [
+                                                                Icon(
+                                                                  Icons.delete,
+                                                                  color: Colors
+                                                                      .redAccent,
+                                                                  size: 14.0,
+                                                                  semanticLabel:
+                                                                  'Text to announce in accessibility modes',
+                                                                ),
+                                                                SizedBox(
+                                                                  width: 5,
+                                                                ),
+                                                                Text(
+                                                                  'Delete Post',
+                                                                  style: TextStyle(
+                                                                      fontSize:
+                                                                      14.0,
+                                                                      color:
+                                                                      bluetext,
+                                                                      fontWeight:
+                                                                      FontWeight
+                                                                          .w200),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+
+                                                        ),
+                                                        GestureDetector(
+                                                          child: Padding(
+                                                            padding:
+                                                            const EdgeInsets
+                                                                .symmetric(
+                                                                vertical:
+                                                                150),
+                                                            child: Row(
+
+                                                              children: [
+
+
+
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        );
+                                      },
+                                    )),
                               ],
                             ),
                           ],
@@ -435,8 +616,9 @@ class _FullScreenImageDialogState extends State<FullScreenImageDialog> {
                               //   ],
                               // ),
 
-                              SizedBox(height: 10,),
-
+                              SizedBox(
+                                height: 10,
+                              ),
 
                               Row(
                                 children: [
@@ -481,7 +663,6 @@ class _FullScreenImageDialogState extends State<FullScreenImageDialog> {
                               ),
 
                               InkWell(
-
                                 onTap: () {
                                   showModalBottomSheet<void>(
                                     backgroundColor: white,
@@ -492,8 +673,7 @@ class _FullScreenImageDialogState extends State<FullScreenImageDialog> {
                                       return Padding(
                                         padding: const EdgeInsets.all(20.0)
                                             .copyWith(
-                                            bottom:
-                                            MediaQuery.of(context)
+                                            bottom: MediaQuery.of(context)
                                                 .viewInsets
                                                 .bottom),
                                         child: CommentBottomSheet(
@@ -520,7 +700,8 @@ class _FullScreenImageDialogState extends State<FullScreenImageDialog> {
                                       ),
                                     ),
                                     SizedBox(width: 2),
-                                    Text("${widget.profileList['media'][index]['commentCount'].toString()} Comments ",
+                                    Text(
+                                        "${widget.profileList['media'][index]['commentCount'].toString()} Comments ",
                                         style: TextStyle(
                                           color: bluetext,
                                           fontSize: 13,
@@ -537,19 +718,28 @@ class _FullScreenImageDialogState extends State<FullScreenImageDialog> {
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 15),
                             child: Container(
-                              height: isExpanded ? null : 40, // Adjust height when expanded
+                              height: isExpanded
+                                  ? null
+                                  : 40, // Adjust height when expanded
                               child: Linkify(
                                 onOpen: _onOpen,
-                                text: widget.profileList['media'][index]['description'],
+                                text: widget.profileList['media'][index]
+                                ['description'],
                                 maxLines: isExpanded ? null : 2,
-                                overflow: isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
-                                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                                overflow: isExpanded
+                                    ? TextOverflow.visible
+                                    : TextOverflow.ellipsis,
+                                style: TextStyle(
+                                    fontSize: 12, fontWeight: FontWeight.w700),
                                 linkStyle: TextStyle(color: Colors.blue),
                               ),
                             ),
                           ),
                         ),
-                        if (widget.profileList['media'][index]['description'].split('\n').length > 2) // Check for multiline
+                        if (widget.profileList['media'][index]['description']
+                            .split('\n')
+                            .length >
+                            2) // Check for multiline
                         // Check for multiline
                           GestureDetector(
                             onTap: () {
@@ -582,6 +772,7 @@ class _FullScreenImageDialogState extends State<FullScreenImageDialog> {
       ),
     );
   }
+
   Future<void> _onOpen(LinkableElement link) async {
     if (await canLaunch(link.url)) {
       await launch(link.url);
@@ -590,8 +781,6 @@ class _FullScreenImageDialogState extends State<FullScreenImageDialog> {
     }
   }
 }
-
-
 
 void _showFullScreenImage(BuildContext context, List<dynamic> imageUrls,
     int initialIndex, dynamic profileList, dynamic homeList) {
