@@ -1,18 +1,18 @@
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:flutter/material.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:rubidya/screens/upload_screen/trimmer_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:dio/dio.dart';
 import '../../commonpage/filters.dart';
 import '../../services/upload_image.dart';
-import '../../../navigation/bottom_navigation.dart';
 import '../../../resources/color.dart';
 import '../../support/logger.dart';
 import 'Upload_Details_page.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:video_player/video_player.dart';
 
 class UploadScreen extends StatefulWidget {
   const UploadScreen({Key? key}) : super(key: key);
@@ -24,6 +24,7 @@ class UploadScreen extends StatefulWidget {
 class _UploadScreenState extends State<UploadScreen> {
   var userid;
   String? imageUrl;
+  String? videoUrl;
   String? description;
   bool showIndicator = false;
   bool uploading = false;
@@ -64,10 +65,8 @@ class _UploadScreenState extends State<UploadScreen> {
     PEACH_MATRIX,
   ];
 
-
   late File image;
-
-
+  late VideoPlayerController _videoPlayerController;
 
   var userId;
   var profileDetails;
@@ -75,7 +74,6 @@ class _UploadScreenState extends State<UploadScreen> {
   bool isExpanded = false;
   int _pageNumber = 1;
   ScrollController _scrollController = ScrollController();
-
 
   @override
   void initState() {
@@ -87,11 +85,21 @@ class _UploadScreenState extends State<UploadScreen> {
   @override
   void dispose() {
     _scrollController.dispose();
+    if (_videoPlayerController != null) {
+      _videoPlayerController.dispose();
+    }
     super.dispose();
   }
 
+  @override
+  // void dispose() {
+  //   _scrollController.dispose();
+  //   super.dispose();
+  // }
+
   void _scrollListener() {
-    if (_scrollController.offset >= _scrollController.position.maxScrollExtent &&
+    if (_scrollController.offset >=
+        _scrollController.position.maxScrollExtent &&
         !_scrollController.position.outOfRange) {
       _loadMore();
     }
@@ -111,7 +119,6 @@ class _UploadScreenState extends State<UploadScreen> {
     });
   }
 
-
   Future<void> _initLoad() async {
     await _MostlikeImage();
     setState(() {
@@ -130,15 +137,13 @@ class _UploadScreenState extends State<UploadScreen> {
     });
   }
 
-
-
-
   Future<void> pickImages() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       setState(() {
-        imageUrl = pickedFile.path; // Use the original image path without cropping
+        imageUrl =
+            pickedFile.path; // Use the original image path without cropping
       });
     }
   }
@@ -148,7 +153,40 @@ class _UploadScreenState extends State<UploadScreen> {
     final pickedFile = await picker.pickImage(source: ImageSource.camera);
     if (pickedFile != null) {
       setState(() {
-        imageUrl = pickedFile.path; // Use the original image path without cropping
+        imageUrl =
+            pickedFile.path; // Use the original image path without cropping
+      });
+    }
+  }
+
+  Future<void> pickVideo() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.video,
+      allowCompression: false,
+    );
+    if (result != null) {
+      final file = File(result.files.single.path!);
+      if (!mounted) return;
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => TrimmerView(file),
+        ),
+      );
+    }
+  }
+
+  Future<void> pickVideoFromCamera() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickVideo(source: ImageSource.camera);
+    if (pickedFile != null) {
+      setState(() {
+        videoUrl = pickedFile.path;
+        imageUrl = null;
+        _videoPlayerController = VideoPlayerController.file(File(videoUrl!))
+          ..initialize().then((_) {
+            setState(() {}); // Ensure the first frame is shown
+            _videoPlayerController.play();
+          });
       });
     }
   }
@@ -178,7 +216,8 @@ class _UploadScreenState extends State<UploadScreen> {
 
       if (croppedImage != null) {
         setState(() {
-          imageUrl = croppedImage.path; // Update the imageUrl with the cropped image path
+          imageUrl = croppedImage
+              .path; // Update the imageUrl with the cropped image path
         });
       }
     }
@@ -203,15 +242,14 @@ class _UploadScreenState extends State<UploadScreen> {
     }
   }
 
-  String filteredImageUrl() {
-    if (imageUrl != null) {
-      if (selectedFilterIndex == 0) {
-        return imageUrl!;
-      } else {
-        return imageUrl!;
-      }
+  Widget videoPlayerWidget() {
+    if (videoUrl != null && _videoPlayerController.value.isInitialized) {
+      return AspectRatio(
+        aspectRatio: _videoPlayerController.value.aspectRatio,
+        child: VideoPlayer(_videoPlayerController),
+      );
     } else {
-      return '';
+      return Container();
     }
   }
 
@@ -243,7 +281,8 @@ class _UploadScreenState extends State<UploadScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => uploadedetails(imageUrl: filteredImage()),
+                      builder: (context) =>
+                          uploadedetails(imageUrl: filteredImage()),
                     ),
                   );
                 });
@@ -264,21 +303,17 @@ class _UploadScreenState extends State<UploadScreen> {
         children: [
           SizedBox(height: 50),
           SizedBox(height: 20),
-          Center(
-            child: Container(
-              height: 445,
-              child: Stack(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(0),
-                      child: filteredImage(),
-                    ),
+          Container(
+            height: 445,
+            child: Stack(
+              children: [
+                if (imageUrl != null) filteredImage(),
+                if (videoUrl != null) videoPlayerWidget(),
+                if (showIndicator)
+                  Center(
+                    child: CircularProgressIndicator(),
                   ),
-                  SizedBox(height: 40),
-                ],
-              ),
+              ],
             ),
           ),
           if (imageUrl != null)
@@ -295,7 +330,8 @@ class _UploadScreenState extends State<UploadScreen> {
                       });
                     },
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 10),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(5),
                         child: ColorFiltered(
@@ -322,18 +358,20 @@ class _UploadScreenState extends State<UploadScreen> {
         physics: AlwaysScrollableScrollPhysics(),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 3,
-
         ),
         itemCount: mostlikeimage['media'].length,
         itemBuilder: (BuildContext context, int index) {
           return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10,vertical: 5),
+            padding: const EdgeInsets.symmetric(
+                horizontal: 10, vertical: 5),
             child: GestureDetector(
               onTap: () {
-                List<dynamic> imageUrls =
-                mostlikeimage['media'].map((item) => item['filePath']).toList();
+                List<dynamic> imageUrls = mostlikeimage['media']
+                    .map((item) => item['filePath'])
+                    .toList();
                 int selectedIndex = index;
-                _showFullScreenImage(context, imageUrls, selectedIndex, mostlikeimage);
+                _showFullScreenImage(
+                    context, imageUrls, selectedIndex, mostlikeimage);
               },
               child: Stack(
                 children: [
@@ -344,11 +382,11 @@ class _UploadScreenState extends State<UploadScreen> {
                       height: 300,
                       child: Image.network(
                         mostlikeimage['media'][index]['filePath'],
-                        fit: BoxFit.cover, // Use BoxFit.cover to stretch and maintain aspect ratio
+                        fit: BoxFit
+                            .cover, // Use BoxFit.cover to stretch and maintain aspect ratio
                       ),
                     ),
                   ),
-
                   Positioned(
                     top: 78,
                     left: 30,
@@ -359,8 +397,10 @@ class _UploadScreenState extends State<UploadScreen> {
                           height: 18,
                         ),
                         Text(
-                          mostlikeimage['media'][index]['likeCount'].toString(),
-                          style: TextStyle(fontSize: 10, color: Colors.white),
+                          mostlikeimage['media'][index]['likeCount']
+                              .toString(),
+                          style: TextStyle(
+                              fontSize: 10, color: Colors.white),
                         )
                       ],
                     ),
@@ -375,8 +415,11 @@ class _UploadScreenState extends State<UploadScreen> {
                           height: 18,
                         ),
                         Text(
-                          mostlikeimage['media'][index]['commentCount'].toString(), // This is a placeholder, should be replaced with dynamic data
-                          style: TextStyle(fontSize: 10, color: Colors.white),
+                          mostlikeimage['media'][index]
+                          ['commentCount']
+                              .toString(), // This is a placeholder, should be replaced with dynamic data
+                          style: TextStyle(
+                              fontSize: 10, color: Colors.white),
                         )
                       ],
                     ),
@@ -396,74 +439,117 @@ class _UploadScreenState extends State<UploadScreen> {
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 25),
-        child: FloatingActionButton(
-          onPressed: () {
-            showModalBottomSheet(
-              context: context,
-              builder: (BuildContext context) {
-                return Container(
-                  height: 200,
-                  width: 500,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          InkWell(
-                            onTap: () {
-                              pickImageFromCamera();
-                              Navigator.pop(context);
-                            },
-                            child: Column(
-                              children: [
-                                Icon(Icons.camera_alt_rounded, size: 50),
-                                Text("Camera"),
-                              ],
-                            ),
+      floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+
+
+          FloatingActionButton(
+            onPressed: () {
+              showModalBottomSheet(
+                context: context,
+                builder: (BuildContext context) {
+                  return Container(
+                    height: 100,
+                    width: 500,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 30),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              ListTile(
+                                leading: Icon(Icons.camera_alt_outlined),
+                                title: Text('Photo'),
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  pickImages();
+                                },
+                              ),
+                            ],
                           ),
-                          SizedBox(width: 50),
-                          InkWell(
-                            onTap: () {
-                              pickImages();
-                              Navigator.pop(context);
-                            },
-                            child: Column(
-                              children: [
-                                Icon(Icons.image, size: 50),
-                                Text("Gallery"),
-                              ],
-                            ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              );
+            },
+            backgroundColor: bluetext,
+            child: Icon(Icons.camera, color: Colors.white),
+          ),
+          SizedBox(
+            width: 20,
+          ),
+          FloatingActionButton(
+            onPressed: () {
+              showModalBottomSheet(
+                context: context,
+                builder: (BuildContext context) {
+                  return Container(
+                    height: 220,
+                    width: 500,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 30),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+
+                              ListTile(
+                                leading: Icon(Icons.videocam),
+                                title: Text('Video'),
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  pickVideo();
+                                },
+                              ),
+                              ListTile(
+                                leading: Icon(Icons.videocam_outlined),
+                                title: Text('Record Video'),
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  pickVideoFromCamera();
+                                },
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ],
-                  ),
-                );
-              },
-            );
-          },
-          backgroundColor: bluetext,
-          child: Icon(Icons.add, color: Colors.white),
-        ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              );
+            },
+            backgroundColor: bluetext,
+            child: Icon(Icons.file_upload_outlined, color: Colors.white),
+          ),
+        ],
       ),
     );
   }
 }
 
-
-void _showFullScreenImage(BuildContext context, List<dynamic> imageUrls, int initialIndex,dynamic mostlikeimage) {
+void _showFullScreenImage(BuildContext context, List<dynamic> imageUrls,
+    int initialIndex, dynamic mostlikeimage) {
   showDialog(
     context: context,
     builder: (BuildContext context) {
       // Using a ScrollController to manage the scroll position
-      ScrollController scrollController = ScrollController(initialScrollOffset: initialIndex * 650.0); // Assuming image height is 600. Adjust as needed.
+      ScrollController scrollController = ScrollController(
+          initialScrollOffset: initialIndex *
+              650.0); // Assuming image height is 600. Adjust as needed.
 
       return Scaffold(
         appBar: AppBar(
-          title: Text("Posts",style: TextStyle(fontSize: 14),),
+          title: Text(
+            "Posts",
+            style: TextStyle(fontSize: 14),
+          ),
         ),
         body: Column(
           children: [
@@ -486,11 +572,15 @@ void _showFullScreenImage(BuildContext context, List<dynamic> imageUrls, int ini
                                   children: [
                                     SizedBox(width: 60),
                                     Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                      CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          mostlikeimage['media'][index]['firstName'],
-                                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                                          mostlikeimage['media'][index]
+                                          ['firstName'],
+                                          style: TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w500),
                                         ),
                                         // Text(
                                         //   profilelist['media'][index]['userId']['lastName'],
@@ -500,13 +590,14 @@ void _showFullScreenImage(BuildContext context, List<dynamic> imageUrls, int ini
                                     ),
                                     Expanded(child: SizedBox()),
                                     Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                                      child: Icon(Icons.more_vert, color: Colors.grey),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 10),
+                                      child: Icon(Icons.more_vert,
+                                          color: Colors.grey),
                                     ),
                                   ],
                                 ),
                               ),
-
                               InkWell(
                                 onTap: () {
                                   // Navigator.push(
@@ -519,7 +610,8 @@ void _showFullScreenImage(BuildContext context, List<dynamic> imageUrls, int ini
                                   // );
                                 },
                                 child: Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10),
                                   child: Stack(
                                     children: [
                                       Container(
@@ -527,12 +619,15 @@ void _showFullScreenImage(BuildContext context, List<dynamic> imageUrls, int ini
                                         width: 40,
                                         decoration: BoxDecoration(
                                           shape: BoxShape.circle,
-                                          color: Colors.transparent, // Set background color to transparent
+                                          color: Colors
+                                              .transparent, // Set background color to transparent
                                         ),
                                         child: ClipRRect(
-                                          borderRadius: BorderRadius.all(Radius.circular(100)),
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(100)),
                                           child: Image.network(
-                                            mostlikeimage['media'][index]['profilePic'],
+                                            mostlikeimage['media'][index]
+                                            ['profilePic'],
                                             height: 51,
                                             fit: BoxFit.cover,
                                           ),
@@ -541,7 +636,8 @@ void _showFullScreenImage(BuildContext context, List<dynamic> imageUrls, int ini
                                       Positioned(
                                         top: 28,
                                         left: 28,
-                                        child: Image.asset('assets/image/verificationlogo.png'),
+                                        child: Image.asset(
+                                            'assets/image/verificationlogo.png'),
                                       ),
                                     ],
                                   ),
@@ -551,13 +647,19 @@ void _showFullScreenImage(BuildContext context, List<dynamic> imageUrls, int ini
                           ),
                           SizedBox(height: 10),
                           Container(
-                            key: ValueKey(imageUrls[index],),
-                            decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(20))),
+                            key: ValueKey(
+                              imageUrls[index],
+                            ),
+                            decoration: BoxDecoration(
+                                borderRadius:
+                                BorderRadius.all(Radius.circular(20))),
                             child: Image.network(
                               imageUrls[index],
                               fit: BoxFit.fill,
                               headers: {'Cache-Control': 'no-cache'},
-                              loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+                              loadingBuilder: (BuildContext context,
+                                  Widget child,
+                                  ImageChunkEvent? loadingProgress) {
                                 if (loadingProgress == null) {
                                   return child;
                                 } else {
@@ -566,7 +668,8 @@ void _showFullScreenImage(BuildContext context, List<dynamic> imageUrls, int ini
                                   );
                                 }
                               },
-                              errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
+                              errorBuilder: (BuildContext context,
+                                  Object exception, StackTrace? stackTrace) {
                                 return Center(
                                   child: Text(
                                     'Failed to load image',
@@ -577,7 +680,8 @@ void _showFullScreenImage(BuildContext context, List<dynamic> imageUrls, int ini
                             ),
                           ),
                           Padding(
-                            padding: const EdgeInsets.only(right: 23, top: 10, left: 15),
+                            padding: const EdgeInsets.only(
+                                right: 23, top: 10, left: 15),
                             child: Row(
                               children: [
                                 // FavoriteButton(
@@ -589,10 +693,13 @@ void _showFullScreenImage(BuildContext context, List<dynamic> imageUrls, int ini
                                 //   },
                                 // ),
                                 SizedBox(width: 10),
-                                Text("Likes", style: TextStyle(color: Colors.blue, fontSize: 10)),
+                                Text("Likes",
+                                    style: TextStyle(
+                                        color: Colors.blue, fontSize: 10)),
                                 SizedBox(width: 2),
                                 Text(
-                                  mostlikeimage['media'][index]['likeCount'].toString(), // Convert int to String
+                                  mostlikeimage['media'][index]['likeCount']
+                                      .toString(), // Convert int to String
                                   style: TextStyle(
                                     color: Colors.blue,
                                     fontSize: 13,
@@ -618,7 +725,9 @@ void _showFullScreenImage(BuildContext context, List<dynamic> imageUrls, int ini
                               ],
                             ),
                           ),
-                          SizedBox(height: 10,),
+                          SizedBox(
+                            height: 10,
+                          ),
                           // Padding(
                           //   padding: const EdgeInsets.symmetric(horizontal: 10),
                           //   child: Container(
@@ -647,7 +756,9 @@ void _showFullScreenImage(BuildContext context, List<dynamic> imageUrls, int ini
                           //     ),
                           //   ),
                           // ),
-                          SizedBox(height: 50,)
+                          SizedBox(
+                            height: 50,
+                          )
                         ],
                       ),
                     ),

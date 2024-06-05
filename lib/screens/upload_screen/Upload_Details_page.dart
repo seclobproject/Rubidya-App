@@ -5,6 +5,7 @@ import 'package:rubidya/resources/color.dart';
 import 'package:widgets_to_image/widgets_to_image.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dio/dio.dart';
+import 'package:video_player/video_player.dart';
 import '../../commonpage/filters.dart';
 import '../../navigation/bottom_navigation.dart';
 import '../../services/upload_image.dart';
@@ -14,9 +15,11 @@ import 'package:flutter/rendering.dart';
 import 'package:easy_debounce/easy_debounce.dart';
 
 class uploadedetails extends StatefulWidget {
-  final Widget imageUrl;
+  final Widget? imageUrl;
+  final String? videoUrl;
 
-  const uploadedetails({Key? key, required this.imageUrl}) : super(key: key);
+  const uploadedetails({Key? key, this.imageUrl, this.videoUrl})
+      : super(key: key);
 
   @override
   State<uploadedetails> createState() => _uploadedetailsState();
@@ -24,7 +27,6 @@ class uploadedetails extends StatefulWidget {
 
 class _uploadedetailsState extends State<uploadedetails> {
   var userid;
-  String? imageUrl;
   String? description;
   bool showIndicator = false;
   bool uploading = false;
@@ -34,11 +36,26 @@ class _uploadedetailsState extends State<uploadedetails> {
   WidgetsToImageController controller = WidgetsToImageController();
   late String userId;
   final GlobalKey imageKey = GlobalKey();
+  VideoPlayerController? _videoPlayerController;
 
   @override
   void initState() {
     super.initState();
     _initUserId();
+
+    if (widget.videoUrl != null) {
+      _videoPlayerController =
+      VideoPlayerController.file(File(widget.videoUrl!))
+        ..initialize().then((_) {
+          setState(() {});
+        });
+    }
+  }
+
+  @override
+  void dispose() {
+    _videoPlayerController?.dispose();
+    super.dispose();
   }
 
   Future<void> _initUserId() async {
@@ -48,7 +65,7 @@ class _uploadedetailsState extends State<uploadedetails> {
     });
   }
 
-  Future<void> uploadImage() async {
+  Future<void> uploadMedia() async {
     if (uploading) return;
 
     setState(() {
@@ -57,35 +74,38 @@ class _uploadedetailsState extends State<uploadedetails> {
     });
 
     try {
-      RenderRepaintBoundary boundary =
-      imageKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
-      ui.Image image = await boundary.toImage(pixelRatio: 5.0);
-      ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-      Uint8List uint8List = byteData!.buffer.asUint8List();
+      if (widget.imageUrl != null) {
+        RenderRepaintBoundary boundary = imageKey.currentContext!
+            .findRenderObject() as RenderRepaintBoundary;
+        ui.Image image = await boundary.toImage(pixelRatio: 5.0);
+        ByteData? byteData =
+        await image.toByteData(format: ui.ImageByteFormat.png);
+        Uint8List uint8List = byteData!.buffer.asUint8List();
 
-      FormData formData = FormData.fromMap({
-        'media': MultipartFile.fromBytes(
-          uint8List,
-          filename: 'image.png',
-        ),
-        'description': description,
-      });
+        FormData formData = FormData.fromMap({
+          'media': MultipartFile.fromBytes(
+            uint8List,
+            filename: 'image.png',
+          ),
+          'description': description,
+        });
 
-      var response = await UploadService.uploadimage(formData);
-      if (response['sts'] == "01") {
-        print("Image uploaded successfully");
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => Bottomnav(initialPageIndex: 4)),
-              (route) => false,
-        );
+        var response = await UploadService.uploadimage(formData);
+        handleResponse(response);
+      } else if (widget.videoUrl != null) {
+        File videoFile = File(widget.videoUrl!);
 
-        print(response['msg']);
-      } else {
-        print(response['sts']);
-        print(response['msg']);
+        FormData formData = FormData.fromMap({
+          'media': await MultipartFile.fromFile(videoFile.path,
+              filename: 'video.mp4'),
+          'description': description,
+        });
+
+        var response = await UploadService.uploadvideo(formData);
+        handleResponse(response);
       }
     } on DioException catch (e) {
-      print("Exception during image upload: $e");
+      print("Exception during media upload: $e");
       String errorMessage = "Connection error. Please try again.";
       if (e.type == DioErrorType.connectionError) {
         errorMessage = "No Internet connection. Please check your network.";
@@ -97,12 +117,26 @@ class _uploadedetailsState extends State<uploadedetails> {
         ),
       );
     } catch (e) {
-      print("Exception during image upload: $e");
+      print("Exception during media upload: $e");
     } finally {
       setState(() {
         uploading = false;
         isLoading = false;
       });
+    }
+  }
+
+  void handleResponse(response) {
+    if (response['sts'] == "01") {
+      print("Media uploaded successfully");
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => Bottomnav(initialPageIndex: 4)),
+            (route) => false,
+      );
+      print(response['msg']);
+    } else {
+      print(response['sts']);
+      print(response['msg']);
     }
   }
 
@@ -117,7 +151,7 @@ class _uploadedetailsState extends State<uploadedetails> {
       'deductbalance',
       Duration(milliseconds: 3000),
           () {
-        uploadImage().then((_) {
+        uploadMedia().then((_) {
           setState(() {
             isLoading = false;
           });
@@ -130,6 +164,23 @@ class _uploadedetailsState extends State<uploadedetails> {
         isLoading = false;
       });
     });
+  }
+
+  Widget mediaWidget() {
+    if (widget.imageUrl != null) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(0.0),
+        child: widget.imageUrl!,
+      );
+    } else if (widget.videoUrl != null &&
+        _videoPlayerController?.value.isInitialized == true) {
+      return AspectRatio(
+        aspectRatio: _videoPlayerController!.value.aspectRatio,
+        child: VideoPlayer(_videoPlayerController!),
+      );
+    } else {
+      return Container();
+    }
   }
 
   @override
@@ -158,7 +209,6 @@ class _uploadedetailsState extends State<uploadedetails> {
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: TextField(
-
                   keyboardType: TextInputType.multiline,
                   minLines: 1,
                   maxLines: 5,
@@ -190,10 +240,7 @@ class _uploadedetailsState extends State<uploadedetails> {
               padding: const EdgeInsets.symmetric(horizontal: 10),
               child: RepaintBoundary(
                 key: imageKey,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(0.0),
-                  child: widget.imageUrl,
-                ),
+                child: mediaWidget(),
               ),
             ),
             SizedBox(
@@ -202,11 +249,12 @@ class _uploadedetailsState extends State<uploadedetails> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               child: Align(
-                  alignment: Alignment.topLeft,
-                  child: Text(
-                    "Add location",
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w400),
-                  )),
+                alignment: Alignment.topLeft,
+                child: Text(
+                  "Add location",
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w400),
+                ),
+              ),
             ),
             Divider(
               color: Colors.black,
@@ -215,11 +263,12 @@ class _uploadedetailsState extends State<uploadedetails> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               child: Align(
-                  alignment: Alignment.topLeft,
-                  child: Text(
-                    "Tag people",
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w400),
-                  )),
+                alignment: Alignment.topLeft,
+                child: Text(
+                  "Tag people",
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w400),
+                ),
+              ),
             ),
             Divider(
               color: Colors.black,
@@ -228,28 +277,30 @@ class _uploadedetailsState extends State<uploadedetails> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               child: Align(
-                  alignment: Alignment.topLeft,
-                  child: Row(
-                    children: [
-                      Text(
-                        "Audience",
-                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w400),
-                      ),
-                      Expanded(child: SizedBox()),
-                      Text(
-                        "Everyone",
-                        style: TextStyle(fontSize: 14, color: gradnew),
-                      ),
-                      SizedBox(
-                        width: 10,
-                      ),
-                      Icon(
-                        Icons.arrow_forward_ios_outlined,
-                        size: 14,
-                        color: gradnew,
-                      )
-                    ],
-                  )),
+                alignment: Alignment.topLeft,
+                child: Row(
+                  children: [
+                    Text(
+                      "Audience",
+                      style:
+                      TextStyle(fontSize: 15, fontWeight: FontWeight.w400),
+                    ),
+                    Expanded(child: SizedBox()),
+                    Text(
+                      "Everyone",
+                      style: TextStyle(fontSize: 14, color: gradnew),
+                    ),
+                    SizedBox(
+                      width: 10,
+                    ),
+                    Icon(
+                      Icons.arrow_forward_ios_outlined,
+                      size: 14,
+                      color: gradnew,
+                    )
+                  ],
+                ),
+              ),
             ),
             Divider(
               color: Colors.black,
@@ -258,11 +309,12 @@ class _uploadedetailsState extends State<uploadedetails> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               child: Align(
-                  alignment: Alignment.topLeft,
-                  child: Text(
-                    "Add music",
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w400),
-                  )),
+                alignment: Alignment.topLeft,
+                child: Text(
+                  "Add music",
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w400),
+                ),
+              ),
             ),
             Divider(
               color: Colors.black,
@@ -286,7 +338,8 @@ class _uploadedetailsState extends State<uploadedetails> {
                     child: isLoading
                         ? LinearProgressIndicator(
                       backgroundColor: Colors.transparent,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      valueColor:
+                      AlwaysStoppedAnimation<Color>(Colors.white),
                     )
                         : Row(
                       mainAxisAlignment: MainAxisAlignment.center,

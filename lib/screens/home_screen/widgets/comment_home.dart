@@ -17,8 +17,6 @@ class CommentBottomSheet extends StatefulWidget {
 }
 
 
-
-
 class _CommentBottomSheetState extends State<CommentBottomSheet> {
   bool isExpanded = false;
   var userid;
@@ -32,10 +30,13 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
 
   bool isLiked = true;
 
-  // Pagination variables
   int _currentPage = 1;
   bool _isLastPage = false;
   bool _isFetchingMore = false;
+
+  bool _isSendButtonEnabled = true;
+
+  TextEditingController _commentController = TextEditingController();
 
   Future<void> _likecomment(String commentId) async {
     var reqData = {
@@ -46,7 +47,7 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
       var response = await HomeService.postlikecomment(reqData);
       log.i('Comment Like: $response');
 
-      // Update the local state of the specific comment
+
       setState(() {
         for (var comment in commentList) {
           if (comment['commentId'] == commentId) {
@@ -57,7 +58,7 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
               comment['isLiked'] = true;
               comment['likesOfComment'] = (comment['likesOfComment'] ?? 0) + 1;
             }
-            break; // Break the loop once the comment is found and updated
+            break;
           }
         }
       });
@@ -70,6 +71,7 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
     if (comment?.isNotEmpty ?? false) {
       setState(() {
         _isLoading = true;
+        _isSendButtonEnabled = false;
       });
       var reqData = {
         'mediaId': widget.id,
@@ -78,14 +80,17 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
       try {
         var response = await HomeService.postcomment(reqData);
         log.i('Add Comment: $response');
-        await _fetchComments(reset: true); // Refresh comments
+        await _fetchComments(reset: true);
         setState(() {
           comment = '';
+          _commentController.clear();
           _isLoading = false;
+          _isSendButtonEnabled = true;
         });
       } catch (e) {
         setState(() {
           _isLoading = false;
+          _isSendButtonEnabled = true;
         });
       }
     }
@@ -103,7 +108,7 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
       try {
         var response = await HomeService.postreplaycomment(reqData);
         log.i('Add Reply Comment: $response');
-        await _fetchComments(reset: true); // Refresh comments
+        await _fetchComments(reset: true);
         setState(() {
           replaycomment = '';
           _isLoading = false;
@@ -111,7 +116,6 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
       } catch (e) {
         setState(() {
           _isLoading = false;
-
         });
       }
     }
@@ -130,7 +134,7 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
         textColor: Colors.white,
         fontSize: 14.0,
       );
-      await _fetchComments(reset: true); // Refresh comments
+      await _fetchComments(reset: true);
     } catch (e) {
       log.e('Error deleting comment: $e');
       Fluttertoast.showToast(
@@ -144,8 +148,6 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
       );
     }
   }
-
-
 
   Future<void> _fetchComments({bool reset = false}) async {
     if (_isFetchingMore) return;
@@ -172,20 +174,20 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
           List<dynamic> newComments = response['results'] ?? [];
           commentList.addAll(newComments);
 
-          // Assuming there's a field named 'likeCount' in each comment object
-          likeCount = 0; // Initialize likeCount
+
+          likeCount = 0;
           for (var comment in newComments) {
             likeCount += comment['likesOfComment'] ?? 0;
           }
 
           for (var comment in newComments) {
             isLiked = comment['isLiked'] ?? false;
-            comment['isLiked'] = isLiked; // Ensure the field exists in comment object
-            comment['isLiked'] = isLiked; // Ensure the field exists in comment object
+            comment['isLiked'] = isLiked;
+            comment['isLiked'] = isLiked;
           }
 
           showRepliesList = List<bool>.filled(commentList.length, false);
-          _isLastPage = newComments.length < 10; // Assuming 10 comments per page
+          _isLastPage = newComments.length < 10;
           _currentPage++;
         });
       } else {
@@ -199,8 +201,6 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
       });
     }
   }
-
-
 
   @override
   void initState() {
@@ -237,16 +237,14 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
             child: commentList.isNotEmpty
                 ? NotificationListener<ScrollNotification>(
               onNotification: (ScrollNotification scrollInfo) {
-                if (scrollInfo.metrics.pixels ==
-                    scrollInfo.metrics.maxScrollExtent &&
+                if (scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent &&
                     !_isFetchingMore) {
                   _fetchComments();
                 }
                 return false;
               },
               child: ListView.builder(
-                itemCount:
-                commentList.length + 1, // +1 for loading indicator
+                itemCount: commentList.length + 1,
                 itemBuilder: (context, index) {
                   if (index == commentList.length) {
                     return _isFetchingMore
@@ -255,15 +253,12 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
                   }
                   var commentItem = commentList[index];
                   bool isMyComment = commentItem['isMyComment'] ?? false;
-                  String profilePicUrl =
-                  (commentItem['profilePic'] ?? '').toString();
+                  String profilePicUrl = (commentItem['profilePic'] ?? '').toString();
                   likeCount = commentItem['likesOfComment'] ?? 0;
                   isLiked = commentItem['isLiked'] ?? false;
 
-                  bool isValidUrl =
-                      Uri.tryParse(profilePicUrl)?.isAbsolute ?? false;
-                  List<dynamic> replies =
-                      commentItem['replyComment'] ?? [];
+                  bool isValidUrl = Uri.tryParse(profilePicUrl)?.isAbsolute ?? false;
+                  List<dynamic> replies = commentItem['replyComment'] ?? [];
 
                   return Container(
                       padding: EdgeInsets.all(8.0),
@@ -271,107 +266,152 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           if (isValidUrl)
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                GestureDetector(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => profileinnerpage(
-                                          id: commentItem['userId'],
+                            GestureDetector(
+                              onLongPress: (){
+                                if (isMyComment) {
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title: Text('Delete Comment?'),
+                                        content: Text('Delete this comment?'),
+                                        actions: <Widget>[
+                                          TextButton(
+                                            onPressed: () {
+                                              _deleteComment(commentItem['commentId']);
+                                              Navigator.pop(context);
+                                            },
+                                            child: Text('Delete'),
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  );
+                                }
+                              },
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  GestureDetector(
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => profileinnerpage(
+                                            id: commentItem['userId'],
+                                          ),
                                         ),
+                                      );
+                                    },
+                                    child: Container(
+                                      margin: EdgeInsets.only(right: 16.0),
+                                      child: CircleAvatar(
+                                        backgroundImage: isValidUrl && commentItem['profilePic'] != null
+                                            ? NetworkImage(commentItem['profilePic'])
+                                            : null,
+                                        child: !isValidUrl || commentItem['profilePic'] == null
+                                            ? Image.network("https://play-lh.googleusercontent.com/4HZhLFCcIjgfbXoVj3mgZdQoKO2A_z-uX2gheF5yNCkb71wzGqwobr9muj8I05Nc8u8")
+                                            : null,
+                                        radius: 20,
                                       ),
-                                    );
-                                  },
-                                  child: Container(
-                                    margin: EdgeInsets.only(right: 16.0),
-                                    child: CircleAvatar(
-                                      backgroundImage: isValidUrl && commentItem['profilePic'] != null
-                                          ? NetworkImage(commentItem['profilePic'])
-                                          : null,
-                                      child: !isValidUrl || commentItem['profilePic'] == null
-                                          ? Image.network("https://play-lh.googleusercontent.com/4HZhLFCcIjgfbXoVj3mgZdQoKO2A_z-uX2gheF5yNCkb71wzGqwobr9muj8I05Nc8u8")
-                                          : null,
-                                      radius: 20,
                                     ),
                                   ),
-                                ),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: <Widget>[
-                                      Text(commentItem['firstName'] ?? '', style: Theme.of(context).textTheme.subtitle1),
-                                      Container(
-                                        margin: EdgeInsets.only(top: 5.0),
-                                        child: Text(commentItem['comment'] ?? ''),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                if (isValidUrl)
                                   Expanded(
-                                    child: Align(
-                                      alignment: Alignment.centerRight,
-                                      child: Stack(
-                                        alignment: Alignment.center,
-                                        children: [
-                                          IconButton(
-                                            onPressed: () async{
-                                              await _likecomment(commentItem['commentId']);
-
-                                            },
-                                            icon: Icon(
-                                              isLiked ? Icons.favorite : Icons.favorite_border,
-                                              color: isLiked ? Colors.red : Colors.grey, size: 20, // Set color based on isLiked state
-                                            ),
-                                          ),
-                                          Positioned(
-                                            bottom: 0,
-
-                                            child: Text(
-                                              likeCount.toString(), // Replace with the actual like count variable
-                                              style: TextStyle(
-                                                fontSize: 10, // Adjust the font size as needed
-                                                color: Colors.grey, // Adjust the color as needed
-                                              ),
-                                            ),
+                                    child: GestureDetector(
+                                      // onLongPress: () {
+                                      //   if (isMyComment) {
+                                      //     showDialog(
+                                      //       context: context,
+                                      //       builder: (BuildContext context) {
+                                      //         return AlertDialog(
+                                      //           title: Text('Delete Comment?'),
+                                      //           content: Text('Delete this comment?'),
+                                      //           actions: <Widget>[
+                                      //             TextButton(
+                                      //               onPressed: () {
+                                      //                 _deleteComment(commentItem['commentId']);
+                                      //                 Navigator.pop(context);
+                                      //               },
+                                      //               child: Text('Delete'),
+                                      //             ),
+                                      //           ],
+                                      //         );
+                                      //       },
+                                      //     );
+                                      //   }
+                                      // },
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: <Widget>[
+                                          Text(commentItem['firstName'] ?? '', style: Theme.of(context).textTheme.subtitle1),
+                                          Container(
+                                            margin: EdgeInsets.only(top: 5.0),
+                                            child: Text(commentItem['comment'] ?? ''),
                                           ),
                                         ],
                                       ),
                                     ),
                                   ),
-                                if (isMyComment)
-                                  GestureDetector(
-                                    onTap: () {
-                                      showDialog(
-                                        context: context,
-                                        builder: (BuildContext context) {
-                                          return AlertDialog(
-                                            title: Text('Delete Comment?'),
-                                            content: Text('Delete this comment?'),
-                                            actions: <Widget>[
-                                              TextButton(
-                                                onPressed: () {
-                                                  _deleteComment(commentItem['commentId']);
-                                                  Navigator.pop(context);
-                                                },
-                                                child: Text('Delete'),
+                                  if (isValidUrl)
+                                    GestureDetector(
+                                      child: Align(
+                                        alignment: Alignment.centerRight,
+                                        child: Stack(
+                                          alignment: Alignment.center,
+                                          children: [
+                                            IconButton(
+                                              onPressed: () async {
+                                                await _likecomment(commentItem['commentId']);
+                                              },
+                                              icon: Icon(
+                                                isLiked ? Icons.favorite : Icons.favorite_border,
+                                                color: isLiked ? Colors.red : Colors.grey,
+                                                size: 20,
                                               ),
-
-                                            ],
-                                          );
-                                        },
-                                      );
-                                    },
-
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(vertical: 13.0),
-                                      child: Icon(Icons.delete, size: 20, color: Colors.red),
+                                            ),
+                                            Positioned(
+                                              bottom: 0,
+                                              child: Text(
+                                                likeCount.toString(),
+                                                style: TextStyle(
+                                                  fontSize: 10,
+                                                  color: Colors.grey,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
                                     ),
-                                  ),
-                              ],
+                                  // if (isMyComment)
+                                  //   GestureDetector(
+                                  //     onTap: () {
+                                  //       showDialog(
+                                  //         context: context,
+                                  //         builder: (BuildContext context) {
+                                  //           return AlertDialog(
+                                  //             title: Text('Delete Comment?'),
+                                  //             content: Text('Delete this comment?'),
+                                  //             actions: <Widget>[
+                                  //               TextButton(
+                                  //                 onPressed: () {
+                                  //                   _deleteComment(commentItem['commentId']);
+                                  //                   Navigator.pop(context);
+                                  //                 },
+                                  //                 child: Text('Delete'),
+                                  //               ),
+                                  //             ],
+                                  //           );
+                                  //         },
+                                  //       );
+                                  //     },
+                                  //     child: Padding(
+                                  //       padding: const EdgeInsets.symmetric(vertical: 13.0),
+                                  //       child: Icon(Icons.delete, size: 20, color: Colors.red),
+                                  //     ),
+                                  //   ),
+                                ],
+                              ),
                             ),
                           SizedBox(height: 4),
                           if (isValidUrl)
@@ -388,45 +428,26 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
                                             _isLoading
-                                                ? Center(
-                                                child:
-                                                CupertinoActivityIndicator())
+                                                ? Center(child: CupertinoActivityIndicator())
                                                 : SizedBox(),
                                             !_isLoading
                                                 ? TextField(
-                                              decoration:
-                                              InputDecoration(
-                                                hintText:
-                                                'Write your reply here...',
-                                                hintStyle: TextStyle(
-                                                    fontSize: 12,
-                                                    fontWeight:
-                                                    FontWeight
-                                                        .w600),
-                                                suffixIcon:
-                                                IconButton(
-                                                  icon: Icon(
-                                                      Icons.send,
-                                                      color:
-                                                      buttoncolor),
-                                                  onPressed:
-                                                      () async {
-                                                    if (replaycomment
-                                                        ?.isNotEmpty ??
-                                                        false) {
-                                                      await _addreplayComment(
-                                                          commentItem[
-                                                          'commentId']);
-                                                      Navigator.pop(
-                                                          context);
+                                              decoration: InputDecoration(
+                                                hintText: 'Write your reply here...',
+                                                hintStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                                                suffixIcon: IconButton(
+                                                  icon: Icon(Icons.send, color: buttoncolor),
+                                                  onPressed: () async {
+                                                    if (replaycomment?.isNotEmpty ?? false) {
+                                                      await _addreplayComment(commentItem['commentId']);
+                                                      Navigator.pop(context);
                                                     }
                                                   },
                                                 ),
                                               ),
                                               onChanged: (text) {
                                                 setState(() {
-                                                  replaycomment =
-                                                      text;
+                                                  replaycomment = text;
                                                 });
                                               },
                                             )
@@ -446,8 +467,7 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
                           GestureDetector(
                             onTap: () {
                               setState(() {
-                                showRepliesList[index] =
-                                !showRepliesList[index];
+                                showRepliesList[index] = !showRepliesList[index];
                               });
                             },
                             child: Column(
@@ -467,16 +487,13 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
                               shrinkWrap: true,
                               physics: NeverScrollableScrollPhysics(),
                               itemCount: replies.length,
-                              itemBuilder: (BuildContext context,
-                                  int replyIndex) {
+                              itemBuilder: (BuildContext context, int replyIndex) {
                                 var replyItem = replies[replyIndex];
                                 String replyProfilePicUrl = replyItem['userId']['profilePic']['filePath'] ?? '';
-                                bool isReplyValidUrl =
-                                    Uri.tryParse(replyProfilePicUrl)?.isAbsolute ?? false;
+                                bool isReplyValidUrl = Uri.tryParse(replyProfilePicUrl)?.isAbsolute ?? false;
                                 return ListTile(
                                   leading: ClipRRect(
-                                    borderRadius: BorderRadius.all(
-                                        Radius.circular(100)),
+                                    borderRadius: BorderRadius.all(Radius.circular(100)),
                                     child: isReplyValidUrl
                                         ? Image.network(
                                       replyProfilePicUrl,
@@ -487,17 +504,13 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
                                         : Center(
                                       child: Text(
                                         'No Image',
-                                        style: TextStyle(
-                                            color: Colors.grey),
+                                        style: TextStyle(color: Colors.grey),
                                       ),
                                     ),
                                   ),
                                   title: Text(
                                     replyItem['userId']['firstName'],
-                                    style: TextStyle(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.black),
+                                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: Colors.black),
                                   ),
                                   subtitle: Text(
                                     replyItem['comment'] ?? '',
@@ -520,17 +533,19 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
               children: [
                 Expanded(
                   child: TextField(
+                    controller: _commentController,
                     decoration: InputDecoration(
                       hintText: 'Write a comment...',
-                      hintStyle:
-                      TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                      hintStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
                       suffixIcon: IconButton(
-                        icon: Icon(Icons.send, color: buttoncolor),
-                        onPressed: () async {
+                        icon: Icon(Icons.send, color: _isSendButtonEnabled ? buttoncolor : Colors.grey),
+                        onPressed: _isSendButtonEnabled
+                            ? () async {
                           if (comment?.isNotEmpty ?? false) {
                             await _addComment();
                           }
-                        },
+                        }
+                            : null,
                       ),
                     ),
                     onChanged: (text) {
@@ -538,6 +553,7 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
                         comment = text;
                       });
                     },
+                    enabled: _isSendButtonEnabled,
                   ),
                 ),
               ],

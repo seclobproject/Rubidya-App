@@ -56,6 +56,18 @@ class ProfileService {
     }
   }
 
+  static Future<Map<String, dynamic>> getProfileVideo({int page = 1, int limit = 12}) async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.get('$baseURL/api/users/get-all-videos?page=$page&limit=$limit');
+      return response.data;
+    } catch (e) {
+      // Handle error appropriately, e.g., log the error or throw it further
+      throw e;
+    }
+  }
+
+
   static Future getProfile() async {
     try {
       var dio = await DioHelper.getInstance();
@@ -170,6 +182,12 @@ class ProfileService {
   static Future profilestatus() async {
     var dio = await DioHelper.getInstance();
     var response = await dio.get('$baseURL/api/users/get-stats');
+    return response.data;
+  }
+
+  static Future TeamPerformance() async {
+    var dio = await DioHelper.getInstance();
+    var response = await dio.get('$baseURL/api/rank/view-all-ranks');
     return response.data;
   }
 

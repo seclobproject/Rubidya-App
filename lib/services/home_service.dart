@@ -149,7 +149,7 @@ class HomeService {
   //   }
   // }
 
-  static Future<Map<String, dynamic>> getFeed({int page = 1, int limit = 3}) async {
+  static Future<Map<String, dynamic>> getFeed({int page = 1, int limit = 7}) async {
     try {
       var dio = await DioHelper.getInstance();
       var response = await dio.get('$baseURL/api/posts/get-latest-posts?page=$page&limit=$limit');
@@ -197,7 +197,26 @@ class HomeService {
     }
   }
 
+  static Future<Map<String, dynamic>> getStories({int page = 1, int limit = 10}) async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.get('$baseURL/api/users/get-latest-stories');
+      return response.data;
+    } catch (e) {
+      // Handle error appropriately, e.g., log the error or throw it further
+      throw e;
+    }
+  }
 
+  static Future singlepost(id) async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.get('$baseURL/api/posts/get-post-details/$id');
+      return response.data;
+    } catch (e) {
+      rethrow;
+    }
+  }
 
 
   static Future commentreplay(id) async {

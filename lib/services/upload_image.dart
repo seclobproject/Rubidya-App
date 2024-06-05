@@ -1,4 +1,3 @@
-
 import '../networking/constant.dart';
 import '../support/dio_helper.dart';
 
@@ -14,6 +13,27 @@ class UploadService {
       rethrow;
     }
   }
+
+  static Future uploadvideo(data) async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.post('$baseURL/api/users/upload-videos',data: data);
+      return response.data;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  static Future uploadstory(data) async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.post('$baseURL/api/users/upload-story',data: data);
+      return response.data;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
 
 
 

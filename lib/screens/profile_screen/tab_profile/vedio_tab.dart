@@ -1,6 +1,21 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
-import '../../../resources/color.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_linkify/flutter_linkify.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:video_player/video_player.dart';
+import 'package:video_thumbnail/video_thumbnail.dart';
+import '../../../navigation/bottom_navigation.dart';
+import '../../../resources/color.dart';
+import '../../../services/home_service.dart';
+import '../../../support/dio_helper.dart';
+import '../../../support/logger.dart';
+import 'fullScreenimagepage.dart';
+
+
 class vediotab extends StatefulWidget {
   const vediotab({super.key});
 
@@ -9,66 +24,199 @@ class vediotab extends StatefulWidget {
 }
 
 class _vediotabState extends State<vediotab> {
+  var userId;
+  var profileList;
+  var homeList;
+  bool isLoading = false;
+  bool _isLoading = true;
+  int _pageNumber = 1;
+  ScrollController _scrollController = ScrollController();
+  late VideoPlayerController _videoController;
+
+  @override
+  void initState() {
+    super.initState();
+    _initLoad();
+    _scrollController = ScrollController();
+    _scrollController.addListener(_scrollListener);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _videoController.dispose();
+    super.dispose();
+  }
+
+  void _scrollListener() {
+    if (_scrollController.offset >=
+        _scrollController.position.maxScrollExtent &&
+        !_scrollController.position.outOfRange) {
+      _loadMore();
+    }
+  }
+
+  static Future<Map<String, dynamic>> getUserVideos(
+      {int page = 1, int limit = 12}) async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.get(
+          'https://rubidya.com/api/posts/get-all-videos?page=$page&limit=$limit');
+      return response.data;
+    } catch (e) {
+      // Handle error appropriately, e.g., log the error or throw it further
+      throw e;
+    }
+  }
+
+  Future<void> _ProfileImage({int page = 1}) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    userId = prefs.getString('userId');
+    var response = await getUserVideos(page: page);
+    log.i('Profile Image Loading........: $response');
+    setState(() {
+      if (profileList == null) {
+        profileList = response;
+      } else {
+        profileList['media'].addAll(response['media']);
+      }
+    });
+  }
+
+  Future<void> _addLike(String postId, bool isLiked) async {
+    var reqData = {
+      'postId': postId,
+      'isLiked': isLiked,
+    };
+    var response = await HomeService.like(reqData);
+    log.i('Add to Like: $response');
+  }
+
+  Future<void> _initLoad() async {
+    await _ProfileImage();
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
+  Future<void> _loadMore() async {
+    setState(() {
+      _pageNumber++;
+      isLoading = true;
+    });
+    await _ProfileImage(page: _pageNumber);
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  Future<Uint8List?> _generateThumbnail(String videoUrl) async {
+    final thumbnail = await VideoThumbnail.thumbnailData(
+      video: videoUrl,
+      imageFormat: ImageFormat.JPEG,
+      maxWidth: 100, // adjust as needed
+      quality: 25, // adjust as needed
+    );
+    return thumbnail;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return  Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10,vertical: 10),
-      child: GridView.builder(
-        physics: NeverScrollableScrollPhysics(),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 3, // You can adjust the number of columns as needed
-          crossAxisSpacing: 8.0,
-          mainAxisSpacing: 8.0,
-        ),
-        itemCount: 10, // Adjust the number of items as needed
-        itemBuilder: (BuildContext context, int index) {
-          return  Stack(
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Container(
-                  width: 112,
-                  height: 200,
-                  child: Image.network(
-                    'https://burst.shopifycdn.com/photos/fashion-model-in-red-suit.jpg?width=1000&format=pjpg&exif=0&iptc=0',
-                    fit: BoxFit.cover,
+    return profileList != null && profileList['media'] != null
+        ? GridView.builder(
+      controller: _scrollController,
+      physics: AlwaysScrollableScrollPhysics(),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        mainAxisSpacing: 5,
+      ),
+      itemCount: profileList['media'].length,
+      itemBuilder: (BuildContext context, int index) {
+        String videoUrl = profileList['media'][index]['filePath'];
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+          child: GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => FullScreenVideoPage(
+                    videoUrl: profileList['media'][index]['filePath'],
+                    likeCount: profileList['media'][index]['likeCount'],
                   ),
                 ),
-              ),
-              Positioned(
-                top: 85,
-                left: 30,
-                child:Column(
-                  children: [
-                    SvgPicture.asset(
-                      "assets/svg/heart.svg",
-                      height: 18,
-                    ),
-                    Text("1.5k",style: TextStyle(fontSize: 10,color: white),)
-                  ],
-                ),
-              ),
-              Positioned(
-                top: 85,
-                right: 30,
-                child: Column(
-                  children: [
-                    SvgPicture.asset(
-                      "assets/svg/coment2.svg",
-                      height: 18,
-                    ),
-                    Text("200",style: TextStyle(fontSize: 10,color: white),)
-                  ],
-                ),
-              ),
+              );
 
-            ],
-          );
-        },
-      ),
+            },
+            child: Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: FutureBuilder<Uint8List?>(
+                    future: _generateThumbnail(videoUrl),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.done &&
+                          snapshot.data != null) {
+                        return Image.memory(
+                          snapshot.data!,
+                          fit: BoxFit.fill,
+                          width: 112,
+                          height: 300,
+                        );
+                      } else {
+                        return Container(
+                          width: 112,
+                          height: 300,
+                          color: Colors.grey, // Placeholder color
+                        );
+                      }
+                    },
+                  ),
+                ),
+                Positioned(
+                  top: 78,
+                  left: 30,
+                  child: Column(
+                    children: [
+                      SvgPicture.asset(
+                        "assets/svg/heart.svg",
+                        height: 18,
+                      ),
+                      Text(
+                        profileList['media'][index]['likeCount'].toString(),
+                        style: TextStyle(fontSize: 10, color: Colors.white),
+                      ),
+                    ],
+                  ),
+                ),
+                Positioned(
+                  top: 78,
+                  right: 30,
+                  child: Column(
+                    children: [
+                      SvgPicture.asset(
+                        "assets/svg/coment2.svg",
+                        height: 18,
+                      ),
+                      Text(
+                        profileList['media'][index]['commentCount'].toString(),
+
+                        style: TextStyle(fontSize: 10, color: Colors.white),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    )
+        : Center(
+      child: isLoading
+          ? CircularProgressIndicator()
+          : Text("No videos available",
+          style: TextStyle(color: Colors.black)),
     );
   }
 }
-
-
-

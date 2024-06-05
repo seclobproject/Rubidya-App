@@ -11,6 +11,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../commonpage/messagepage.dart';
 import '../../commonpage/notification.dart';
 import '../../services/home_service.dart';
+import 'package:share_plus/share_plus.dart';
+
 import '../../support/logger.dart';
 import '../profile_screen/inner_page/profile_inner_page.dart';
 import '../search_screen/searchpage.dart';
@@ -179,6 +181,9 @@ class _homepageState extends State<homepage> {
   }
 
 
+
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -256,20 +261,13 @@ class _homepageState extends State<homepage> {
                   height: 109,
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
-                        spreadRadius: 0.1,
-                        blurRadius: 5,
-                        offset: Offset(0, 1),
-                      ),
-                    ],
+
                     borderRadius: BorderRadius.only(
                       bottomLeft: Radius.circular(10),
                       topLeft: Radius.circular(10),
                     ),
                   ),
-                  child: homestory(), // Assuming homestory is a custom widget
+                  child: HomeStory(), // Assuming homestory is a custom widget
                 ),
               ),
               SizedBox(height: 20),
@@ -419,6 +417,14 @@ class _ProductCardState extends State<ProductCard> {
         });
       });
     });
+  }
+  String generateDeepLink() {
+    return 'rubidya.com/post/${widget.id}';
+  }
+
+  void sharePost(String postId) {
+    final Uri deepLink = Uri.parse('rubidya.com/post/${widget.id}');
+    Share.share('Check out this post: $deepLink');
   }
 
   @override
@@ -614,9 +620,15 @@ class _ProductCardState extends State<ProductCard> {
 
                     Expanded(child: SizedBox()),
 
-                    SvgPicture.asset(
-                      "assets/svg/share.svg",
-                      height: 20,
+                    IconButton(
+                      onPressed: () {
+                        // Replace 'postId' with the actual ID of the post
+                        sharePost('postId');
+                      },
+                      icon: SvgPicture.asset(
+                        "assets/svg/share.svg",
+                        height: 20,
+                      ),
                     ),
                   ],
                 ),
