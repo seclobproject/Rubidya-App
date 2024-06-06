@@ -47,8 +47,10 @@ class _uploadedetailsState extends State<uploadedetails> {
       _videoPlayerController =
       VideoPlayerController.file(File(widget.videoUrl!))
         ..initialize().then((_) {
-          setState(() {});
+          setState(() {
+          });
         });
+
     }
   }
 
@@ -174,9 +176,12 @@ class _uploadedetailsState extends State<uploadedetails> {
       );
     } else if (widget.videoUrl != null &&
         _videoPlayerController?.value.isInitialized == true) {
-      return AspectRatio(
-        aspectRatio: _videoPlayerController!.value.aspectRatio,
-        child: VideoPlayer(_videoPlayerController!),
+      return GestureDetector(
+        onTap: (){_videoPlayerController?.play();},
+        child: AspectRatio(
+          aspectRatio: _videoPlayerController!.value.aspectRatio,
+          child: VideoPlayer(_videoPlayerController!),
+        ),
       );
     } else {
       return Container();

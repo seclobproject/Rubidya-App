@@ -16,7 +16,7 @@ class _TrimmerViewState extends State<TrimmerView> {
   final _trimmer = Trimmer();
 
   double _startValue = 0.0;
-  double _endValue = 60.0;
+  double _endValue = 0;
   bool _isPlaying = false;
   bool _progressVisibility = false;
 
@@ -31,7 +31,7 @@ class _TrimmerViewState extends State<TrimmerView> {
     final videoDuration =
         _trimmer.videoPlayerController!.value.duration.inSeconds;
     setState(() {
-      _endValue = videoDuration > 60 ? 60.0 : videoDuration.toDouble();
+      _endValue = videoDuration.toDouble() > 60 ? 60.0 : videoDuration.toDouble();
     });
   }
 
@@ -42,13 +42,17 @@ class _TrimmerViewState extends State<TrimmerView> {
 
     _trimmer.saveTrimmedVideo(
       startValue: _startValue,
-      endValue: _endValue,
+      endValue: _endValue*1000,
       onSave: (String? videoUrl) {
         setState(() {
           _progressVisibility = false;
         });
 
+        // print(videoUrl);
+
         if (videoUrl != null) {
+          print(_startValue);
+          print(_endValue);
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(
               builder: (context) => uploadedetails(videoUrl: videoUrl),

@@ -5,18 +5,19 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:rubidya/resources/color.dart';
 import 'package:rubidya/screens/home_screen/widgets/comment_home.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
+// import 'package:rubidya/screens/temp_screens/notification.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:rubidya/screens/home_screen/widgets/home_story.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../commonpage/messagepage.dart';
-import '../../commonpage/notification.dart';
 import '../../services/home_service.dart';
-import 'package:share_plus/share_plus.dart';
-
 import '../../support/logger.dart';
 import '../profile_screen/inner_page/profile_inner_page.dart';
 import '../search_screen/searchpage.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:video_player/video_player.dart';
+import 'package:share_plus/share_plus.dart';
+
+// import '../temp_screens/messagepage.dart';
 
 class homepage extends StatefulWidget {
   const homepage({Key? key}) : super(key: key);
@@ -181,9 +182,6 @@ class _homepageState extends State<homepage> {
   }
 
 
-
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -226,10 +224,10 @@ class _homepageState extends State<homepage> {
                     ),
                     InkWell(
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => messagepage()),
-                        );
+                        // Navigator.push(
+                        //   context,
+                        //   MaterialPageRoute(builder: (context) => messagepage()),
+                        // );
                       },
                       child: SvgPicture.asset(
                         "assets/svg/massage.svg",
@@ -238,11 +236,10 @@ class _homepageState extends State<homepage> {
                     SizedBox(width: 20),
                     IconButton(
                         onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => notificationpage()),
-                          );
-
+                          //   Navigator.push(
+                          //     context,
+                          //     MaterialPageRoute(builder: (context) => notificationpage()),
+                          //   );
                         },
                         icon: Badge(
                             textColor: Colors.white,
@@ -301,6 +298,7 @@ class _homepageState extends State<homepage> {
                           commentcount: homeList!['posts'][index]['commentCount'].toString() ?? '',
                           id: homeList!['posts'][index]['_id'] ?? '',
                           userId: homeList!['posts'][index]['userId'] ?? '',
+                          filetype: homeList!['posts'][index]['fileType'] ?? '',
                           likeCount: homeList!['posts'][index]['isLiked'] ?? false,
                           onLikePressed: () {
                             _toggleLikePost(homeList!['posts'][index]['_id']);
@@ -375,6 +373,7 @@ class ProductCard extends StatefulWidget {
     required this.description,
     required this.onLikePressed,
     required this.onDoubleTapLike,
+    required this.filetype,
   }) : super(key: key);
 
   final String img;
@@ -389,6 +388,7 @@ class ProductCard extends StatefulWidget {
   final String profilepic;
   final String description;
   final bool likeCount;
+  final String filetype;
 
   final VoidCallback onLikePressed;
   final VoidCallback onDoubleTapLike;
@@ -402,10 +402,27 @@ class _ProductCardState extends State<ProductCard> {
 
   late String currentImg;
 
+  late VideoPlayerController _videoController;
+
   @override
   void initState() {
     super.initState();
-    currentImg = widget.img;
+    if (widget.filetype == "image/jpeg") {
+      currentImg = widget.img;
+    } else if (widget.filetype == "video/mp4") {
+      _initializeVideoPlayer();
+    }
+  }
+
+  void _initializeVideoPlayer() {
+    final videoUrl = widget.img;
+    _videoController = VideoPlayerController.network(videoUrl)
+      ..initialize().then((_) {
+        setState(
+                () {}); // Ensure the video player is rebuilt after initialization
+      }).catchError((error) {
+        print('Error initializing video player: $error');
+      });
   }
 
   void reloadImage() {
@@ -426,7 +443,6 @@ class _ProductCardState extends State<ProductCard> {
     final Uri deepLink = Uri.parse('rubidya.com/post/${widget.id}');
     Share.share('Check out this post: $deepLink');
   }
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -526,29 +542,74 @@ class _ProductCardState extends State<ProductCard> {
             ],
           ),
           SizedBox(height: 10),
-          GestureDetector(
+          widget.filetype == "image/jpeg"
+              ? GestureDetector(
             onTap: reloadImage,
             child: Container(
               key: ValueKey(currentImg),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.all(Radius.circular(20)),
               ),
-              child: CachedNetworkImage(
-                imageUrl: currentImg,
+              child: Image.network(
+                currentImg,
                 fit: BoxFit.fill,
-                httpHeaders: {'Cache-Control': 'no-cache'},
-                progressIndicatorBuilder: (context, url, downloadProgress) =>
-                    Center(
+                headers: {'Cache-Control': 'no-cache'},
+                loadingBuilder: (BuildContext context, Widget child,
+                    ImageChunkEvent? loadingProgress) {
+                  if (loadingProgress == null) {
+                    return child;
+                  } else {
+                    return Center(
                       child: CupertinoActivityIndicator(),
+                    );
+                  }
+                },
+                errorBuilder: (BuildContext context, Object exception,
+                    StackTrace? stackTrace) {
+                  return Center(
+                    child: Text(
+                      'Failed to load image',
+                      style: TextStyle(color: Colors.red),
                     ),
-                errorWidget: (context, url, error) =>
-                    Center(
-                      child: Text(
-                        'Failed to load image',
-                        style: TextStyle(color: Colors.red),
-                      ),
-                    ),
+                  );
+                },
               ),
+            ),
+          )
+              : GestureDetector(
+            onTap: () {
+              setState(() {
+                _videoController.value.isPlaying
+                    ? _videoController.pause()
+                    : _videoController.play();
+              });
+            },
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Container(
+                  decoration: const BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(20)),
+                  ),
+                  child: _videoController.value.isInitialized
+                      ? AspectRatio(
+                    aspectRatio: _videoController.value.aspectRatio,
+                    child: VideoPlayer(_videoController),
+                  )
+                      : const Center(child: CircularProgressIndicator()),
+                ),
+                if (!_videoController.value.isPlaying)
+                  IconButton(
+                    iconSize: 70,
+                    icon: Icon(Icons.play_circle_fill_outlined),
+                    color: Colors.white,
+                    onPressed: () {
+                      setState(() {
+                        _videoController.play();
+                      });
+                    },
+                  ),
+              ],
             ),
           ),
 
@@ -576,11 +637,9 @@ class _ProductCardState extends State<ProductCard> {
                       child: IconButton(
                         onPressed: widget.onLikePressed,
                         icon: ImageIcon(
-                          AssetImage(
-                              widget.likeCount
-                                  ?  'assets/image/rubred.png'
-                                  : 'assets/image/rubblack.png'
-                          ),
+                          AssetImage(widget.likeCount
+                              ? 'assets/image/rubred.png'
+                              : 'assets/image/rubblack.png'),
                           size: 30.0,
                           color: widget.likeCount ? Colors.red : Colors.black26,
                         ),
@@ -729,7 +788,8 @@ class _ProductCardState extends State<ProductCard> {
                   onOpen: _onOpen,
                   text: widget.description,
                   maxLines: isExpanded ? null : 2,
-                  overflow: isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
+                  overflow:
+                  isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
                   style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
                   linkStyle: TextStyle(color: Colors.blue),
                 ),
@@ -876,5 +936,4 @@ class MembersListing extends StatelessWidget {
       ),
     );
   }
-
 }
