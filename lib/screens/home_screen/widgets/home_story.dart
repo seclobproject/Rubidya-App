@@ -1,12 +1,11 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:rubidya/resources/color.dart';
-
 import 'package:rubidya/services/home_service.dart';
 import 'package:story_view/story_view.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:dio/dio.dart';
 import 'package:video_trimmer/video_trimmer.dart';
-
 import '../../../navigation/bottom_navigation.dart';
 import '../../../services/upload_image.dart';
 
@@ -21,8 +20,8 @@ class _HomeStoryState extends State<HomeStory> {
   Trimmer? _trimmer;
   List<dynamic> _stories = [];
   bool _isLoading = true;
-  bool uploading = false; // Declare and initialize uploading variable
-  bool isLoading = false; // Declare and initialize isLoading variable
+  bool uploading = false;
+  bool isLoading = false;
   String description = '';
 
   @override
@@ -56,6 +55,7 @@ class _HomeStoryState extends State<HomeStory> {
       });
     }
   }
+
   Future<void> uploadVideo() async {
     if (uploading) return;
 
@@ -67,7 +67,7 @@ class _HomeStoryState extends State<HomeStory> {
     try {
       // Get the video file from the gallery
       final picker = ImagePicker();
-      final pickedFile = await picker.getVideo(source: ImageSource.gallery);
+      final pickedFile = await picker.pickVideo(source: ImageSource.gallery);
 
       if (pickedFile != null) {
         // Prepare the video file for upload
@@ -78,6 +78,20 @@ class _HomeStoryState extends State<HomeStory> {
           ),
           'description': description,
         });
+
+        // Show the snackbar with a progress bar
+        final snackBar = SnackBar(
+          content: Row(
+            children: [
+              CupertinoActivityIndicator(),
+              SizedBox(width: 20),
+              Text("Uploading Story...")
+            ],
+          ),
+          duration: Duration(hours: 1), // Make it last long enough
+        );
+
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
 
         // Upload the video using your service
         var response = await UploadService.uploadstory(formData);
@@ -120,18 +134,14 @@ class _HomeStoryState extends State<HomeStory> {
         uploading = false;
         isLoading = false;
       });
+
+      // Dismiss the progress snackbar
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
     }
   }
 
-
-
-
   @override
   Widget build(BuildContext context) {
-    // Check if uploading is in progress
-    if (uploading) {
-      return Center(child: CircularProgressIndicator());
-    }
     if (_isLoading) {
       return Center(child: CircularProgressIndicator());
     }
@@ -154,7 +164,7 @@ class _HomeStoryState extends State<HomeStory> {
         children: [
           ClipOval(
             child: Container(
-              color: Colors.grey, // Placeholder color
+              color: Colors.grey,
               height: 60,
               width: 60,
               child: Icon(
@@ -176,7 +186,6 @@ class _HomeStoryState extends State<HomeStory> {
     return ListView(
       scrollDirection: Axis.horizontal,
       children: [
-        // Add Your Story option
         GestureDetector(
           onTap: uploadVideo,
           child: Padding(
@@ -205,12 +214,21 @@ class _HomeStoryState extends State<HomeStory> {
             ),
           ),
         ),
-
-        // Other user stories
         ...storiesByUser.entries.map<Widget>((entry) {
           List<dynamic> userStories = entry.value;
           String username = userStories.first['username'];
-          String profilePicUrl = userStories.first['profilePic']['filePath'];
+          String profilePicUrl;
+          if (userStories.first.containsKey('profilePic') && userStories.first['profilePic'] != null) {
+            profilePicUrl = userStories.first['profilePic']['filePath'];
+          } else {
+            // Display a Material Icon when profilePic is null
+            profilePicUrl = "https://play-lh.googleusercontent.com/4HZhLFCcIjgfbXoVj3mgZdQoKO2A_z-uX2gheF5yNCkb71wzGqwobr9muj8I05Nc8u8=w240-h480-rw"; // Replace 'person' with the Material Icon you want to use
+          }
+
+
+          String truncatedUsername = username.length > 10
+              ? username.substring(0, 10) + '...'
+              : username;
 
           return GestureDetector(
             onTap: () => _playUserStories(context, userStories),
@@ -249,7 +267,7 @@ class _HomeStoryState extends State<HomeStory> {
                     ],
                   ),
                   SizedBox(height: 8),
-                  Text(username, style: TextStyle(fontSize: 12)),
+                  Text(truncatedUsername, style: TextStyle(fontSize: 12)),
                 ],
               ),
             ),
@@ -261,7 +279,6 @@ class _HomeStoryState extends State<HomeStory> {
 
   void _playUserStories(BuildContext context, List<dynamic> userStories) {
     if (userStories.isEmpty) {
-      // If no stories available, show a dummy picture
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -269,16 +286,17 @@ class _HomeStoryState extends State<HomeStory> {
         ),
       );
     } else {
-      // Set the 'seen' property of each story to true
       userStories.forEach((story) {
         story['seen'] = true;
       });
 
-      // If stories available, navigate to UserStoriesScreen
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => UserStoriesScreen(userStories: userStories),
+          builder: (context) => UserStoriesScreen(
+            userStories: userStories,
+            allUserStories: _stories,
+          ),
         ),
       );
     }
@@ -320,11 +338,44 @@ class NoStoryScreen extends StatelessWidget {
   }
 }
 
-class UserStoriesScreen extends StatelessWidget {
+class UserStoriesScreen extends StatefulWidget {
   final List<dynamic> userStories;
+  final List<dynamic> allUserStories;
 
-  const UserStoriesScreen({Key? key, required this.userStories})
-      : super(key: key);
+  const UserStoriesScreen({Key? key, required this.userStories, required this.allUserStories})
+      :
+        super(key: key);
+
+  @override
+  _UserStoriesScreenState createState() => _UserStoriesScreenState();
+}
+
+class _UserStoriesScreenState extends State<UserStoriesScreen> {
+  late StoryController _storyController;
+  late List<dynamic> _currentUserStories;
+  late List<List<dynamic>> _allUserStoriesGrouped;
+  int _currentUserIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _storyController = StoryController();
+    _currentUserStories = widget.userStories;
+    _allUserStoriesGrouped = _groupStoriesByUser(widget.allUserStories);
+    _currentUserIndex = _allUserStoriesGrouped.indexWhere((stories) => stories == _currentUserStories);
+  }
+
+  List<List<dynamic>> _groupStoriesByUser(List<dynamic> stories) {
+    Map<String, List<dynamic>> storiesByUser = {};
+    stories.forEach((story) {
+      String userId = story['userId'];
+      if (!storiesByUser.containsKey(userId)) {
+        storiesByUser[userId] = [];
+      }
+      storiesByUser[userId]!.add(story);
+    });
+    return storiesByUser.values.toList();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -335,16 +386,22 @@ class UserStoriesScreen extends StatelessWidget {
         title: Row(
           children: [
             ClipOval(
-              child: Image.network(
-                userStories.first['profilePic']['filePath'],
+              child: _currentUserStories.first.containsKey('profilePic') && _currentUserStories.first['profilePic'] != null
+                  ? Image.network(
+                _currentUserStories.first['profilePic']['filePath'],
                 height: 40,
                 width: 40,
                 fit: BoxFit.cover,
+              )
+                  : Icon(
+                Icons.person, // Use whatever Material Icon you prefer
+                size: 40,
               ),
             ),
+
             SizedBox(width: 8),
             Text(
-              userStories.first['username'],
+              _currentUserStories.first['username'],
               style: TextStyle(color: Colors.white, fontSize: 16),
             ),
           ],
@@ -357,29 +414,29 @@ class UserStoriesScreen extends StatelessWidget {
         ],
       ),
       body: StoryView(
-        storyItems: userStories.map<StoryItem>((story) {
+        storyItems: _currentUserStories.map<StoryItem>((story) {
           String videoUrl = story['filePath'];
           String username = story['username'];
+          String truncatedUsername = username.length > 10 ? username.substring(0, 10) : username;
           return StoryItem.pageVideo(
             videoUrl,
-            caption: Text(username),
-            controller: StoryController(), // Add this line
-            duration: Duration(
-                seconds: 10), // Set the duration as per your requirement
+            caption: Text(truncatedUsername),
+            controller: _storyController,
+            duration: Duration(seconds: 30),
             imageFit: BoxFit.cover,
           );
         }).toList(),
         repeat: false,
-        controller: StoryController(),
+        controller: _storyController,
+        onComplete: _moveToNextUser,
       ),
     );
   }
-}
 
-void main() {
-  runApp(MaterialApp(
-    home: Scaffold(
-      body: HomeStory(),
-    ),
-  ));
+  void _moveToNextUser() {
+    setState(() {
+      _currentUserIndex = (_currentUserIndex + 1) % _allUserStoriesGrouped.length;
+      _currentUserStories = _allUserStoriesGrouped[_currentUserIndex];
+    });
+  }
 }

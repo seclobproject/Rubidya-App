@@ -314,14 +314,24 @@ class _TopSixGridviewday extends State<TopSixGridviewweek> {
                           color: blueshade,
                           border: Border.all(width: 5, color: bluetext),
                         ),
-                        child: CircleAvatar(
+                        child:CircleAvatar(
                           radius: 30,
                           backgroundColor: bluetext,
-                          backgroundImage: trendingthisweektopsix != null &&
-                              trendingthisweektopsix['response'] != null &&
-                              trendingthisweektopsix['response'][index] != null &&
-                              trendingthisweektopsix['response'][index]['profilePic'] != null
-                              ? NetworkImage(trendingthisweektopsix['response'][index]['profilePic'])
+                          backgroundImage:
+                          trendingthisweektopsix['response'][index]
+                          ['profilePic'] !=
+                              null
+                              ? NetworkImage(
+                              trendingthisweektopsix['response']
+                              [index]['profilePic'])
+                              : null,
+                          child: trendingthisweektopsix['response'][index]
+                          ['profilePic'] ==
+                              null
+                              ? Icon(Icons.person,
+                              size: 30,
+                              color: Colors
+                                  .white) // Optionally add an icon or placeholder
                               : null,
                         ),
 

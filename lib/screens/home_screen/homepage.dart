@@ -16,6 +16,7 @@ import '../search_screen/searchpage.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:video_player/video_player.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
 // import '../temp_screens/messagepage.dart';
 
@@ -172,6 +173,31 @@ class _homepageState extends State<homepage> {
     }
   }
 
+  void _toggleSavePost(String postId) {
+    setState(() {
+      bool isSaved = !homeList!['posts']
+          .firstWhere((post) => post['_id'] == postId)['isSaved'];
+      homeList!['posts'].firstWhere((post) => post['_id'] == postId)['isSaved'] =
+          isSaved;
+    });
+    _addSave(
+        postId,
+        homeList!['posts']
+            .firstWhere((post) => post['_id'] == postId)['isSaved']);
+  }
+
+  Future<void> _addSave(String postId, bool isSaved) async {
+    try {
+      var response = await HomeService.save({
+        'postId': postId,
+        'isSaved': isSaved,
+      });
+      log.i('Add to Like: $response');
+    } catch (e) {
+      log.e('Failed to like post: $e');
+    }
+  }
+
   Future<void> _refresh() async {
     setState(() {
       _pageNumber = 1;
@@ -306,6 +332,11 @@ class _homepageState extends State<homepage> {
                           onDoubleTapLike: () {
                             _toggleLikePost(homeList!['posts'][index]['_id']);
                           },
+                          onSavePressed: () {
+                            _toggleSavePost(homeList!['posts'][index]['_id']);
+                          },
+                          saveCount: homeList!['posts'][index]['isSaved'] ?? false,
+
                         ),
                       ],
                     );
@@ -366,7 +397,6 @@ class ProductCard extends StatefulWidget {
     required this.createdTime,
     required this.id,
     required this.userId,
-    required this.likeCount,
     required this.likedby,
     required this.commentcount,
     required this.commentby,
@@ -374,24 +404,29 @@ class ProductCard extends StatefulWidget {
     required this.onLikePressed,
     required this.onDoubleTapLike,
     required this.filetype,
+    required this.likeCount
+    ,required this.saveCount,
+    required this.onSavePressed,
   }) : super(key: key);
 
   final String img;
+  final String profilepic;
   final String name;
+  final String likes;
   final String createdTime;
   final String id;
   final String userId;
   final String likedby;
-  final String commentby;
-  final String likes;
   final String commentcount;
-  final String profilepic;
+  final String commentby;
   final String description;
   final bool likeCount;
   final String filetype;
+  final bool saveCount;
 
   final VoidCallback onLikePressed;
   final VoidCallback onDoubleTapLike;
+  final VoidCallback onSavePressed;
 
   @override
   _ProductCardState createState() => _ProductCardState();
@@ -399,9 +434,7 @@ class ProductCard extends StatefulWidget {
 
 class _ProductCardState extends State<ProductCard> {
   bool isExpanded = false;
-
   late String currentImg;
-
   late VideoPlayerController _videoController;
 
   @override
@@ -415,11 +448,9 @@ class _ProductCardState extends State<ProductCard> {
   }
 
   void _initializeVideoPlayer() {
-    final videoUrl = widget.img;
-    _videoController = VideoPlayerController.network(videoUrl)
+    _videoController = VideoPlayerController.network(widget.img)
       ..initialize().then((_) {
-        setState(
-                () {}); // Ensure the video player is rebuilt after initialization
+        setState(() {});
       }).catchError((error) {
         print('Error initializing video player: $error');
       });
@@ -435,6 +466,7 @@ class _ProductCardState extends State<ProductCard> {
       });
     });
   }
+
   String generateDeepLink() {
     return 'rubidya.com/post/${widget.id}';
   }
@@ -443,10 +475,17 @@ class _ProductCardState extends State<ProductCard> {
     final Uri deepLink = Uri.parse('rubidya.com/post/${widget.id}');
     Share.share('Check out this post: $deepLink');
   }
+
+  @override
+  void dispose() {
+    _videoController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onDoubleTap: widget.onDoubleTapLike, // Handle double tap here
+      onDoubleTap: widget.onDoubleTapLike,
       child: Column(
         children: [
           Stack(
@@ -471,7 +510,7 @@ class _ProductCardState extends State<ProductCard> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            widget.name,
+                            widget.name.length > 25 ? widget.name.substring(0, 25) : widget.name,
                             style: TextStyle(
                                 fontSize: 15, fontWeight: FontWeight.w500),
                           ),
@@ -510,13 +549,11 @@ class _ProductCardState extends State<ProductCard> {
                         width: 40,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Colors
-                              .transparent, // Set background color to transparent
+                          color: Colors.transparent,
                         ),
                         child: ClipRRect(
                           borderRadius: BorderRadius.all(Radius.circular(100)),
-                          child: widget.profilepic != null &&
-                              widget.profilepic.isNotEmpty
+                          child: widget.profilepic.isNotEmpty
                               ? Image.network(
                             widget.profilepic,
                             height: 51,
@@ -576,45 +613,56 @@ class _ProductCardState extends State<ProductCard> {
               ),
             ),
           )
-              : GestureDetector(
-            onTap: () {
-              setState(() {
-                _videoController.value.isPlaying
-                    ? _videoController.pause()
-                    : _videoController.play();
-              });
+              : VisibilityDetector(
+            key: Key(widget.id),
+            onVisibilityChanged: (VisibilityInfo info) {
+              if (info.visibleFraction > 0.5) {
+                if (!_videoController.value.isPlaying) {
+                  _videoController.play();
+                }
+              } else {
+                if (_videoController.value.isPlaying) {
+                  _videoController.pause();
+                }
+              }
             },
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Container(
-                  decoration: const BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(20)),
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  _videoController.value.isPlaying
+                      ? _videoController.pause()
+                      : _videoController.play();
+                });
+              },
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(20)),
+                    ),
+                    child: _videoController.value.isInitialized
+                        ? AspectRatio(
+                      aspectRatio: _videoController.value.aspectRatio,
+                      child: VideoPlayer(_videoController),
+                    )
+                        : Center(child: CupertinoActivityIndicator()),
                   ),
-                  child: _videoController.value.isInitialized
-                      ? AspectRatio(
-                    aspectRatio: _videoController.value.aspectRatio,
-                    child: VideoPlayer(_videoController),
-                  )
-                      : const Center(child: CircularProgressIndicator()),
-                ),
-                if (!_videoController.value.isPlaying)
-                  IconButton(
-                    iconSize: 70,
-                    icon: Icon(Icons.play_circle_fill_outlined),
-                    color: Colors.white,
-                    onPressed: () {
-                      setState(() {
-                        _videoController.play();
-                      });
-                    },
-                  ),
-              ],
+                  // if (!_videoController.value.isPlaying)
+                  //   IconButton(
+                  //     iconSize: 70,
+                  //     icon: Icon(Icons.play_circle_fill_outlined),
+                  //     color: Colors.white,
+                  //     onPressed: () {
+                  //       setState(() {
+                  //         _videoController.play();
+                  //       });
+                  //     },
+                  //   ),
+                ],
+              ),
             ),
           ),
-
-          // SizedBox(height: 10,),
-
           Padding(
             padding: const EdgeInsets.only(right: 23, top: 10, left: 15),
             child: Column(
@@ -622,15 +670,6 @@ class _ProductCardState extends State<ProductCard> {
               children: [
                 Row(
                   children: [
-                    // IconButton(
-                    //   onPressed: widget.onLikePressed,
-                    //   icon: Icon(
-                    //     widget.likeCount ? Icons.favorite : Icons.favorite_border,
-                    //     color: widget.likeCount ? Colors.red : Colors.black26,
-                    //     size: 30.0,
-                    //   ),
-                    // ),
-
                     SizedBox(
                       height: 50,
                       width: 50,
@@ -645,21 +684,17 @@ class _ProductCardState extends State<ProductCard> {
                         ),
                       ),
                     ),
-
                     SizedBox(width: 10),
-
                     InkWell(
                       onTap: () {
                         showModalBottomSheet<void>(
-                          backgroundColor: white,
+                          backgroundColor: Colors.white,
                           context: context,
                           isScrollControlled: true,
                           builder: (BuildContext context) {
-                            late Map<String, dynamic>? homeList;
                             return Padding(
                               padding: const EdgeInsets.all(20.0).copyWith(
-                                  bottom:
-                                  MediaQuery.of(context).viewInsets.bottom),
+                                  bottom: MediaQuery.of(context).viewInsets.bottom),
                               child: CommentBottomSheet(id: widget.id),
                             );
                           },
@@ -670,19 +705,20 @@ class _ProductCardState extends State<ProductCard> {
                         height: 20,
                       ),
                     ),
-                    SizedBox(width: 20),
-                    SvgPicture.asset(
-                      "assets/svg/save.svg",
-                      height: 20,
+                    SizedBox(
+                      height: 50,
+                      width: 50,
+                      child: IconButton(
+                        onPressed: widget.onSavePressed,
+                        icon: widget.saveCount ? Icon(Icons.bookmark)
+                            : Icon(Icons.bookmark_border_outlined),
+                      ),
                     ),
                     SizedBox(width: 20),
-
                     Expanded(child: SizedBox()),
-
                     IconButton(
                       onPressed: () {
-                        // Replace 'postId' with the actual ID of the post
-                        sharePost('postId');
+                        sharePost(widget.id);
                       },
                       icon: SvgPicture.asset(
                         "assets/svg/share.svg",
@@ -691,33 +727,28 @@ class _ProductCardState extends State<ProductCard> {
                     ),
                   ],
                 ),
-                SizedBox(
-                  height: 10,
-                ),
+                SizedBox(height: 10),
                 Row(
                   children: [
                     RichText(
                       text: TextSpan(
                         style: TextStyle(
-                          color: bluetext,
+                          color: Colors.blue,
                           fontSize: 12,
                         ),
                         children: [
+                          TextSpan(text: "Liked by "),
                           TextSpan(
-                            text: "Liked by ",
-                            style: TextStyle(),
-                          ),
-                          TextSpan(
-                            text: "${widget.likedby}",
+                            text: widget.likedby,
                             style: TextStyle(
-                              color: bluetext,
+                              color: Colors.blue,
                               fontWeight: FontWeight.w800,
                             ),
                           ),
                           TextSpan(
                             text: " and",
                             style: TextStyle(
-                              color: bluetext,
+                              color: Colors.blue,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -725,22 +756,23 @@ class _ProductCardState extends State<ProductCard> {
                       ),
                     ),
                     SizedBox(width: 2),
-                    Text("${widget.likes} Others ",
-                        style: TextStyle(
-                            color: bluetext,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700)),
+                    Text(
+                      "${widget.likes} Others",
+                      style: TextStyle(
+                          color: Colors.blue,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700),
+                    ),
                     SizedBox(width: 2),
                   ],
                 ),
                 InkWell(
                   onTap: () {
                     showModalBottomSheet<void>(
-                      backgroundColor: white,
+                      backgroundColor: Colors.white,
                       context: context,
                       isScrollControlled: true,
                       builder: (BuildContext context) {
-                        late Map<String, dynamic>? homeList;
                         return Padding(
                           padding: const EdgeInsets.all(20.0).copyWith(
                               bottom: MediaQuery.of(context).viewInsets.bottom),
@@ -754,36 +786,34 @@ class _ProductCardState extends State<ProductCard> {
                       RichText(
                         text: TextSpan(
                           style: TextStyle(
-                            color: bluetext,
+                            color: Colors.blue,
                             fontSize: 12,
                           ),
                           children: [
-                            TextSpan(
-                              text: "View All",
-                              style: TextStyle(),
-                            ),
+                            TextSpan(text: "View All"),
                           ],
                         ),
                       ),
                       SizedBox(width: 2),
-                      Text("${widget.commentcount} Comments ",
-                          style: TextStyle(
-                            color: bluetext,
-                            fontSize: 13,
-                          )),
+                      Text(
+                        "${widget.commentcount} Comments",
+                        style: TextStyle(
+                          color: Colors.blue,
+                          fontSize: 13,
+                        ),
+                      ),
                     ],
                   ),
                 ),
               ],
             ),
           ),
-
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10),
             child: Align(
               alignment: Alignment.topLeft,
               child: Container(
-                height: isExpanded ? null : 40, // Adjust height when expanded
+                height: isExpanded ? null : 40,
                 child: Linkify(
                   onOpen: _onOpen,
                   text: widget.description,
@@ -796,11 +826,11 @@ class _ProductCardState extends State<ProductCard> {
               ),
             ),
           ),
-          if (widget.description.split('\n').length > 2) // Check for multiline
+          if (widget.description.split('\n').length > 2)
             GestureDetector(
               onTap: () {
                 setState(() {
-                  isExpanded = !isExpanded; // Toggle the isExpanded state
+                  isExpanded = !isExpanded;
                 });
               },
               child: Padding(
@@ -808,16 +838,12 @@ class _ProductCardState extends State<ProductCard> {
                 child: Align(
                   alignment: Alignment.bottomRight,
                   child: Text(
-                    isExpanded ? 'See Less' : 'See More ',
+                    isExpanded ? 'See Less' : 'See More',
                     style: TextStyle(color: Colors.blue, fontSize: 8),
                   ),
                 ),
               ),
             ),
-
-          // SizedBox(
-          //   height: 15,
-          // )
         ],
       ),
     );

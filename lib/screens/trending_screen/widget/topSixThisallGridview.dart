@@ -145,8 +145,22 @@ class _TopSixGridviewall extends State<TopSixGridviewall> {
                         child: CircleAvatar(
                           radius: 30,
                           backgroundColor: bluetext,
-                          backgroundImage: NetworkImage(
-                              trendingthisalltopsix['response'][index]['profilePic']),
+                          backgroundImage:
+                          trendingthisalltopsix['response'][index]
+                          ['profilePic'] !=
+                              null
+                              ? NetworkImage(
+                              trendingthisalltopsix['response']
+                              [index]['profilePic'])
+                              : null,
+                          child: trendingthisalltopsix['response'][index]
+                          ['profilePic'] ==
+                              null
+                              ? Icon(Icons.person,
+                              size: 30,
+                              color: Colors
+                                  .white) // Optionally add an icon or placeholder
+                              : null,
                         ),
                       ),
                       Positioned(

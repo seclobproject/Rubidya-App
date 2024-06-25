@@ -201,15 +201,16 @@ class _TrendingPageState extends State<TrendingPage> {
                     ClipRRect(
                       borderRadius: BorderRadius.circular(45),
                       child: Container(
-                        width: 25,
-                        height: 25,
-                        color: white,
-                        child: Image.network(
-                          trendingpoint['profilePic'],
-                          fit: BoxFit.fill,
-                          width: 30,
-                          height: 30,
-                        ),
+                          width: 25,
+                          height: 25,
+                          color: white,
+                          child: Image.network(
+                            trendingpoint['profilePic'] ?? 'fallback_image_url',
+                            fit: BoxFit.fill,
+                            width: 30,
+                            height: 30,
+                          )
+
                       ),
                     ),
 

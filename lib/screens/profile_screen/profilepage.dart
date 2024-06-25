@@ -8,6 +8,7 @@ import 'package:rubidya/screens/profile_screen/widget/followers_list.dart';
 import 'package:rubidya/screens/profile_screen/widget/following_list.dart';
 import 'package:rubidya/screens/profile_screen/widget/rubidium_widget/my_wallet.dart';
 import 'package:rubidya/screens/profile_screen/widget/rubidium_widget/verification_page.dart';
+import 'package:rubidya/screens/profile_screen/widget/saved.dart';
 import '../../commonpage/contactpage.dart';
 import '../../resources/color.dart';
 import '../home_screen/widgets/referral_page.dart';
@@ -348,6 +349,36 @@ class _ProfileViewState extends State<ProfileView> {
                                 ),
                                 SizedBox(
                                   height: 25,
+                                ),
+
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 40),
+                                  child: Align(
+                                    alignment: Alignment.topLeft,
+                                    child: InkWell(
+                                      onTap: (){
+                                        Navigator.of(context).push(MaterialPageRoute(builder: (context) => Saved_items()));
+                                      },
+                                      child: Row(
+                                        children: [
+                                          SvgPicture.asset(
+                                            "assets/svg/save.svg",
+                                            height: 14,
+                                          ),
+                                          SizedBox(
+                                            width: 10,
+                                          ),
+                                          Text(
+                                            'Saved',
+                                            style: TextStyle(
+                                                fontSize: 14.0,
+                                                color: bluetext,
+                                                fontWeight: FontWeight.w200),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
                                 ),
                                 //
                                 //

@@ -14,6 +14,21 @@ import 'dart:ui' as ui;
 import 'package:flutter/rendering.dart';
 import 'package:easy_debounce/easy_debounce.dart';
 
+class UploadProgressDialog extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      content: Row(
+        children: [
+          CircularProgressIndicator(),
+          SizedBox(width: 20),
+          Text("Uploading..."),
+        ],
+      ),
+    );
+  }
+}
+
 class uploadedetails extends StatefulWidget {
   final Widget? imageUrl;
   final String? videoUrl;
@@ -38,6 +53,16 @@ class _uploadedetailsState extends State<uploadedetails> {
   final GlobalKey imageKey = GlobalKey();
   VideoPlayerController? _videoPlayerController;
 
+  void _showProgressDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return UploadProgressDialog();
+      },
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -47,10 +72,8 @@ class _uploadedetailsState extends State<uploadedetails> {
       _videoPlayerController =
       VideoPlayerController.file(File(widget.videoUrl!))
         ..initialize().then((_) {
-          setState(() {
-          });
+          setState(() {});
         });
-
     }
   }
 
@@ -176,12 +199,9 @@ class _uploadedetailsState extends State<uploadedetails> {
       );
     } else if (widget.videoUrl != null &&
         _videoPlayerController?.value.isInitialized == true) {
-      return GestureDetector(
-        onTap: (){_videoPlayerController?.play();},
-        child: AspectRatio(
-          aspectRatio: _videoPlayerController!.value.aspectRatio,
-          child: VideoPlayer(_videoPlayerController!),
-        ),
+      return AspectRatio(
+        aspectRatio: _videoPlayerController!.value.aspectRatio,
+        child: VideoPlayer(_videoPlayerController!),
       );
     } else {
       return Container();
@@ -331,7 +351,10 @@ class _uploadedetailsState extends State<uploadedetails> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10),
               child: InkWell(
-                onTap: isLoading ? null : _handleTap,
+                onTap: isLoading ? null : () {
+                  _showProgressDialog();
+                  _handleTap();
+                },
                 child: Container(
                   height: 36,
                   width: 400,

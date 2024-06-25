@@ -482,7 +482,7 @@ class _profileinnerpageState extends State<profileinnerpage>
                       ),
                     ),
                   ),
-                  vediotab()
+                  vediotab(innerUser: widget.id,)
                 ],
               ),
             ),

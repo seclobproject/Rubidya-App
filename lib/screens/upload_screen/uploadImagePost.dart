@@ -64,49 +64,7 @@ class _UploadScreenState extends State<UploadScreen> {
     // XABI_MATRIX
   ];
 
-  // Future<void> uploadImage() async {
-  //   setState(() {
-  //     uploading = true; // Set uploading flag to true when upload starts
-  //   });
-  //
-  //   SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   userid = (prefs.getString('userid') ?? "");
-  //   try {
-  //     // Your existing upload logic...
-  //     if (imageUrl == null) {
-  //       print("Please pick an image first");
-  //       return;
-  //     }
-  //
-  //     // Upload the filtered image instead of the original one
-  //     File filteredImageFile = File(filteredImageUrl()); // Get filtered image file path
-  //
-  //     FormData formData = FormData.fromMap({
-  //       'media': await MultipartFile.fromFile(filteredImageFile.path), // Use filtered image path
-  //       'description': description,
-  //     });
-  //     var response = await UploadService.uploadimage(formData);
-  //
-  //     // Assuming response is a map
-  //     if (response['sts'] == "01") {
-  //       print("Image uploaded successfully");
-  //       print(response['msg']);
-  //
-  //       // Pass the selected image data to the uploadedetails screen
-  //
-  //
-  //     } else {
-  //       print(response['sts']);
-  //       print(response['msg']);
-  //     }
-  //   } catch (e) {
-  //     print("Exception during image upload: $e");
-  //   } finally {
-  //     setState(() {
-  //       uploading = false; // Set uploading flag to false when upload completes or encounters an error
-  //     });
-  //   }
-  // }
+
 
   late File image;
 
@@ -301,50 +259,7 @@ class _UploadScreenState extends State<UploadScreen> {
               ),
             ),
           SizedBox(height: 20),
-          // if (imageUrl != null)
-          //   Padding(
-          //     padding: const EdgeInsets.symmetric(horizontal: 20),
-          //     child: GestureDetector(
-          //       onTap: () {
-          //         setState(() {
-          //           showIndicator = !showIndicator;
-          //           // uploadImage(); // Call uploadImage function
-          //
-          //           Navigator.push(
-          //             context,
-          //             MaterialPageRoute(
-          //               builder: (context) => uploadedetails(imageUrl: filteredImage()),
-          //             ),
-          //           );
-          //
-          //         });
-          //       },
-          //       child: Stack(
-          //         children: [
-          //           Container(
-          //             height: 40,
-          //             width: 400,
-          //             decoration: BoxDecoration(
-          //               color: Colors.blue,
-          //               borderRadius: BorderRadius.all(Radius.circular(10)),
-          //             ),
-          //             child: Center(
-          //               child: Text(
-          //                 "Upload",
-          //                 style: TextStyle(fontSize: 12, color: Colors.white),
-          //               ),
-          //             ),
-          //           ),
-          //           if (showIndicator)
-          //             Positioned.fill(
-          //               child: Center(
-          //                 child: CircularProgressIndicator(),
-          //               ),
-          //             ),
-          //         ],
-          //       ),
-          //     ),
-          //   ),
+
         ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,

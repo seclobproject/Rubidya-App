@@ -42,7 +42,7 @@ class _TrimmerViewState extends State<TrimmerView> {
 
     _trimmer.saveTrimmedVideo(
       startValue: _startValue,
-      endValue: _endValue*1000,
+      endValue: _endValue*2000000,
       onSave: (String? videoUrl) {
         setState(() {
           _progressVisibility = false;

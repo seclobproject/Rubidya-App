@@ -56,6 +56,17 @@ class ProfileService {
     }
   }
 
+  static Future<Map<String, dynamic>> getSaved({int page = 1, int limit = 12}) async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.get('$baseURL/api/posts/get-saved-posts?page=$page&limit=$limit');
+      return response.data;
+    } catch (e) {
+      // Handle error appropriately, e.g., log the error or throw it further
+      throw e;
+    }
+  }
+
   static Future<Map<String, dynamic>> getProfileVideo({int page = 1, int limit = 12}) async {
     try {
       var dio = await DioHelper.getInstance();

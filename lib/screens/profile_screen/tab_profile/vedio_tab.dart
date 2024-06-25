@@ -17,7 +17,9 @@ import 'fullScreenimagepage.dart';
 
 
 class vediotab extends StatefulWidget {
-  const vediotab({super.key});
+  String? innerUser;
+
+  vediotab({super.key,this.innerUser});
 
   @override
   State<vediotab> createState() => _vediotabState();
@@ -56,7 +58,7 @@ class _vediotabState extends State<vediotab> {
     }
   }
 
-  static Future<Map<String, dynamic>> getUserVideos(
+  static Future<Map<String, dynamic>> getMyVideos(
       {int page = 1, int limit = 12}) async {
     try {
       var dio = await DioHelper.getInstance();
@@ -69,10 +71,34 @@ class _vediotabState extends State<vediotab> {
     }
   }
 
+  static Future<Map<String, dynamic>> getUserVideos(String user,
+      {int page = 1, int limit = 12}) async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.get(
+          'https://rubidya.com/api/users/get-video-details/$user?page=$page&limit=$limit');
+      return response.data;
+    } catch (e) {
+      // Handle error appropriately, e.g., log the error or throw it further
+      throw e;
+    }
+  }
+
   Future<void> _ProfileImage({int page = 1}) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     userId = prefs.getString('userId');
-    var response = await getUserVideos(page: page);
+    var response;
+    if(widget.innerUser != null)
+    {
+      response = await getUserVideos(widget.innerUser!);
+    }
+    else
+    {
+      response = await getMyVideos(page: page);
+    }
+
+    print(widget.innerUser);
+
     log.i('Profile Image Loading........: $response');
     setState(() {
       if (profileList == null) {

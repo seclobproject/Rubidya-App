@@ -51,8 +51,8 @@ android {
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
         minSdkVersion 24
         targetSdkVersion 33
-        versionCode 54
-        versionName '3.2.8'
+        versionCode 56
+        versionName '3.3.1 '
     }
 
     buildTypes {

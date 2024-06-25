@@ -172,6 +172,16 @@ class HomeService {
     }
   }
 
+  static Future save(data) async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.post('$baseURL/api/posts/save-unsave-post',data: data);
+      return response.data;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   static Future postlikecomment(data) async {
     try {
       var dio = await DioHelper.getInstance();

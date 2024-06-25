@@ -318,7 +318,22 @@ class _TopSixGridviewmonth extends State<TopSixGridviewmonth> {
                         child: CircleAvatar(
                           radius: 30,
                           backgroundColor: bluetext,
-                          backgroundImage: NetworkImage(trendingthismonthtopsix['response'][index]['profilePic']),
+                          backgroundImage:
+                          trendingthismonthtopsix['response'][index]
+                          ['profilePic'] !=
+                              null
+                              ? NetworkImage(
+                              trendingthismonthtopsix['response']
+                              [index]['profilePic'])
+                              : null,
+                          child: trendingthismonthtopsix['response'][index]
+                          ['profilePic'] ==
+                              null
+                              ? Icon(Icons.person,
+                              size: 30,
+                              color: Colors
+                                  .white) // Optionally add an icon or placeholder
+                              : null,
                         ),
                       ),
                       Positioned(
