@@ -66,6 +66,7 @@ dev_dependencies:
   path: ^1.8.0
   sqflite: ^2.0.0
   visibility_detector: ^0.4.0+2
+  story: ^1.1.0
 
 
 

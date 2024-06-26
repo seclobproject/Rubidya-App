@@ -648,17 +648,7 @@ class _ProductCardState extends State<ProductCard> {
                     )
                         : Center(child: CupertinoActivityIndicator()),
                   ),
-                  // if (!_videoController.value.isPlaying)
-                  //   IconButton(
-                  //     iconSize: 70,
-                  //     icon: Icon(Icons.play_circle_fill_outlined),
-                  //     color: Colors.white,
-                  //     onPressed: () {
-                  //       setState(() {
-                  //         _videoController.play();
-                  //       });
-                  //     },
-                  //   ),
+
                 ],
               ),
             ),
@@ -709,7 +699,7 @@ class _ProductCardState extends State<ProductCard> {
                       height: 50,
                       width: 50,
                       child: IconButton(
-                        onPressed: widget.onSavePressed,
+                        onPressed: widget.filetype == "image/jpeg" ? widget.onSavePressed : null,
                         icon: widget.saveCount ? Icon(Icons.bookmark)
                             : Icon(Icons.bookmark_border_outlined),
                       ),
@@ -733,7 +723,7 @@ class _ProductCardState extends State<ProductCard> {
                     RichText(
                       text: TextSpan(
                         style: TextStyle(
-                          color: Colors.blue,
+                          color: bluetext,
                           fontSize: 12,
                         ),
                         children: [
@@ -741,14 +731,14 @@ class _ProductCardState extends State<ProductCard> {
                           TextSpan(
                             text: widget.likedby,
                             style: TextStyle(
-                              color: Colors.blue,
+                              color: bluetext,
                               fontWeight: FontWeight.w800,
                             ),
                           ),
                           TextSpan(
                             text: " and",
                             style: TextStyle(
-                              color: Colors.blue,
+                              color: bluetext,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -759,7 +749,7 @@ class _ProductCardState extends State<ProductCard> {
                     Text(
                       "${widget.likes} Others",
                       style: TextStyle(
-                          color: Colors.blue,
+                          color: bluetext,
                           fontSize: 13,
                           fontWeight: FontWeight.w700),
                     ),
@@ -786,7 +776,7 @@ class _ProductCardState extends State<ProductCard> {
                       RichText(
                         text: TextSpan(
                           style: TextStyle(
-                            color: Colors.blue,
+                            color: bluetext,
                             fontSize: 12,
                           ),
                           children: [
@@ -798,7 +788,7 @@ class _ProductCardState extends State<ProductCard> {
                       Text(
                         "${widget.commentcount} Comments",
                         style: TextStyle(
-                          color: Colors.blue,
+                          color: bluetext,
                           fontSize: 13,
                         ),
                       ),

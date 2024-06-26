@@ -38,6 +38,7 @@ class _profileinnerpageState extends State<profileinnerpage>
   bool _isMoreLoading = false;
   String? imageUrl;
   bool isFollowing = false;
+  bool isBlocked = false;
   final fallbackImageUrl = 'https://pbs.twimg.com/media/CidJXBuUUAEgAYu.jpg';
   int _pageNumber = 1;
   ScrollController _scrollController = ScrollController();
@@ -67,9 +68,11 @@ class _profileinnerpageState extends State<profileinnerpage>
 
     if (response != null && response['media'] != null) {
       bool initialFollowStatus = response['media'][0]['isFollowing'];
+      bool initialBlockStatus = response['media'][0]['isBlocked'] ?? false; // Add null check here
 
       setState(() {
         isFollowing = initialFollowStatus;
+        isBlocked = initialBlockStatus; // Add this line
         profileinnerpageshow = response;
       });
     }
@@ -120,6 +123,24 @@ class _profileinnerpageState extends State<profileinnerpage>
     });
   }
 
+  Future<void> blockUser() async {
+    var reqData = {'user': widget.id};
+    var response = await ProfileService.blockuser(reqData);
+    log.i('User blocked: $response');
+    setState(() {
+      isBlocked = true;
+    });
+  }
+
+  Future<void> unblockUser() async {
+    var reqData = {'user': widget.id};
+    var response = await ProfileService.unblockuser(reqData);
+    log.i('User unblocked: $response');
+    setState(() {
+      isBlocked = false;
+    });
+  }
+
   @override
   void dispose() {
     _tabController.dispose();
@@ -147,18 +168,110 @@ class _profileinnerpageState extends State<profileinnerpage>
                   builder: (BuildContext context) {
                     return Container(
                       decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.only(
-                            topRight: Radius.circular(40),
-                            topLeft: Radius.circular(40),
-                          )),
+                        color: Colors.white,
+                        borderRadius: BorderRadius.only(
+                          topRight: Radius.circular(40),
+                          topLeft: Radius.circular(40),
+                        ),
+                      ),
                       height: 400.0,
+                      width: 400.0,
                       child: Column(
-                        children: [],
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          SizedBox(height: 20,),
+                          CircleAvatar(
+                            radius: 50.0,
+                            backgroundImage: NetworkImage(profileinnerpageshow['media'][0]['profilePic']), // Replace with the actual URL of the profile photo
+                          ),
+                          SizedBox(height: 20.0),
+                          Text(
+                            (profileinnerpageshow?['media']?[0]['firstName'] ?? 'loading...'),
+                            style: TextStyle(
+                              color: bluetext,
+                              fontSize: 15.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(10.0),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.block, // This is the block icon
+                                  size: 30.0,
+                                  color: bluetext, // Adjust the size as needed
+                                ),
+                                SizedBox(width: 4.0), // Optional: add some space between the icon and the text
+                                Expanded(
+                                  child: Text(
+                                    " They won't be able to message you through\n Rubidya, access your profile, or find any of your content",
+                                    style: TextStyle(
+                                      color: bluetext,
+                                      fontSize: 14.0,
+                                      fontWeight: FontWeight.normal,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(10.0),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.notifications_off_outlined, // This is the block icon
+                                  size: 30.0,
+                                  color: bluetext, // Adjust the size as needed
+                                ),
+                                SizedBox(width: 4.0), // Optional: add some space between the icon and the text
+                                Expanded(
+                                  child: Text(
+                                    " They won't be informed that you have blocked them",
+                                    style: TextStyle(
+                                      color: bluetext,
+                                      fontSize: 14.0,
+                                      fontWeight: FontWeight.normal,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(height: 20.0),
+                          GestureDetector(
+                            onTap: () async {
+                              if (isBlocked) {
+                                await unblockUser();
+                              } else {
+                                await blockUser();
+                              }
+                              Navigator.pop(context); // Close the modal
+                            },
+                            child: Container(
+                              height: 40,
+                              width: 350,
+                              decoration: BoxDecoration(
+                                color: bluetext,
+                                borderRadius: BorderRadius.all(Radius.circular(10)),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  isBlocked ? "Unblock" : "Block",
+                                  style: TextStyle(fontSize: 10, color: white),
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 10.0),
+                          Text("Report User"),
+                        ],
                       ),
                     );
                   },
                 );
+
               },
               child: Icon(Icons.more_horiz),
             ),
@@ -169,7 +282,7 @@ class _profileinnerpageState extends State<profileinnerpage>
       backgroundColor: white,
       body: _isLoading
           ? Center(
-        child: CupertinoActivityIndicator(),
+        child: CircularProgressIndicator(),
       )
           : SingleChildScrollView(
         controller: _scrollController,
@@ -190,12 +303,15 @@ class _profileinnerpageState extends State<profileinnerpage>
                           child: profileinnerpageshow != null &&
                               profileinnerpageshow['media'] != null &&
                               profileinnerpageshow['media'].isNotEmpty &&
-                              profileinnerpageshow['media'][0]['profilePic'] != null
+                              profileinnerpageshow['media'][0]
+                              ['profilePic'] !=
+                                  null
                               ? SizedBox(
                             width: 90,
                             height: 90,
                             child: Image.network(
-                              profileinnerpageshow['media'][0]['profilePic'],
+                              profileinnerpageshow['media'][0]
+                              ['profilePic'],
                               fit: BoxFit.contain,
                             ),
                           )
@@ -205,12 +321,14 @@ class _profileinnerpageState extends State<profileinnerpage>
                               width: 90,
                               decoration: BoxDecoration(
                                 color: grad2,
-                                borderRadius: BorderRadius.circular(100),
+                                borderRadius:
+                                BorderRadius.circular(100),
                               ),
                               child: Center(
                                 child: Text(
                                   "No Img",
-                                  style: TextStyle(color: greybg),
+                                  style:
+                                  TextStyle(color: greybg),
                                 ),
                               ),
                             ),
@@ -223,7 +341,9 @@ class _profileinnerpageState extends State<profileinnerpage>
                 Container(
                   width: 250.0,
                   height: 64.0,
-                  decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(10))),
+                  decoration: BoxDecoration(
+                      borderRadius:
+                      BorderRadius.all(Radius.circular(10))),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
@@ -231,14 +351,18 @@ class _profileinnerpageState extends State<profileinnerpage>
                         children: [
                           SizedBox(height: 10),
                           Text(
-                            (profileinnerpageshow?['media']?[0]['post'].toString() ?? 'loading...'),
+                            (profileinnerpageshow?['media']?[0]['post']
+                                .toString() ??
+                                'loading...'),
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w500,
                               color: bluetext,
                             ),
                           ),
-                          Text("Post", style: TextStyle(fontSize: 10, color: bluetext))
+                          Text("Post",
+                              style:
+                              TextStyle(fontSize: 10, color: bluetext))
                         ],
                       ),
                       InkWell(
@@ -256,9 +380,17 @@ class _profileinnerpageState extends State<profileinnerpage>
                           children: [
                             SizedBox(height: 10),
                             Text(
-                                (profileinnerpageshow?['media']?[0]['followers'].toString() ?? 'loading...'),
-                                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500, color: bluetext)),
-                            Text("Followers", style: TextStyle(fontSize: 10, color: bluetext))
+                                (profileinnerpageshow?['media']?[0]
+                                ['followers']
+                                    .toString() ??
+                                    'loading...'),
+                                style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w500,
+                                    color: bluetext)),
+                            Text("Followers",
+                                style:
+                                TextStyle(fontSize: 10, color: bluetext))
                           ],
                         ),
                       ),
@@ -277,11 +409,18 @@ class _profileinnerpageState extends State<profileinnerpage>
                           children: [
                             SizedBox(height: 10),
                             Text(
-                                (profileinnerpageshow?['media']?[0]['following'].toString() ?? 'loading...'),
-                                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500, color: bluetext)),
+                                (profileinnerpageshow?['media']?[0]
+                                ['following']
+                                    .toString() ??
+                                    'loading...'),
+                                style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w500,
+                                    color: bluetext)),
                             Text(
                               "Following",
-                              style: TextStyle(fontSize: 10, color: bluetext),
+                              style:
+                              TextStyle(fontSize: 10, color: bluetext),
                             )
                           ],
                         ),
@@ -299,8 +438,12 @@ class _profileinnerpageState extends State<profileinnerpage>
                   child: Align(
                     alignment: Alignment.topLeft,
                     child: Text(
-                      (profileinnerpageshow?['media']?[0]['firstName'] ?? 'loading...'),
-                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: bluetext),
+                      (profileinnerpageshow?['media']?[0]['firstName'] ??
+                          'loading...'),
+                      style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: bluetext),
                     ),
                   ),
                 ),
@@ -308,8 +451,12 @@ class _profileinnerpageState extends State<profileinnerpage>
                 Align(
                   alignment: Alignment.topLeft,
                   child: Text(
-                    (profileinnerpageshow?['media']?[0]['lastName'] ?? 'loading...'),
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: bluetext),
+                    (profileinnerpageshow?['media']?[0]['lastName'] ??
+                        'loading...'),
+                    style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: bluetext),
                   ),
                 ),
               ],
@@ -319,8 +466,12 @@ class _profileinnerpageState extends State<profileinnerpage>
               child: Align(
                 alignment: Alignment.topLeft,
                 child: Text(
-                  (profileinnerpageshow?['media']?[0]['bio'] ?? 'loading...'),
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: bluetext),
+                  (profileinnerpageshow?['media']?[0]['bio'] ??
+                      'loading...'),
+                  style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: bluetext),
                   overflow: TextOverflow.ellipsis,
                   maxLines: 2,
                 ),
@@ -339,7 +490,8 @@ class _profileinnerpageState extends State<profileinnerpage>
                       width: 180,
                       decoration: BoxDecoration(
                           color: bluetext,
-                          borderRadius: BorderRadius.all(Radius.circular(10))),
+                          borderRadius:
+                          BorderRadius.all(Radius.circular(10))),
                       child: Center(
                           child: Text(
                             isFollowing ? "Unfollow" : "Follow",
@@ -353,7 +505,8 @@ class _profileinnerpageState extends State<profileinnerpage>
                     width: 150,
                     decoration: BoxDecoration(
                         color: conainer220,
-                        borderRadius: BorderRadius.all(Radius.circular(10))),
+                        borderRadius:
+                        BorderRadius.all(Radius.circular(10))),
                     child: Center(
                         child: Text(
                           "Message",
@@ -367,13 +520,15 @@ class _profileinnerpageState extends State<profileinnerpage>
             SizedBox(height: 20),
             Container(
               height: 30,
-              decoration: BoxDecoration(color: white, boxShadow: [
-                BoxShadow(
-                  color: white1,
-                  blurRadius: 1.0,
-                  offset: Offset(1, 0),
-                ),
-              ]),
+              decoration: BoxDecoration(
+                  color: white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: white1,
+                      blurRadius: 1.0,
+                      offset: Offset(1, 0),
+                    ),
+                  ]),
               child: TabBar(
                 controller: _tabController,
                 labelColor: bluetext,
@@ -391,49 +546,67 @@ class _profileinnerpageState extends State<profileinnerpage>
                 controller: _tabController,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                    child: profileinnerpageshow != null && profileinnerpageshow['media'] != null
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 10, vertical: 10),
+                    child: profileinnerpageshow != null &&
+                        profileinnerpageshow['media'] != null
                         ? GridView.builder(
                       controller: _scrollController,
-                      // physics: NeverScrollableScrollPhysics(),
-
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-
+                      gridDelegate:
+                      SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 3,
                         crossAxisSpacing: 8.0,
                         mainAxisSpacing: 8.0,
                       ),
-                      itemCount: profileinnerpageshow['media'].length + 1,
-                      itemBuilder: (BuildContext context, int index) {
-                        if (index == profileinnerpageshow['media'].length) {
+                      itemCount:
+                      profileinnerpageshow['media'].length + 1,
+                      itemBuilder:
+                          (BuildContext context, int index) {
+                        if (index ==
+                            profileinnerpageshow['media'].length) {
                           return _isMoreLoading
-                              ? Center(child: CircularProgressIndicator())
+                              ? Center(
+                              child:
+                              CircularProgressIndicator())
                               : SizedBox.shrink();
                         }
                         return GestureDetector(
                           onTap: () {
-                            List<dynamic> imageUrls = profileinnerpageshow['media']
-                                .map((item) => item['filePath'])
+                            List<dynamic> imageUrls =
+                            profileinnerpageshow['media']
+                                .map((item) =>
+                            item['filePath'])
                                 .toList();
                             int selectedIndex = index;
-                            _showFullScreenImage(context, imageUrls, selectedIndex,
-                                profileinnerpageshow, index);
+                            _showFullScreenImage(
+                                context,
+                                imageUrls,
+                                selectedIndex,
+                                profileinnerpageshow,
+                                index);
                           },
                           child: Stack(
                             children: [
                               ClipRRect(
-                                borderRadius: BorderRadius.circular(10),
+                                borderRadius:
+                                BorderRadius.circular(10),
                                 child: Container(
                                   width: 112,
                                   height: 300,
-                                  child: profileinnerpageshow['media'] != null &&
-                                      profileinnerpageshow['media'][index] != null &&
-                                      profileinnerpageshow['media'][index]['filePath'] != null
+                                  child: profileinnerpageshow['media']
+                                  [index] !=
+                                      null &&
+                                      profileinnerpageshow['media']
+                                      [index]
+                                      ['filePath'] !=
+                                          null
                                       ? Image.network(
-                                    profileinnerpageshow['media'][index]['filePath'],
+                                    profileinnerpageshow['media']
+                                    [index]['filePath'],
                                     fit: BoxFit.fill,
                                   )
-                                      : Image.network(fallbackImageUrl),
+                                      : Image.network(
+                                      fallbackImageUrl),
                                 ),
                               ),
                               Positioned(
@@ -446,8 +619,12 @@ class _profileinnerpageState extends State<profileinnerpage>
                                       height: 18,
                                     ),
                                     Text(
-                                      profileinnerpageshow['media'][index]['likeCount'].toString(),
-                                      style: TextStyle(fontSize: 10, color: Colors.white),
+                                      profileinnerpageshow['media']
+                                      [index]['likeCount']
+                                          .toString(),
+                                      style: TextStyle(
+                                          fontSize: 10,
+                                          color: Colors.white),
                                     ),
                                   ],
                                 ),
@@ -462,8 +639,13 @@ class _profileinnerpageState extends State<profileinnerpage>
                                       height: 18,
                                     ),
                                     Text(
-                                      profileinnerpageshow['media'][index]['commentCount'].toString(),
-                                      style: TextStyle(fontSize: 10, color: Colors.white),
+                                      profileinnerpageshow['media']
+                                      [index]
+                                      ['commentCount']
+                                          .toString(),
+                                      style: TextStyle(
+                                          fontSize: 10,
+                                          color: Colors.white),
                                     ),
                                   ],
                                 ),
@@ -478,11 +660,12 @@ class _profileinnerpageState extends State<profileinnerpage>
                           ? CircularProgressIndicator()
                           : Text(
                         "No images available",
-                        style: TextStyle(color: Colors.black),
+                        style:
+                        TextStyle(color: Colors.black),
                       ),
                     ),
                   ),
-                  vediotab(innerUser: widget.id,)
+                  vediotab(),
                 ],
               ),
             ),
@@ -492,6 +675,30 @@ class _profileinnerpageState extends State<profileinnerpage>
     );
   }
 }
+
+class ReportUserScreen extends StatelessWidget {
+  final String userId;
+
+  const ReportUserScreen({Key? key, required this.userId}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Report User"),
+      ),
+      body: Center(
+        child: Text("Implement your report user UI here"),
+      ),
+    );
+  }
+}
+
+
+
+
+
+
 
 
 

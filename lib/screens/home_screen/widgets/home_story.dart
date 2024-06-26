@@ -2,12 +2,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:rubidya/resources/color.dart';
 import 'package:rubidya/services/home_service.dart';
-import 'package:story_view/story_view.dart';
+import 'package:story/story.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:dio/dio.dart';
 import 'package:video_trimmer/video_trimmer.dart';
 import '../../../navigation/bottom_navigation.dart';
 import '../../../services/upload_image.dart';
+import 'package:video_player/video_player.dart';
 
 class HomeStory extends StatefulWidget {
   const HomeStory({Key? key}) : super(key: key);
@@ -106,7 +107,8 @@ class _HomeStoryState extends State<HomeStory> {
           );
 
           Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (context) => Bottomnav(initialPageIndex: 0)),
+            MaterialPageRoute(
+                builder: (context) => Bottomnav(initialPageIndex: 0)),
                 (route) => false,
           );
           print(response['msg']);
@@ -218,13 +220,14 @@ class _HomeStoryState extends State<HomeStory> {
           List<dynamic> userStories = entry.value;
           String username = userStories.first['username'];
           String profilePicUrl;
-          if (userStories.first.containsKey('profilePic') && userStories.first['profilePic'] != null) {
+          if (userStories.first.containsKey('profilePic') &&
+              userStories.first['profilePic'] != null) {
             profilePicUrl = userStories.first['profilePic']['filePath'];
           } else {
             // Display a Material Icon when profilePic is null
-            profilePicUrl = "https://play-lh.googleusercontent.com/4HZhLFCcIjgfbXoVj3mgZdQoKO2A_z-uX2gheF5yNCkb71wzGqwobr9muj8I05Nc8u8=w240-h480-rw"; // Replace 'person' with the Material Icon you want to use
+            profilePicUrl =
+            "https://play-lh.googleusercontent.com/4HZhLFCcIjgfbXoVj3mgZdQoKO2A_z-uX2gheF5yNCkb71wzGqwobr9muj8I05Nc8u8=w240-h480-rw"; // Replace 'person' with the Material Icon you want to use
           }
-
 
           String truncatedUsername = username.length > 10
               ? username.substring(0, 10) + '...'
@@ -342,30 +345,30 @@ class UserStoriesScreen extends StatefulWidget {
   final List<dynamic> userStories;
   final List<dynamic> allUserStories;
 
-  const UserStoriesScreen({Key? key, required this.userStories, required this.allUserStories})
-      :
-        super(key: key);
+  const UserStoriesScreen(
+      {Key? key, required this.userStories, required this.allUserStories})
+      : super(key: key);
 
   @override
   _UserStoriesScreenState createState() => _UserStoriesScreenState();
 }
 
 class _UserStoriesScreenState extends State<UserStoriesScreen> {
-  late StoryController _storyController;
   late List<dynamic> _currentUserStories;
-  late List<List<dynamic>> _allUserStoriesGrouped;
+  late List<Map<String, dynamic>> _allUserStoriesGrouped;
   int _currentUserIndex = 0;
 
   @override
   void initState() {
     super.initState();
-    _storyController = StoryController();
     _currentUserStories = widget.userStories;
     _allUserStoriesGrouped = _groupStoriesByUser(widget.allUserStories);
-    _currentUserIndex = _allUserStoriesGrouped.indexWhere((stories) => stories == _currentUserStories);
+    _currentUserIndex = _allUserStoriesGrouped.indexWhere(
+          (group) => group['userId'] == _currentUserStories.first['userId'],
+    );
   }
 
-  List<List<dynamic>> _groupStoriesByUser(List<dynamic> stories) {
+  List<Map<String, dynamic>> _groupStoriesByUser(List<dynamic> stories) {
     Map<String, List<dynamic>> storiesByUser = {};
     stories.forEach((story) {
       String userId = story['userId'];
@@ -374,69 +377,126 @@ class _UserStoriesScreenState extends State<UserStoriesScreen> {
       }
       storiesByUser[userId]!.add(story);
     });
-    return storiesByUser.values.toList();
+    return storiesByUser.entries
+        .map((entry) => {'userId': entry.key, 'stories': entry.value})
+        .toList();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        backgroundColor: Colors.black,
-        title: Row(
-          children: [
-            ClipOval(
-              child: _currentUserStories.first.containsKey('profilePic') && _currentUserStories.first['profilePic'] != null
-                  ? Image.network(
-                _currentUserStories.first['profilePic']['filePath'],
-                height: 40,
-                width: 40,
-                fit: BoxFit.cover,
-              )
-                  : Icon(
-                Icons.person, // Use whatever Material Icon you prefer
-                size: 40,
+      body: SafeArea(
+        child: StoryPageView(
+          indicatorDuration: Duration(seconds: 10),
+          initialPage: _currentUserIndex,
+          itemBuilder: (context, pageIndex, storyIndex) {
+            final story =
+            _allUserStoriesGrouped[pageIndex]['stories'][storyIndex];
+            return Stack(
+              children: [
+                Positioned.fill(
+                  child: Container(color: Colors.black),
+                ),
+                Positioned.fill(
+                  child: VideoPlayerWidget(videoUrl: story['filePath']),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 44, left: 8),
+                  child: Row(
+                    children: [
+                      Container(
+                        height: 32,
+                        width: 32,
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                            image:
+                            NetworkImage(story['profilePic']['filePath']),
+                            fit: BoxFit.cover,
+                          ),
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(
+                        width: 8,
+                      ),
+                      Text(
+                        story['username'],
+                        style: TextStyle(
+                          fontSize: 17,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          },
+          gestureItemBuilder: (context, pageIndex, storyIndex) {
+            return Align(
+              alignment: Alignment.topRight,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 32),
+                child: IconButton(
+                  padding: EdgeInsets.zero,
+                  color: Colors.white,
+                  icon: Icon(Icons.close),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                ),
               ),
-            ),
-
-            SizedBox(width: 8),
-            Text(
-              _currentUserStories.first['username'],
-              style: TextStyle(color: Colors.white, fontSize: 16),
-            ),
-          ],
+            );
+          },
+          pageLength: _allUserStoriesGrouped.length,
+          storyLength: (int pageIndex) {
+            return _allUserStoriesGrouped[pageIndex]['stories'].length;
+          },
+          onPageLimitReached: () {
+            Navigator.pop(context);
+          },
         ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.close, color: Colors.white),
-            onPressed: () => Navigator.pop(context),
-          ),
-        ],
-      ),
-      body: StoryView(
-        storyItems: _currentUserStories.map<StoryItem>((story) {
-          String videoUrl = story['filePath'];
-          String username = story['username'];
-          String truncatedUsername = username.length > 10 ? username.substring(0, 10) : username;
-          return StoryItem.pageVideo(
-            videoUrl,
-            caption: Text(truncatedUsername),
-            controller: _storyController,
-            duration: Duration(seconds: 30),
-            imageFit: BoxFit.cover,
-          );
-        }).toList(),
-        repeat: false,
-        controller: _storyController,
-        onComplete: _moveToNextUser,
       ),
     );
   }
+}
 
-  void _moveToNextUser() {
-    setState(() {
-      _currentUserIndex = (_currentUserIndex + 1) % _allUserStoriesGrouped.length;
-      _currentUserStories = _allUserStoriesGrouped[_currentUserIndex];
-    });
+class VideoPlayerWidget extends StatefulWidget {
+  final String videoUrl;
+
+  const VideoPlayerWidget({Key? key, required this.videoUrl}) : super(key: key);
+
+  @override
+  _VideoPlayerWidgetState createState() => _VideoPlayerWidgetState();
+}
+
+class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
+  late VideoPlayerController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = VideoPlayerController.network(widget.videoUrl)
+      ..initialize().then((_) {
+        setState(() {});
+        _controller.play();
+      });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _controller.value.isInitialized
+        ? AspectRatio(
+      aspectRatio: _controller.value.aspectRatio,
+      child: VideoPlayer(_controller),
+    )
+        : Center(child: CircularProgressIndicator());
   }
 }

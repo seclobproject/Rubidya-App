@@ -245,4 +245,30 @@ class ProfileService {
     }
   }
 
+  static Future blockuser(data) async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.put(
+        '$baseURL/api/users/block-user',
+        data: data,
+      );
+      return response;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  static Future unblockuser(data) async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.put(
+        '$baseURL/api/users/unblock-user',
+        data: data,
+      );
+      return response;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
 }
