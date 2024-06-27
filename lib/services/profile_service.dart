@@ -258,6 +258,20 @@ class ProfileService {
     }
   }
 
+
+  static Future reportuser(data) async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.post(
+        '$baseURL/api/users/report-user',
+        data: data,
+      );
+      return response;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   static Future unblockuser(data) async {
     try {
       var dio = await DioHelper.getInstance();
@@ -268,6 +282,16 @@ class ProfileService {
       return response;
     } catch (e) {
       rethrow;
+    }
+  }
+
+  static Future<Map<String, dynamic>> getBlockedUsers({int page = 1, int limit = 10}) async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.get('$baseURL/api/users/get-all-blockedusers?page=$page&limit=$limit');
+      return response.data;
+    } catch (e) {
+      throw e;
     }
   }
 

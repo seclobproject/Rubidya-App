@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:rubidya/authentication_page/terms_and_conditions.dart';
 import 'package:rubidya/screens/profile_screen/tab_profile/photo_tab.dart';
 import 'package:rubidya/screens/profile_screen/tab_profile/vedio_tab.dart';
+import 'package:rubidya/screens/profile_screen/widget/blokeduserlist.dart';
 import 'package:rubidya/screens/profile_screen/widget/edit_profile.dart';
 import 'package:rubidya/screens/profile_screen/widget/followers_list.dart';
 import 'package:rubidya/screens/profile_screen/widget/following_list.dart';
@@ -351,6 +352,7 @@ class _ProfileViewState extends State<ProfileView> {
                                   height: 25,
                                 ),
 
+
                                 Padding(
                                   padding: const EdgeInsets.symmetric(horizontal: 40),
                                   child: Align(
@@ -370,6 +372,44 @@ class _ProfileViewState extends State<ProfileView> {
                                           ),
                                           Text(
                                             'Saved',
+                                            style: TextStyle(
+                                                fontSize: 14.0,
+                                                color: bluetext,
+                                                fontWeight: FontWeight.w200),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+
+                                SizedBox(
+                                  height: 25,
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 40),
+                                  child: Align(
+                                    alignment: Alignment.topLeft,
+                                    child: InkWell(
+                                      onTap: () {
+                                        Navigator.of(context).push(
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    BlockedAccountsPage()));
+                                      },
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            Icons.block,
+                                            size: 18,
+                                            color: Color(0xff1E3167),
+                                          ),
+                                          SizedBox(
+                                            width: 10,
+                                          ),
+                                          Text(
+                                            'Blocked Users ',
                                             style: TextStyle(
                                                 fontSize: 14.0,
                                                 color: bluetext,

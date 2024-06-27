@@ -141,6 +141,109 @@ class _profileinnerpageState extends State<profileinnerpage>
     });
   }
 
+  Future<void> reportUser(String description, BuildContext context) async {
+    var reqData = {
+      'user': widget.id,
+      'description': description,
+    };
+    var response = await ProfileService.reportuser(reqData);
+    log.i('User Reported: $response');
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(response['msg'] ?? 'Something went wrong'),
+        backgroundColor: Colors.green,
+      ),
+    );
+  }
+
+  void _showReportSheet(BuildContext context) {
+    TextEditingController _reportController = TextEditingController();
+
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
+              topRight: Radius.circular(40),
+              topLeft: Radius.circular(40),
+            ),
+          ),
+          height: 400.0,
+          width: 400.0,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  "Report User",
+                  style: TextStyle(
+                    color: bluetext,
+                    fontSize: 20.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 20.0),
+                Text(
+                  "What Do You Want to Report",
+                  style: TextStyle(
+                    color: blueshade,
+                    fontSize: 18.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 20.0),
+                TextField(
+                  controller: _reportController,
+                  maxLines: 5,
+                  decoration: InputDecoration(
+                    hintText:
+                    "With the exception of reporting an infringement of intellectual property, your report is anonymous. Make a quick call to the local emergency services if someone is in danger.",
+                    hintStyle: TextStyle(fontSize: 12.0),
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                SizedBox(height: 20.0),
+                Container(
+                  width: double.infinity,
+                  height: 50.0,
+                  child: GestureDetector(
+                    onTap: () {
+                      String reportText = _reportController.text;
+                      reportUser(reportText, context); // Ensure context is correct
+                      Navigator.pop(context); // Close the bottom sheet
+                    },
+                    child: Container(
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: bluetext,
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      child: Text(
+                        'Report User',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+
+
+
   @override
   void dispose() {
     _tabController.dispose();
@@ -265,7 +368,20 @@ class _profileinnerpageState extends State<profileinnerpage>
                             ),
                           ),
                           SizedBox(height: 10.0),
-                          Text("Report User"),
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.pop(context); // Close the current bottom sheet
+                              _showReportSheet(context); // Show the new bottom sheet
+                            },
+                            child: Text(
+                              "Report User",
+                              style: TextStyle(
+                                color: Colors.red,
+                                fontSize: 14.0,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                     );
@@ -676,23 +792,7 @@ class _profileinnerpageState extends State<profileinnerpage>
   }
 }
 
-class ReportUserScreen extends StatelessWidget {
-  final String userId;
 
-  const ReportUserScreen({Key? key, required this.userId}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Report User"),
-      ),
-      body: Center(
-        child: Text("Implement your report user UI here"),
-      ),
-    );
-  }
-}
 
 
 
