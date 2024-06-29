@@ -1,14 +1,13 @@
-import 'package:flutter/cupertino.dart';
+import 'dart:io';
+import 'package:video_player/video_player.dart';
 import 'package:flutter/material.dart';
-import 'package:rubidya/resources/color.dart';
-import 'package:rubidya/services/home_service.dart';
-import 'package:story/story.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:dio/dio.dart';
-import 'package:video_trimmer/video_trimmer.dart';
+import 'package:story_view/story_view.dart';
 import '../../../navigation/bottom_navigation.dart';
+import '../../../resources/color.dart';
+import '../../../services/home_service.dart';
 import '../../../services/upload_image.dart';
-import 'package:video_player/video_player.dart';
 
 class HomeStory extends StatefulWidget {
   const HomeStory({Key? key}) : super(key: key);
@@ -18,7 +17,6 @@ class HomeStory extends StatefulWidget {
 }
 
 class _HomeStoryState extends State<HomeStory> {
-  Trimmer? _trimmer;
   List<dynamic> _stories = [];
   bool _isLoading = true;
   bool uploading = false;
@@ -40,7 +38,7 @@ class _HomeStoryState extends State<HomeStory> {
           _stories = stories.map((story) {
             return {
               ...story,
-              'seen': false, // Initialize 'seen' property
+              'seen': false,
             };
           }).toList();
           _isLoading = false;
@@ -59,44 +57,30 @@ class _HomeStoryState extends State<HomeStory> {
 
   Future<void> uploadVideo() async {
     if (uploading) return;
-
     setState(() {
       uploading = true;
       isLoading = true;
     });
-
     try {
-      // Get the video file from the gallery
       final picker = ImagePicker();
-      final pickedFile = await picker.pickVideo(source: ImageSource.gallery);
-
+      final pickedFile = await picker.getVideo(source: ImageSource.gallery);
       if (pickedFile != null) {
-        // Prepare the video file for upload
+        // Get the duration of the video
+        final videoPlayerController =
+        VideoPlayerController.file(File(pickedFile.path));
+        await videoPlayerController.initialize();
+        final videoDuration = videoPlayerController.value.duration.inSeconds;
+
         FormData formData = FormData.fromMap({
           'media': await MultipartFile.fromFile(
             pickedFile.path,
             filename: 'video.mp4',
           ),
           'description': description,
+          'duration': videoDuration, // Pass the duration to the backend
         });
 
-        // Show the snackbar with a progress bar
-        final snackBar = SnackBar(
-          content: Row(
-            children: [
-              CupertinoActivityIndicator(),
-              SizedBox(width: 20),
-              Text("Uploading Story...")
-            ],
-          ),
-          duration: Duration(hours: 1), // Make it last long enough
-        );
-
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
-
-        // Upload the video using your service
         var response = await UploadService.uploadstory(formData);
-
         if (response['sts'] == "01") {
           print("Video uploaded successfully");
           ScaffoldMessenger.of(context).showSnackBar(
@@ -105,7 +89,6 @@ class _HomeStoryState extends State<HomeStory> {
               backgroundColor: Colors.green,
             ),
           );
-
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(
                 builder: (context) => Bottomnav(initialPageIndex: 0)),
@@ -136,15 +119,12 @@ class _HomeStoryState extends State<HomeStory> {
         uploading = false;
         isLoading = false;
       });
-
-      // Dismiss the progress snackbar
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
+    if (uploading || _isLoading) {
       return Center(child: CircularProgressIndicator());
     }
 
@@ -158,32 +138,10 @@ class _HomeStoryState extends State<HomeStory> {
       storiesByUser[userId]!.add(story);
     });
 
-    // If there are no stories, display a user profile icon
-    if (storiesByUser.isEmpty) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          ClipOval(
-            child: Container(
-              color: Colors.grey,
-              height: 60,
-              width: 60,
-              child: Icon(
-                Icons.person,
-                size: 40,
-                color: Colors.white,
-              ),
-            ),
-          ),
-          SizedBox(height: 2),
-          Text(
-            "  No stories ",
-            style: TextStyle(fontSize: 10),
-          ),
-        ],
-      );
-    }
+    List<Map<String, List<dynamic>>> allStories =
+    storiesByUser.entries.map((entry) {
+      return {entry.key: entry.value};
+    }).toList();
 
     return ListView(
       scrollDirection: Axis.horizontal,
@@ -216,71 +174,102 @@ class _HomeStoryState extends State<HomeStory> {
             ),
           ),
         ),
-        ...storiesByUser.entries.map<Widget>((entry) {
-          List<dynamic> userStories = entry.value;
-          String username = userStories.first['username'];
-          String profilePicUrl;
-          if (userStories.first.containsKey('profilePic') &&
-              userStories.first['profilePic'] != null) {
-            profilePicUrl = userStories.first['profilePic']['filePath'];
-          } else {
-            // Display a Material Icon when profilePic is null
-            profilePicUrl =
-            "https://play-lh.googleusercontent.com/4HZhLFCcIjgfbXoVj3mgZdQoKO2A_z-uX2gheF5yNCkb71wzGqwobr9muj8I05Nc8u8=w240-h480-rw"; // Replace 'person' with the Material Icon you want to use
-          }
+        if (allStories.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+            child: Column(
+              children: [
+                ClipOval(
+                  child: Container(
+                    color: Colors.grey,
+                    height: 60,
+                    width: 60,
+                    child: Icon(
+                      Icons.person,
+                      size: 40,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                SizedBox(height: 8),
+                Text("No stories", style: TextStyle(fontSize: 12)),
+              ],
+            ),
+          )
+        else
+          ...allStories.asMap().entries.map<Widget>((entry) {
+            int index = entry.key;
+            List<dynamic> userStories = entry.value?.values?.first ?? [];
+            if (userStories.isEmpty) return Container(); // Return an empty container if userStories is empty
 
-          String truncatedUsername = username.length > 10
-              ? username.substring(0, 10) + '...'
-              : username;
+            String username = userStories.first['username'] ?? '';
+            String profilePicUrl = userStories.first['profilePic']?['filePath'] ?? '';
 
-          return GestureDetector(
-            onTap: () => _playUserStories(context, userStories),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-              child: Column(
-                children: [
-                  Stack(
-                    children: [
-                      ClipOval(
-                        child: Image.network(
-                          profilePicUrl,
-                          height: 60,
-                          width: 60,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                      Positioned(
-                        bottom: 0,
-                        right: 0,
-                        child: Container(
-                          height: 15,
-                          width: 15,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: Colors.white,
-                              width: 1,
-                            ),
-                            color: userStories.first['seen']
-                                ? blueshade
-                                : bluetext,
+            return GestureDetector(
+              onTap: () => _playUserStories(context, allStories, index),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                child: Column(
+                  children: [
+                    Stack(
+                      children: [
+                        ClipOval(
+                          child: profilePicUrl.isNotEmpty
+                              ? Image.network(
+                            profilePicUrl,
+                            height: 60,
+                            width: 60,
+                            fit: BoxFit.cover,
+                          )
+                              : Container(
+                            height: 60,
+                            width: 60,
+                            color: Colors.grey, // Placeholder color if no image
                           ),
                         ),
+                        Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: Container(
+                            height: 15,
+                            width: 15,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Colors.white,
+                                width: 1,
+                              ),
+                              color: userStories.first['seen'] ? blueshade : bluetext,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 8),
+                    SizedBox(
+                      width: 80,
+                      child: Center(
+                        child: Text(
+                          username,
+                          style: TextStyle(fontSize: 12),
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                    ],
-                  ),
-                  SizedBox(height: 8),
-                  Text(truncatedUsername, style: TextStyle(fontSize: 12)),
-                ],
+                    ),
+                  ],
+                ),
               ),
-            ),
-          );
-        }).toList(),
+            );
+          }).toList(),
+
       ],
     );
   }
 
-  void _playUserStories(BuildContext context, List<dynamic> userStories) {
+  void _playUserStories(BuildContext context,
+      List<Map<String, List<dynamic>>> allStories, int initialIndex) {
+    List<dynamic> userStories = allStories[initialIndex].values.first;
+
     if (userStories.isEmpty) {
       Navigator.push(
         context,
@@ -289,17 +278,17 @@ class _HomeStoryState extends State<HomeStory> {
         ),
       );
     } else {
+      // Set the 'seen' property of each story to true
       userStories.forEach((story) {
         story['seen'] = true;
       });
-
       Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) => UserStoriesScreen(
-            userStories: userStories,
-            allUserStories: _stories,
-          ),
+              userStories: userStories,
+              allStories: allStories,
+              initialIndex: initialIndex),
         ),
       );
     }
@@ -343,160 +332,179 @@ class NoStoryScreen extends StatelessWidget {
 
 class UserStoriesScreen extends StatefulWidget {
   final List<dynamic> userStories;
-  final List<dynamic> allUserStories;
+  final List<Map<String, List<dynamic>>> allStories;
+  final int initialIndex;
+  final StoryController storyController = StoryController();
 
-  const UserStoriesScreen(
-      {Key? key, required this.userStories, required this.allUserStories})
-      : super(key: key);
+  UserStoriesScreen({
+    Key? key,
+    required this.userStories,
+    required this.allStories,
+    required this.initialIndex,
+  }) : super(key: key);
 
   @override
   _UserStoriesScreenState createState() => _UserStoriesScreenState();
 }
 
 class _UserStoriesScreenState extends State<UserStoriesScreen> {
-  late List<dynamic> _currentUserStories;
-  late List<Map<String, dynamic>> _allUserStoriesGrouped;
-  int _currentUserIndex = 0;
+  late int currentIndex;
+  late int currentStoryIndex;
+  late List<StoryItem> currentStoryItems;
 
   @override
   void initState() {
     super.initState();
-    _currentUserStories = widget.userStories;
-    _allUserStoriesGrouped = _groupStoriesByUser(widget.allUserStories);
-    _currentUserIndex = _allUserStoriesGrouped.indexWhere(
-          (group) => group['userId'] == _currentUserStories.first['userId'],
-    );
+    currentIndex = widget.initialIndex;
+    currentStoryIndex = 0;
+    _updateCurrentStoryItems();
   }
 
-  List<Map<String, dynamic>> _groupStoriesByUser(List<dynamic> stories) {
-    Map<String, List<dynamic>> storiesByUser = {};
-    stories.forEach((story) {
-      String userId = story['userId'];
-      if (!storiesByUser.containsKey(userId)) {
-        storiesByUser[userId] = [];
+  void _updateCurrentStoryItems() {
+    List<dynamic> currentUserStories =
+        widget.allStories[currentIndex].values.first;
+    currentStoryItems = currentUserStories.map<StoryItem>((story) {
+      String videoUrl = story['filePath'];
+      int duration = story['duration'] ??
+          10; // Default to 10 seconds if duration is not provided
+      return StoryItem.pageVideo(
+        videoUrl,
+        controller: widget.storyController,
+        duration: Duration(seconds: duration),
+        imageFit: BoxFit.cover,
+      );
+    }).toList();
+    widget.storyController
+        .play(); // Start playing the stories from the beginning
+  }
+
+  void _onComplete() {
+    setState(() {
+      if (currentIndex < widget.allStories.length - 1) {
+        currentIndex++;
+        currentStoryIndex = 0;
+        _updateCurrentStoryItems();
+      } else {
+        Navigator.pop(
+            context); // Go back to the previous screen if all stories are completed
       }
-      storiesByUser[userId]!.add(story);
     });
-    return storiesByUser.entries
-        .map((entry) => {'userId': entry.key, 'stories': entry.value})
-        .toList();
+  }
+
+  void _goToNextStory() {
+    setState(() {
+      if (currentStoryIndex < currentStoryItems.length - 1) {
+        currentStoryIndex++;
+      } else {
+        _onComplete();
+        return; // Return early to avoid the next steps
+      }
+      // Ensure the next story item is updated correctly
+      _updateCurrentStoryItems();
+    });
+  }
+
+  void _goToPreviousStory() {
+    setState(() {
+      if (currentStoryIndex > 0) {
+        currentStoryIndex--;
+      } else if (currentIndex > 0) {
+        currentIndex--;
+        currentStoryIndex =
+            widget.allStories[currentIndex].values.first.length - 1;
+        _updateCurrentStoryItems();
+      }
+      widget.storyController
+          .play(); // Ensure the previous story starts playing automatically
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    List<dynamic> currentUserStories = widget.allStories[currentIndex]?.values?.first ?? [];
+    if (currentUserStories.isEmpty) {
+      return Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.black,
+          title: Text(
+            'No Stories',
+            style: TextStyle(color: Colors.white, fontSize: 16),
+          ),
+          actions: [
+            IconButton(
+              icon: Icon(Icons.close, color: Colors.white),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ],
+        ),
+        body: Center(
+          child: Text('No stories available', style: TextStyle(color: Colors.white)),
+        ),
+      );
+    }
+
+    String currentUserName = currentUserStories.first['username'] ?? 'Unknown User';
+    String currentUserProfilePic = currentUserStories.first['profilePic']?['filePath'] ?? '';
+
     return Scaffold(
-      body: SafeArea(
-        child: StoryPageView(
-          indicatorDuration: Duration(seconds: 10),
-          initialPage: _currentUserIndex,
-          itemBuilder: (context, pageIndex, storyIndex) {
-            final story =
-            _allUserStoriesGrouped[pageIndex]['stories'][storyIndex];
-            return Stack(
-              children: [
-                Positioned.fill(
-                  child: Container(color: Colors.black),
-                ),
-                Positioned.fill(
-                  child: VideoPlayerWidget(videoUrl: story['filePath']),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 44, left: 8),
-                  child: Row(
-                    children: [
-                      Container(
-                        height: 32,
-                        width: 32,
-                        decoration: BoxDecoration(
-                          image: DecorationImage(
-                            image:
-                            NetworkImage(story['profilePic']['filePath']),
-                            fit: BoxFit.cover,
-                          ),
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      const SizedBox(
-                        width: 8,
-                      ),
-                      Text(
-                        story['username'],
-                        style: TextStyle(
-                          fontSize: 17,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            );
-          },
-          gestureItemBuilder: (context, pageIndex, storyIndex) {
-            return Align(
-              alignment: Alignment.topRight,
-              child: Padding(
-                padding: const EdgeInsets.only(top: 32),
-                child: IconButton(
-                  padding: EdgeInsets.zero,
-                  color: Colors.white,
-                  icon: Icon(Icons.close),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                ),
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        backgroundColor: Colors.black,
+        title: Row(
+          children: [
+            ClipOval(
+              child: Image.network(
+                currentUserProfilePic,
+                height: 40,
+                width: 40,
+                fit: BoxFit.cover,
               ),
-            );
-          },
-          pageLength: _allUserStoriesGrouped.length,
-          storyLength: (int pageIndex) {
-            return _allUserStoriesGrouped[pageIndex]['stories'].length;
-          },
-          onPageLimitReached: () {
-            Navigator.pop(context);
+            ),
+            SizedBox(width: 8),
+            SizedBox(
+              width: 200,
+              child: Text(
+                currentUserName,
+                style: TextStyle(color: Colors.white, fontSize: 16),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.close, color: Colors.white),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ],
+      ),
+      body: GestureDetector(
+        onTapUp: (details) {
+          final screenWidth = MediaQuery.of(context).size.width;
+          if (details.globalPosition.dx < screenWidth / 2) {
+            _goToPreviousStory();
+          } else {
+            _goToNextStory();
+          }
+        },
+        onHorizontalDragEnd: (details) {
+          if (details.primaryVelocity! < 0) {
+            _goToNextStory(); // Swipe left
+          } else if (details.primaryVelocity! > 0) {
+            _goToPreviousStory(); // Swipe right
+          }
+        },
+        child: StoryView(
+          storyItems: currentStoryItems,
+          repeat: true,
+          controller: widget.storyController,
+          onComplete: _goToNextStory,
+          onVerticalSwipeComplete: (direction) {
+            if (direction == Direction.down) {
+              Navigator.pop(context);
+            }
           },
         ),
       ),
     );
-  }
-}
-
-class VideoPlayerWidget extends StatefulWidget {
-  final String videoUrl;
-
-  const VideoPlayerWidget({Key? key, required this.videoUrl}) : super(key: key);
-
-  @override
-  _VideoPlayerWidgetState createState() => _VideoPlayerWidgetState();
-}
-
-class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
-  late VideoPlayerController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = VideoPlayerController.network(widget.videoUrl)
-      ..initialize().then((_) {
-        setState(() {});
-        _controller.play();
-      });
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return _controller.value.isInitialized
-        ? AspectRatio(
-      aspectRatio: _controller.value.aspectRatio,
-      child: VideoPlayer(_controller),
-    )
-        : Center(child: CircularProgressIndicator());
   }
 }

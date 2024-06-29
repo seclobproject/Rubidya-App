@@ -35,6 +35,12 @@
         <string>yourapp</string>
     </array>
 
+    <key>UIBackgroundModes</key>
+    <array>
+        <string>fetch</string>
+        <string>remote-notification</string>
+    </array>
+
     <key>CFBundleDevelopmentRegion</key>
     <string>$(DEVELOPMENT_LANGUAGE)</string>
 
@@ -96,6 +102,10 @@
     <true/>
 
     <key>UIApplicationSupportsIndirectInputEvents</key>
+    <true/>
+
+    <!-- Required for Flutter plugins -->
+    <key>io.flutter.embedded_views_preview</key>
     <true/>
 </dict>
 </plist>

@@ -261,6 +261,29 @@ class HomeService {
     }
   }
 
+  // static Future<Map<String, dynamic>> getActivityNotification({int page = 1, int limit = 10}) async {
+  //   try {
+  //     var dio = await DioHelper.getInstance();
+  //     var response = await dio.get('$baseURL/api/message/get-activity-notifications');
+  //     return response.data;
+  //   } catch (e) {
+  //     // Handle error appropriately, e.g., log the error or throw it further
+  //     throw e;
+  //   }
+  // }
+
+
+  static Future<Map<String, dynamic>> getActivityNotification({int page = 1, int limit = 10}) async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.get('$baseURL/api/message/get-activity-notifications', queryParameters: {'page': page, 'limit': limit});
+      return response.data;
+    } catch (e) {
+      // Handle error appropriately, e.g., log the error or throw it further
+      throw e;
+    }
+  }
+
 
   static Future deletemycomment(id) async {
     try {
@@ -271,6 +294,23 @@ class HomeService {
       rethrow;
     }
   }
+
+
+  static Future likelist(String id, {int page = 1, int limit = 10}) async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio
+          .get('$baseURL/api/posts/get-details-of-like/$id', queryParameters: {
+        'page': page,
+        'limit': limit,
+      });
+      return response.data;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+
 
   static Future deletemypost(id) async {
     try {

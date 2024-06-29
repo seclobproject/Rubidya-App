@@ -5,11 +5,14 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:rubidya/resources/color.dart';
 import 'package:rubidya/screens/home_screen/widgets/comment_home.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
+import 'package:rubidya/screens/home_screen/widgets/likelist.dart';
 // import 'package:rubidya/screens/temp_screens/notification.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:rubidya/screens/home_screen/widgets/home_story.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../commonpage/notification.dart';
 import '../../services/home_service.dart';
+import '../../services/profile_service.dart';
 import '../../support/logger.dart';
 import '../profile_screen/inner_page/profile_inner_page.dart';
 import '../search_screen/searchpage.dart';
@@ -17,8 +20,10 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:video_player/video_player.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:visibility_detector/visibility_detector.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 
-// import '../temp_screens/messagepage.dart';
+
 
 class homepage extends StatefulWidget {
   const homepage({Key? key}) : super(key: key);
@@ -29,11 +34,15 @@ class homepage extends StatefulWidget {
 
 class _homepageState extends State<homepage> {
   late SharedPreferences prefs;
+  late IO.Socket socket;
+  late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
   bool isLoading = false;
   bool _isLoading = true;
   bool isExpanded = false;
   int _pageNumber = 1;
   String? userId;
+  var profiledetails;
+  String? id;
   Map<String, dynamic>? homeList;
   List<Map<String, dynamic>> suggestFollow = [];
   final ScrollController _scrollController = ScrollController();
@@ -42,12 +51,17 @@ class _homepageState extends State<homepage> {
   void initState() {
     super.initState();
     _initLoad();
+    _profileDetailsApi();
+
+    _initNotifications();
+
     _scrollController.addListener(_scrollListener);
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
+    socket.dispose();
     super.dispose();
   }
 
@@ -57,6 +71,97 @@ class _homepageState extends State<homepage> {
       _loadMore();
     }
   }
+  Future _profileDetailsApi() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    id = prefs.getString('userid');
+    var response = await ProfileService.getProfile();
+    log.i('Profile details show: $response');
+    setState(() {
+      profiledetails = response;
+    });
+    // Initialize socket after profile details are fetched
+    _initSocket();
+  }
+
+  void _initSocket() {
+    String userId = "${profiledetails?['user']?['_id']?.toString()}";
+
+
+    socket = IO.io('wss://rubidya.com', <String, dynamic>{
+      'transports': ['websocket'],
+      'query': {'userId': userId},
+    });
+
+    socket.on('connect', (_) {
+      log.i('Connected to Socket.IO server');
+    });
+
+    socket.on('activityNotification', (data) {
+      log.i('Received activity notification: $data');
+      _showNotification(data['user'], data['message'], data['notificationType'], data['time']);
+    });
+
+    socket.on('disconnect', (_) {
+      log.e('Disconnected from Socket.IO server');
+    });
+  }
+
+
+  void _initNotifications() {
+    flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+    const AndroidInitializationSettings initializationSettingsAndroid =
+    AndroidInitializationSettings('@mipmap/ic_launcher');
+    var initializationSettingsIOS = DarwinInitializationSettings(
+        requestAlertPermission: true,
+        requestBadgePermission: true,
+        requestSoundPermission: true,
+        onDidReceiveLocalNotification: (int id, String? title, String? body, String? payload) async {});
+    final InitializationSettings initializationSettings = InitializationSettings(
+      android: initializationSettingsAndroid,
+      iOS: initializationSettingsIOS,
+    );
+
+    flutterLocalNotificationsPlugin.initialize(initializationSettings,
+        onDidReceiveNotificationResponse: (NotificationResponse response) async {
+          if (response.payload != null) {
+            log.i('notification payload: ${response.payload}');
+            // Handle notification tap
+          }
+        });
+  }
+
+  Future<void> _showNotification(String user, String message, String notificationType, String time) async {
+    const AndroidNotificationDetails androidPlatformChannelSpecifics =
+    AndroidNotificationDetails(
+      'your_channel_id',
+      'your_channel_name',
+      channelDescription: 'your_channel_description',
+      importance: Importance.max,
+      priority: Priority.high,
+      showWhen: false,
+    );
+    const NotificationDetails platformChannelSpecifics =
+    NotificationDetails(android: androidPlatformChannelSpecifics);
+    await flutterLocalNotificationsPlugin.show(
+      0,
+      '$user $notificationType',
+      message,
+      platformChannelSpecifics,
+      payload: 'item x',
+    );
+  }
+
+  void _requestIOSPermissions() {
+    flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>()
+        ?.requestPermissions(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+  }
+
+
 
   Future<void> _suggestFollowList() async {
     try {
@@ -262,14 +367,14 @@ class _homepageState extends State<homepage> {
                     SizedBox(width: 20),
                     IconButton(
                         onPressed: () {
-                          //   Navigator.push(
-                          //     context,
-                          //     MaterialPageRoute(builder: (context) => notificationpage()),
-                          //   );
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => NotificationPage()),
+                          );
                         },
                         icon: Badge(
+
                             textColor: Colors.white,
-                            label: Text("5"),
                             child: Icon(
                               Icons.notifications,
                               color: buttoncolor,
@@ -718,43 +823,51 @@ class _ProductCardState extends State<ProductCard> {
                   ],
                 ),
                 SizedBox(height: 10),
-                Row(
-                  children: [
-                    RichText(
-                      text: TextSpan(
-                        style: TextStyle(
-                          color: bluetext,
-                          fontSize: 12,
+                InkWell(
+                  onTap: (){
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => Like_List(id: widget.id,)), // Replace NextPage with your desired page
+                    );
+                  },
+                  child: Row(
+                    children: [
+                      RichText(
+                        text: TextSpan(
+                          style: TextStyle(
+                            color: bluetext,
+                            fontSize: 12,
+                          ),
+                          children: [
+                            TextSpan(text: "Liked by "),
+                            TextSpan(
+                              text: widget.likedby,
+                              style: TextStyle(
+                                color: bluetext,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            TextSpan(
+                              text: " and",
+                              style: TextStyle(
+                                color: bluetext,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
                         ),
-                        children: [
-                          TextSpan(text: "Liked by "),
-                          TextSpan(
-                            text: widget.likedby,
-                            style: TextStyle(
-                              color: bluetext,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                          TextSpan(
-                            text: " and",
-                            style: TextStyle(
-                              color: bluetext,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
                       ),
-                    ),
-                    SizedBox(width: 2),
-                    Text(
-                      "${widget.likes} Others",
-                      style: TextStyle(
-                          color: bluetext,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700),
-                    ),
-                    SizedBox(width: 2),
-                  ],
+                      SizedBox(width: 2),
+                      Text(
+                        "${widget.likes} Others",
+                        style: TextStyle(
+                            color: bluetext,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700),
+                      ),
+                      SizedBox(width: 2),
+                    ],
+                  ),
                 ),
                 InkWell(
                   onTap: () {
