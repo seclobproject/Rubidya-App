@@ -11,73 +11,136 @@ class NotificationPage extends StatefulWidget {
   State<NotificationPage> createState() => _NotificationPageState();
 }
 
-class _NotificationPageState extends State<NotificationPage> {
-  List<dynamic> notifications = [];
+class _NotificationPageState extends State<NotificationPage> with SingleTickerProviderStateMixin {
+  List<dynamic> activityNotifications = [];
+  List<dynamic> referralNotifications = [];
   bool isLoading = true;
-  bool _isFetchingMore = false;
-  int _currentPage = 1;
-  bool _isLastPage = false;
-  final ScrollController _scrollController = ScrollController();
+  bool _isFetchingMoreActivity = false;
+  bool _isFetchingMoreReferral = false;
+  int _activityPage = 1;
+  int _referralPage = 1;
+  bool _isLastPageActivity = false;
+  bool _isLastPageReferral = false;
+  final ScrollController _activityScrollController = ScrollController();
+  final ScrollController _referralScrollController = ScrollController();
+  late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
-    _fetchNotifications();
-    _scrollController.addListener(_scrollListener);
+    _tabController = TabController(length: 2, vsync: this);
+    _fetchActivityNotifications();
+    _fetchReferralNotifications();
+    _activityScrollController.addListener(_activityScrollListener);
+    _referralScrollController.addListener(_referralScrollListener);
   }
 
   @override
   void dispose() {
-    _scrollController.dispose();
+    _activityScrollController.dispose();
+    _referralScrollController.dispose();
+    _tabController.dispose();
     super.dispose();
   }
 
-  void _scrollListener() {
-    if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent && !_isFetchingMore && !_isLastPage) {
-      _fetchNotifications();
+  void _activityScrollListener() {
+    if (_activityScrollController.position.pixels == _activityScrollController.position.maxScrollExtent &&
+        !_isFetchingMoreActivity &&
+        !_isLastPageActivity) {
+      _fetchActivityNotifications();
     }
   }
 
-  Future<void> _fetchNotifications({bool reset = false}) async {
-    if (_isFetchingMore) return;
+  void _referralScrollListener() {
+    if (_referralScrollController.position.pixels == _referralScrollController.position.maxScrollExtent &&
+        !_isFetchingMoreReferral &&
+        !_isLastPageReferral) {
+      _fetchReferralNotifications();
+    }
+  }
+
+  Future<void> _fetchActivityNotifications({bool reset = false}) async {
+    if (_isFetchingMoreActivity) return;
     if (reset) {
       setState(() {
-        _currentPage = 1;
-        _isLastPage = false;
-        notifications.clear();
+        _activityPage = 1;
+        _isLastPageActivity = false;
+        activityNotifications.clear();
       });
     }
-    if (_isLastPage) return;
+    if (_isLastPageActivity) return;
 
     setState(() {
-      _isFetchingMore = true;
+      _isFetchingMoreActivity = true;
     });
 
     try {
-      var response = await HomeService.getActivityNotification(page: _currentPage, limit: 10);
-      log.i('API Request: page $_currentPage');
-      log.i('API Response: $response');
+      var response = await HomeService.getActivityNotification(page: _activityPage, limit: 10);
+      log.i('Activity API Request: page $_activityPage');
+      log.i('Activity API Response: $response');
 
       if (response['notifications'] != null && response['notifications'].isNotEmpty) {
         setState(() {
-          notifications.addAll(response['notifications']);
-          log.i('Current Notifications: $notifications');
+          activityNotifications.addAll(response['notifications']);
           if (response['notifications'].length < 10) {
-            _isLastPage = true;
+            _isLastPageActivity = true;
           }
-          _currentPage++;
+          _activityPage++;
         });
       } else {
         setState(() {
-          _isLastPage = true;
+          _isLastPageActivity = true;
         });
       }
     } catch (e) {
-      log.e('Failed to fetch notifications: $e');
+      log.e('Failed to fetch activity notifications: $e');
     } finally {
       setState(() {
         isLoading = false;
-        _isFetchingMore = false;
+        _isFetchingMoreActivity = false;
+      });
+    }
+  }
+
+  Future<void> _fetchReferralNotifications({bool reset = false}) async {
+    if (_isFetchingMoreReferral) return;
+    if (reset) {
+      setState(() {
+        _referralPage = 1;
+        _isLastPageReferral = false;
+        referralNotifications.clear();
+      });
+    }
+    if (_isLastPageReferral) return;
+
+    setState(() {
+      _isFetchingMoreReferral = true;
+    });
+
+    try {
+      var response = await HomeService.getReferalNotification(page: _referralPage, limit: 10);
+      log.i('Referral API Request: page $_referralPage');
+      log.i('Referral API Response: $response');
+
+      if (response['notifications'] != null && response['notifications'].isNotEmpty) {
+        setState(() {
+          referralNotifications.addAll(response['notifications']);
+          if (response['notifications'].length < 10) {
+            _isLastPageReferral = true;
+          }
+          _referralPage++;
+        });
+      } else {
+        setState(() {
+          _isLastPageReferral = true;
+        });
+      }
+    } catch (e) {
+      log.e('Failed to fetch referral notifications: $e');
+    } finally {
+      setState(() {
+        isLoading = false;
+        _isFetchingMoreReferral = false;
       });
     }
   }
@@ -96,16 +159,38 @@ class _NotificationPageState extends State<NotificationPage> {
           "Notifications",
           style: TextStyle(fontSize: 14),
         ),
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: [
+            Tab(text: 'Activity Notifications'),
+            Tab(text: 'Referral Notifications'),
+          ],
+        ),
       ),
-      body: isLoading
-          ? Center(child: CircularProgressIndicator())
-          : notifications.isEmpty
-          ? Center(child: Text("No notifications available"))
-          : NotificationListView(
-        notifications: notifications,
-        isLoadingMore: _isFetchingMore,
-        formatTime: formatTime,
-        scrollController: _scrollController,
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          isLoading
+              ? Center(child: CircularProgressIndicator())
+              : activityNotifications.isEmpty
+              ? Center(child: Text("No activity notifications available"))
+              : NotificationListView(
+            notifications: activityNotifications,
+            isLoadingMore: _isFetchingMoreActivity,
+            formatTime: formatTime,
+            scrollController: _activityScrollController,
+          ),
+          isLoading
+              ? Center(child: CircularProgressIndicator())
+              : referralNotifications.isEmpty
+              ? Center(child: Text("No referral notifications available"))
+              : NotificationListView(
+            notifications: referralNotifications,
+            isLoadingMore: _isFetchingMoreReferral,
+            formatTime: formatTime,
+            scrollController: _referralScrollController,
+          ),
+        ],
       ),
     );
   }

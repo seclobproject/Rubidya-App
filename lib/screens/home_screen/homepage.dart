@@ -6,10 +6,11 @@ import 'package:rubidya/resources/color.dart';
 import 'package:rubidya/screens/home_screen/widgets/comment_home.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:rubidya/screens/home_screen/widgets/likelist.dart';
-// import 'package:rubidya/screens/temp_screens/notification.dart';
+
 import 'package:url_launcher/url_launcher.dart';
 import 'package:rubidya/screens/home_screen/widgets/home_story.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:workmanager/workmanager.dart';
 import '../../commonpage/notification.dart';
 import '../../services/home_service.dart';
 import '../../services/profile_service.dart';
@@ -55,7 +56,9 @@ class _homepageState extends State<homepage> {
 
     _initNotifications();
 
+
     _scrollController.addListener(_scrollListener);
+    _registerBackgroundTask();
   }
 
   @override
@@ -71,6 +74,7 @@ class _homepageState extends State<homepage> {
       _loadMore();
     }
   }
+
   Future _profileDetailsApi() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     id = prefs.getString('userid');
@@ -98,7 +102,17 @@ class _homepageState extends State<homepage> {
 
     socket.on('activityNotification', (data) {
       log.i('Received activity notification: $data');
-      _showNotification(data['user'], data['message'], data['notificationType'], data['time']);
+      // Register a one-time background task with Workmanager
+      Workmanager().registerOneOffTask(
+        'uniqueName',
+        'simpleTask',
+        inputData: {
+          'user': data['user'],
+          'message': data['message'],
+          'notificationType': data['notificationType'],
+          'time': data['time'],
+        },
+      );
     });
 
     socket.on('disconnect', (_) {
@@ -148,6 +162,14 @@ class _homepageState extends State<homepage> {
       message,
       platformChannelSpecifics,
       payload: 'item x',
+    );
+  }
+
+  void _registerBackgroundTask() {
+    Workmanager().registerPeriodicTask(
+      "1",
+      "simplePeriodicTask",
+      frequency: Duration(hours: 1),
     );
   }
 

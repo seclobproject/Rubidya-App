@@ -296,6 +296,18 @@ class HomeService {
   }
 
 
+  static Future<Map<String, dynamic>> getReferalNotification({int page = 1, int limit = 10}) async {
+    try {
+      var dio = await DioHelper.getInstance();
+      var response = await dio.get('$baseURL/api/message/get-referal-notifications');
+      return response.data;
+    } catch (e) {
+
+      throw e;
+    }
+  }
+
+
   static Future likelist(String id, {int page = 1, int limit = 10}) async {
     try {
       var dio = await DioHelper.getInstance();
