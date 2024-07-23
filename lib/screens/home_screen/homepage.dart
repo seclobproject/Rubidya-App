@@ -3,14 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:rubidya/resources/color.dart';
+import 'package:rubidya/screens/chat_screen/MessagePage.dart';
 import 'package:rubidya/screens/home_screen/widgets/comment_home.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:rubidya/screens/home_screen/widgets/likelist.dart';
-
 import 'package:url_launcher/url_launcher.dart';
 import 'package:rubidya/screens/home_screen/widgets/home_story.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:workmanager/workmanager.dart';
 import '../../commonpage/notification.dart';
 import '../../services/home_service.dart';
 import '../../services/profile_service.dart';
@@ -23,8 +22,6 @@ import 'package:share_plus/share_plus.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
-
-
 
 class homepage extends StatefulWidget {
   const homepage({Key? key}) : super(key: key);
@@ -53,12 +50,9 @@ class _homepageState extends State<homepage> {
     super.initState();
     _initLoad();
     _profileDetailsApi();
-
     _initNotifications();
 
-
     _scrollController.addListener(_scrollListener);
-    _registerBackgroundTask();
   }
 
   @override
@@ -90,7 +84,6 @@ class _homepageState extends State<homepage> {
   void _initSocket() {
     String userId = "${profiledetails?['user']?['_id']?.toString()}";
 
-
     socket = IO.io('wss://rubidya.com', <String, dynamic>{
       'transports': ['websocket'],
       'query': {'userId': userId},
@@ -102,17 +95,8 @@ class _homepageState extends State<homepage> {
 
     socket.on('activityNotification', (data) {
       log.i('Received activity notification: $data');
-      // Register a one-time background task with Workmanager
-      Workmanager().registerOneOffTask(
-        'uniqueName',
-        'simpleTask',
-        inputData: {
-          'user': data['user'],
-          'message': data['message'],
-          'notificationType': data['notificationType'],
-          'time': data['time'],
-        },
-      );
+      _showNotification(data['user'], data['message'], data['notificationType'],
+          data['time']);
     });
 
     socket.on('disconnect', (_) {
@@ -120,31 +104,52 @@ class _homepageState extends State<homepage> {
     });
   }
 
-
   void _initNotifications() {
     flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
     const AndroidInitializationSettings initializationSettingsAndroid =
     AndroidInitializationSettings('@mipmap/ic_launcher');
     var initializationSettingsIOS = DarwinInitializationSettings(
-        requestAlertPermission: true,
-        requestBadgePermission: true,
-        requestSoundPermission: true,
-        onDidReceiveLocalNotification: (int id, String? title, String? body, String? payload) async {});
-    final InitializationSettings initializationSettings = InitializationSettings(
+      requestAlertPermission: true,
+      requestBadgePermission: true,
+      requestSoundPermission: true,
+      onDidReceiveLocalNotification:
+          (int id, String? title, String? body, String? payload) async {
+        // Handle the received notification here
+      },
+    );
+
+    final InitializationSettings initializationSettings =
+    InitializationSettings(
       android: initializationSettingsAndroid,
       iOS: initializationSettingsIOS,
     );
 
     flutterLocalNotificationsPlugin.initialize(initializationSettings,
-        onDidReceiveNotificationResponse: (NotificationResponse response) async {
+        onDidReceiveNotificationResponse:
+            (NotificationResponse response) async {
           if (response.payload != null) {
             log.i('notification payload: ${response.payload}');
             // Handle notification tap
           }
         });
+
+    // Request permissions
+    _requestIOSPermissions();
   }
 
-  Future<void> _showNotification(String user, String message, String notificationType, String time) async {
+  void _requestIOSPermissions() {
+    flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+        IOSFlutterLocalNotificationsPlugin>()
+        ?.requestPermissions(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+  }
+
+  Future<void> _showNotification(
+      String user, String message, String notificationType, String time) async {
     const AndroidNotificationDetails androidPlatformChannelSpecifics =
     AndroidNotificationDetails(
       'your_channel_id',
@@ -164,26 +169,6 @@ class _homepageState extends State<homepage> {
       payload: 'item x',
     );
   }
-
-  void _registerBackgroundTask() {
-    Workmanager().registerPeriodicTask(
-      "1",
-      "simplePeriodicTask",
-      frequency: Duration(hours: 1),
-    );
-  }
-
-  void _requestIOSPermissions() {
-    flutterLocalNotificationsPlugin
-        .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>()
-        ?.requestPermissions(
-      alert: true,
-      badge: true,
-      sound: true,
-    );
-  }
-
-
 
   Future<void> _suggestFollowList() async {
     try {
@@ -274,8 +259,8 @@ class _homepageState extends State<homepage> {
     setState(() {
       bool isLiked = !homeList!['posts']
           .firstWhere((post) => post['_id'] == postId)['isLiked'];
-      homeList!['posts'].firstWhere((post) => post['_id'] == postId)['isLiked'] =
-          isLiked;
+      homeList!['posts']
+          .firstWhere((post) => post['_id'] == postId)['isLiked'] = isLiked;
       int likeCount = homeList!['posts']
           .firstWhere((post) => post['_id'] == postId)['likeCount'];
       homeList!['posts']
@@ -304,8 +289,8 @@ class _homepageState extends State<homepage> {
     setState(() {
       bool isSaved = !homeList!['posts']
           .firstWhere((post) => post['_id'] == postId)['isSaved'];
-      homeList!['posts'].firstWhere((post) => post['_id'] == postId)['isSaved'] =
-          isSaved;
+      homeList!['posts']
+          .firstWhere((post) => post['_id'] == postId)['isSaved'] = isSaved;
     });
     _addSave(
         postId,
@@ -333,7 +318,6 @@ class _homepageState extends State<homepage> {
     });
     await _initLoad();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -377,10 +361,10 @@ class _homepageState extends State<homepage> {
                     ),
                     InkWell(
                       onTap: () {
-                        // Navigator.push(
-                        //   context,
-                        //   MaterialPageRoute(builder: (context) => messagepage()),
-                        // );
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => MessagePage()),
+                        );
                       },
                       child: SvgPicture.asset(
                         "assets/svg/massage.svg",
@@ -391,11 +375,11 @@ class _homepageState extends State<homepage> {
                         onPressed: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => NotificationPage()),
+                            MaterialPageRoute(
+                                builder: (context) => NotificationPage()),
                           );
                         },
                         icon: Badge(
-
                             textColor: Colors.white,
                             child: Icon(
                               Icons.notifications,
@@ -411,7 +395,6 @@ class _homepageState extends State<homepage> {
                   height: 109,
                   decoration: BoxDecoration(
                     color: Colors.white,
-
                     borderRadius: BorderRadius.only(
                       bottomLeft: Radius.circular(10),
                       topLeft: Radius.circular(10),
@@ -442,17 +425,27 @@ class _homepageState extends State<homepage> {
                           createdTime: _calculateTimeDifference(
                               homeList!['posts'][index]['createdAt']),
                           name: homeList!['posts'][index]['username'] ?? '',
-                          description: homeList!['posts'][index]['description'] ?? '',
-                          likes: homeList!['posts'][index]['likeCount']?.toString() ?? '',
+                          description:
+                          homeList!['posts'][index]['description'] ?? '',
+                          likes: homeList!['posts'][index]['likeCount'] ?? '',
                           img: homeList!['posts'][index]['filePath'] ?? '',
-                          profilepic: homeList!['posts'][index]['profilePic'] ?? '',
-                          likedby: homeList!['posts'][index]['lastLikedUserName'] ?? '',
-                          commentby: homeList!['posts'][index]['lastCommentedUser'] ?? '',
-                          commentcount: homeList!['posts'][index]['commentCount'].toString() ?? '',
+                          profilepic:
+                          homeList!['posts'][index]['profilePic'] ?? '',
+                          likedby: homeList!['posts'][index]
+                          ['lastLikedUserName'] ??
+                              '',
+                          commentby: homeList!['posts'][index]
+                          ['lastCommentedUser'] ??
+                              '',
+                          commentcount: homeList!['posts'][index]
+                          ['commentCount']
+                              .toString() ??
+                              '',
                           id: homeList!['posts'][index]['_id'] ?? '',
                           userId: homeList!['posts'][index]['userId'] ?? '',
                           filetype: homeList!['posts'][index]['fileType'] ?? '',
-                          likeCount: homeList!['posts'][index]['isLiked'] ?? false,
+                          likeCount:
+                          homeList!['posts'][index]['isLiked'] ?? false,
                           onLikePressed: () {
                             _toggleLikePost(homeList!['posts'][index]['_id']);
                           },
@@ -462,8 +455,8 @@ class _homepageState extends State<homepage> {
                           onSavePressed: () {
                             _toggleSavePost(homeList!['posts'][index]['_id']);
                           },
-                          saveCount: homeList!['posts'][index]['isSaved'] ?? false,
-
+                          saveCount:
+                          homeList!['posts'][index]['isSaved'] ?? false,
                         ),
                       ],
                     );
@@ -493,7 +486,8 @@ class _homepageState extends State<homepage> {
                               id: suggestFollow[index]['_id'],
                               status: suggestFollow[index]['isFollowing'],
                               img: suggestFollow[index]['profilePic'] != null
-                                  ? suggestFollow[index]['profilePic']['filePath']
+                                  ? suggestFollow[index]['profilePic']
+                              ['filePath']
                                   : '',
                               onFollowToggled: () => toggleFollow(index),
                             );
@@ -512,8 +506,6 @@ class _homepageState extends State<homepage> {
   }
 }
 
-
-
 class ProductCard extends StatefulWidget {
   const ProductCard({
     Key? key,
@@ -531,15 +523,15 @@ class ProductCard extends StatefulWidget {
     required this.onLikePressed,
     required this.onDoubleTapLike,
     required this.filetype,
-    required this.likeCount
-    ,required this.saveCount,
+    required this.likeCount,
+    required this.saveCount,
     required this.onSavePressed,
   }) : super(key: key);
 
   final String img;
   final String profilepic;
   final String name;
-  final String likes;
+  final int likes;
   final String createdTime;
   final String id;
   final String userId;
@@ -600,7 +592,7 @@ class _ProductCardState extends State<ProductCard> {
 
   void sharePost(String postId) {
     final Uri deepLink = Uri.parse('rubidya.com/post/${widget.id}');
-    Share.share('Check out this post: $deepLink');
+    Share.share('Check out this post: $deepLink',);
   }
 
   @override
@@ -637,7 +629,9 @@ class _ProductCardState extends State<ProductCard> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            widget.name.length > 25 ? widget.name.substring(0, 25) : widget.name,
+                            widget.name.length > 25
+                                ? widget.name.substring(0, 25)
+                                : widget.name,
                             style: TextStyle(
                                 fontSize: 15, fontWeight: FontWeight.w500),
                           ),
@@ -770,12 +764,12 @@ class _ProductCardState extends State<ProductCard> {
                     ),
                     child: _videoController.value.isInitialized
                         ? AspectRatio(
-                      aspectRatio: _videoController.value.aspectRatio,
+                      aspectRatio:
+                      _videoController.value.aspectRatio,
                       child: VideoPlayer(_videoController),
                     )
                         : Center(child: CupertinoActivityIndicator()),
                   ),
-
                 ],
               ),
             ),
@@ -811,7 +805,8 @@ class _ProductCardState extends State<ProductCard> {
                           builder: (BuildContext context) {
                             return Padding(
                               padding: const EdgeInsets.all(20.0).copyWith(
-                                  bottom: MediaQuery.of(context).viewInsets.bottom),
+                                  bottom:
+                                  MediaQuery.of(context).viewInsets.bottom),
                               child: CommentBottomSheet(id: widget.id),
                             );
                           },
@@ -826,8 +821,11 @@ class _ProductCardState extends State<ProductCard> {
                       height: 50,
                       width: 50,
                       child: IconButton(
-                        onPressed: widget.filetype == "image/jpeg" ? widget.onSavePressed : null,
-                        icon: widget.saveCount ? Icon(Icons.bookmark)
+                        onPressed: widget.filetype == "image/jpeg"
+                            ? widget.onSavePressed
+                            : null,
+                        icon: widget.saveCount
+                            ? Icon(Icons.bookmark)
                             : Icon(Icons.bookmark_border_outlined),
                       ),
                     ),
@@ -845,11 +843,14 @@ class _ProductCardState extends State<ProductCard> {
                   ],
                 ),
                 SizedBox(height: 10),
-                InkWell(
-                  onTap: (){
+                GestureDetector(
+                  onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => Like_List(id: widget.id,)), // Replace NextPage with your desired page
+                      MaterialPageRoute(
+                          builder: (context) => Like_List(
+                            id: widget.id,
+                          )), // Replace NextPage with your desired page
                     );
                   },
                   child: Row(
@@ -881,7 +882,7 @@ class _ProductCardState extends State<ProductCard> {
                       ),
                       SizedBox(width: 2),
                       Text(
-                        "${widget.likes} Others",
+                        "${widget.likes - 1} Others",
                         style: TextStyle(
                             color: bluetext,
                             fontSize: 13,
@@ -951,24 +952,26 @@ class _ProductCardState extends State<ProductCard> {
               ),
             ),
           ),
-          if (widget.description.split('\n').length > 2)
-            GestureDetector(
-              onTap: () {
-                setState(() {
-                  isExpanded = !isExpanded;
-                });
-              },
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: Align(
-                  alignment: Alignment.bottomRight,
-                  child: Text(
-                    isExpanded ? 'See Less' : 'See More',
-                    style: TextStyle(color: Colors.blue, fontSize: 8),
-                  ),
+          widget.description.length >
+              100 // Replace 100 with your desired length
+              ? GestureDetector(
+            onTap: () {
+              setState(() {
+                isExpanded = !isExpanded;
+              });
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: Align(
+                alignment: Alignment.bottomRight,
+                child: Text(
+                  isExpanded ? 'See Less' : 'See More',
+                  style: TextStyle(color: bluetext, fontSize: 8),
                 ),
               ),
             ),
+          )
+              : SizedBox.shrink(),
         ],
       ),
     );
@@ -1087,4 +1090,5 @@ class MembersListing extends StatelessWidget {
       ),
     );
   }
+
 }

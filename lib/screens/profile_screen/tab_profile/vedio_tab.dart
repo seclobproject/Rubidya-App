@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -15,11 +14,10 @@ import '../../../support/dio_helper.dart';
 import '../../../support/logger.dart';
 import 'fullScreenimagepage.dart';
 
-
 class vediotab extends StatefulWidget {
   String? innerUser;
 
-  vediotab({super.key,this.innerUser});
+  vediotab({super.key, this.innerUser});
 
   @override
   State<vediotab> createState() => _vediotabState();
@@ -88,12 +86,9 @@ class _vediotabState extends State<vediotab> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     userId = prefs.getString('userId');
     var response;
-    if(widget.innerUser != null)
-    {
+    if (widget.innerUser != null) {
       response = await getUserVideos(widget.innerUser!);
-    }
-    else
-    {
+    } else {
       response = await getMyVideos(page: page);
     }
 
@@ -149,94 +144,104 @@ class _vediotabState extends State<vediotab> {
   @override
   Widget build(BuildContext context) {
     return profileList != null && profileList['media'] != null
-        ? GridView.builder(
-      controller: _scrollController,
-      physics: AlwaysScrollableScrollPhysics(),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        mainAxisSpacing: 5,
-      ),
-      itemCount: profileList['media'].length,
-      itemBuilder: (BuildContext context, int index) {
-        String videoUrl = profileList['media'][index]['filePath'];
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-          child: GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => FullScreenVideoPage(
-                    videoUrl: profileList['media'][index]['filePath'],
-                    likeCount: profileList['media'][index]['likeCount'],
+        ? Padding(
+      padding: const EdgeInsets.only(left: 15),
+      child: GridView.builder(
+        controller: _scrollController,
+        physics: AlwaysScrollableScrollPhysics(),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3,
+          mainAxisSpacing: 5,
+          childAspectRatio: 0.7,
+        ),
+        itemCount: profileList['media'].length,
+        itemBuilder: (BuildContext context, int index) {
+          String videoUrl = profileList['media'][index]['filePath'];
+          return Padding(
+            padding:
+            const EdgeInsets.symmetric(horizontal: 0, vertical: 5),
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => FullScreenVideoPage(
+                      videoUrl: profileList['media'][index]['filePath'],
+                      likeCount: profileList['media'][index]['likeCount'],
+                      description: profileList['media'][index]
+                      ['description'],
+                    ),
                   ),
-                ),
-              );
-
-            },
-            child: Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: FutureBuilder<Uint8List?>(
-                    future: _generateThumbnail(videoUrl),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.done &&
-                          snapshot.data != null) {
-                        return Image.memory(
-                          snapshot.data!,
-                          fit: BoxFit.fill,
-                          width: 112,
-                          height: 300,
-                        );
-                      } else {
-                        return Container(
-                          width: 112,
-                          height: 300,
-                          color: Colors.grey, // Placeholder color
-                        );
-                      }
-                    },
+                );
+              },
+              child: Stack(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: FutureBuilder<Uint8List?>(
+                      future: _generateThumbnail(videoUrl),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.done &&
+                            snapshot.data != null) {
+                          return Image.memory(
+                            snapshot.data!,
+                            fit: BoxFit.fill,
+                            width: 112,
+                            height: 300,
+                          );
+                        } else {
+                          return Container(
+                            width: 112,
+                            height: 300,
+                            color: Colors.grey, // Placeholder color
+                          );
+                        }
+                      },
+                    ),
                   ),
-                ),
-                Positioned(
-                  top: 78,
-                  left: 30,
-                  child: Column(
-                    children: [
-                      SvgPicture.asset(
-                        "assets/svg/heart.svg",
-                        height: 18,
-                      ),
-                      Text(
-                        profileList['media'][index]['likeCount'].toString(),
-                        style: TextStyle(fontSize: 10, color: Colors.white),
-                      ),
-                    ],
+                  Positioned(
+                    top: 125,
+                    left: 30,
+                    child: Column(
+                      children: [
+                        SvgPicture.asset(
+                          "assets/svg/heart.svg",
+                          height: 18,
+                        ),
+                        Text(
+                          profileList['media'][index]['likeCount']
+                              .toString(),
+                          style: TextStyle(
+                              fontSize: 10, color: Colors.white),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                Positioned(
-                  top: 78,
-                  right: 30,
-                  child: Column(
-                    children: [
-                      SvgPicture.asset(
-                        "assets/svg/coment2.svg",
-                        height: 18,
-                      ),
-                      Text(
-                        profileList['media'][index]['commentCount'].toString(),
-
-                        style: TextStyle(fontSize: 10, color: Colors.white),
-                      ),
-                    ],
+                  Positioned(
+                    top: 125,
+                    right: 30,
+                    child: Column(
+                      children: [
+                        SvgPicture.asset(
+                          "assets/svg/coment2.svg",
+                          height: 18,
+                        ),
+                        Text(
+                          profileList['media'][index]['commentCount']
+                              .toString(),
+                          style: TextStyle(
+                              fontSize: 10, color: Colors.white),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     )
         : Center(
       child: isLoading

@@ -1,9 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-
 import 'package:rubidya/screens/profile_screen/tab_profile/vedio_tab.dart';
-
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -11,6 +9,8 @@ import '../../../resources/color.dart';
 import '../../../services/home_service.dart';
 import '../../../services/profile_service.dart';
 import '../../../support/logger.dart';
+
+import '../../chat_screen/ChatPage.dart';
 
 import '../../home_screen/widgets/comment_home.dart';
 
@@ -20,7 +20,10 @@ import 'follower_inner_list.dart';
 import 'following_inner_list.dart';
 
 class profileinnerpage extends StatefulWidget {
-  profileinnerpage({super.key, required this.id});
+  profileinnerpage({
+    super.key,
+    required this.id,
+  });
 
   String? id;
 
@@ -56,7 +59,9 @@ class _profileinnerpageState extends State<profileinnerpage>
   }
 
   void _scrollListener() {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent && !_isMoreLoading) {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent &&
+        !_isMoreLoading) {
       _loadMore();
     }
   }
@@ -68,7 +73,8 @@ class _profileinnerpageState extends State<profileinnerpage>
 
     if (response != null && response['media'] != null) {
       bool initialFollowStatus = response['media'][0]['isFollowing'];
-      bool initialBlockStatus = response['media'][0]['isBlocked'] ?? false; // Add null check here
+      bool initialBlockStatus =
+          response['media'][0]['isBlocked'] ?? false; // Add null check here
 
       setState(() {
         isFollowing = initialFollowStatus;
@@ -213,7 +219,8 @@ class _profileinnerpageState extends State<profileinnerpage>
                   child: GestureDetector(
                     onTap: () {
                       String reportText = _reportController.text;
-                      reportUser(reportText, context); // Ensure context is correct
+                      reportUser(
+                          reportText, context); // Ensure context is correct
                       Navigator.pop(context); // Close the bottom sheet
                     },
                     child: Container(
@@ -241,9 +248,6 @@ class _profileinnerpageState extends State<profileinnerpage>
     );
   }
 
-
-
-
   @override
   void dispose() {
     _tabController.dispose();
@@ -253,6 +257,18 @@ class _profileinnerpageState extends State<profileinnerpage>
 
   @override
   Widget build(BuildContext context) {
+    String userId = '';
+    String conversationId = '';
+    String username = '';
+    String profilepicc = '';
+
+    if (profileinnerpageshow != null && profileinnerpageshow['media'] != null && profileinnerpageshow['media'].isNotEmpty) {
+      userId = profileinnerpageshow['media'][0]['id'] ?? '';
+      conversationId = profileinnerpageshow['media'][0]['id'] ?? '';
+      username = profileinnerpageshow['media'][0]['firstName'] ?? '';
+      profilepicc = profileinnerpageshow['media'][0]['pr'] ?? '';
+    }
+
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -282,14 +298,17 @@ class _profileinnerpageState extends State<profileinnerpage>
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          SizedBox(height: 20,),
+                          SizedBox(
+                            height: 20,
+                          ),
                           CircleAvatar(
                             radius: 50.0,
                             backgroundImage: NetworkImage(profileinnerpageshow['media'][0]['profilePic']), // Replace with the actual URL of the profile photo
                           ),
                           SizedBox(height: 20.0),
                           Text(
-                            (profileinnerpageshow?['media']?[0]['firstName'] ?? 'loading...'),
+                            (profileinnerpageshow?['media']?[0]['firstName'] ??
+                                'loading...'),
                             style: TextStyle(
                               color: bluetext,
                               fontSize: 15.0,
@@ -305,7 +324,9 @@ class _profileinnerpageState extends State<profileinnerpage>
                                   size: 30.0,
                                   color: bluetext, // Adjust the size as needed
                                 ),
-                                SizedBox(width: 4.0), // Optional: add some space between the icon and the text
+                                SizedBox(
+                                    width:
+                                    4.0), // Optional: add some space between the icon and the text
                                 Expanded(
                                   child: Text(
                                     " They won't be able to message you through\n Rubidya, access your profile, or find any of your content",
@@ -324,11 +345,14 @@ class _profileinnerpageState extends State<profileinnerpage>
                             child: Row(
                               children: [
                                 Icon(
-                                  Icons.notifications_off_outlined, // This is the block icon
+                                  Icons
+                                      .notifications_off_outlined, // This is the block icon
                                   size: 30.0,
                                   color: bluetext, // Adjust the size as needed
                                 ),
-                                SizedBox(width: 4.0), // Optional: add some space between the icon and the text
+                                SizedBox(
+                                    width:
+                                    4.0), // Optional: add some space between the icon and the text
                                 Expanded(
                                   child: Text(
                                     " They won't be informed that you have blocked them",
@@ -357,7 +381,8 @@ class _profileinnerpageState extends State<profileinnerpage>
                               width: 350,
                               decoration: BoxDecoration(
                                 color: bluetext,
-                                borderRadius: BorderRadius.all(Radius.circular(10)),
+                                borderRadius:
+                                BorderRadius.all(Radius.circular(10)),
                               ),
                               child: Center(
                                 child: Text(
@@ -370,8 +395,10 @@ class _profileinnerpageState extends State<profileinnerpage>
                           SizedBox(height: 10.0),
                           GestureDetector(
                             onTap: () {
-                              Navigator.pop(context); // Close the current bottom sheet
-                              _showReportSheet(context); // Show the new bottom sheet
+                              Navigator.pop(
+                                  context); // Close the current bottom sheet
+                              _showReportSheet(
+                                  context); // Show the new bottom sheet
                             },
                             child: Text(
                               "Report User",
@@ -387,7 +414,6 @@ class _profileinnerpageState extends State<profileinnerpage>
                     );
                   },
                 );
-
               },
               child: Icon(Icons.more_horiz),
             ),
@@ -416,35 +442,62 @@ class _profileinnerpageState extends State<profileinnerpage>
                         alignment: Alignment.topLeft,
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(100),
-                          child: profileinnerpageshow != null &&
-                              profileinnerpageshow['media'] != null &&
-                              profileinnerpageshow['media'].isNotEmpty &&
-                              profileinnerpageshow['media'][0]
-                              ['profilePic'] !=
-                                  null
-                              ? SizedBox(
-                            width: 90,
-                            height: 90,
-                            child: Image.network(
-                              profileinnerpageshow['media'][0]
-                              ['profilePic'],
-                              fit: BoxFit.contain,
-                            ),
-                          )
-                              : Center(
-                            child: Container(
-                              height: 90,
+                          child: GestureDetector(
+                            onTap: () {
+                              // Handle the image tap event here
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => FullScreenImage(
+                                        imageUrl:
+                                        profileinnerpageshow['media']
+                                        [0]['profilePic']),
+                                  ));
+                              if (profileinnerpageshow != null &&
+                                  profileinnerpageshow['media'] != null &&
+                                  profileinnerpageshow['media']
+                                      .isNotEmpty &&
+                                  profileinnerpageshow['media'][0]
+                                  ['profilePic'] !=
+                                      null) {
+                                // Navigate to the image viewing page or perform any other action
+                                print("Image tapped!");
+                              } else {
+                                // Handle the case when there's no image
+                                print("No image to display.");
+                              }
+                            },
+                            child: profileinnerpageshow != null &&
+                                profileinnerpageshow['media'] !=
+                                    null &&
+                                profileinnerpageshow['media']
+                                    .isNotEmpty &&
+                                profileinnerpageshow['media'][0]
+                                ['profilePic'] !=
+                                    null
+                                ? SizedBox(
                               width: 90,
-                              decoration: BoxDecoration(
-                                color: grad2,
-                                borderRadius:
-                                BorderRadius.circular(100),
+                              height: 90,
+                              child: Image.network(
+                                profileinnerpageshow['media'][0]
+                                ['profilePic'],
+                                fit: BoxFit.contain,
                               ),
-                              child: Center(
-                                child: Text(
-                                  "No Img",
-                                  style:
-                                  TextStyle(color: greybg),
+                            )
+                                : Center(
+                              child: Container(
+                                height: 90,
+                                width: 90,
+                                decoration: BoxDecoration(
+                                  color: grad2,
+                                  borderRadius:
+                                  BorderRadius.circular(100),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    "No Img",
+                                    style: TextStyle(color: greybg),
+                                  ),
                                 ),
                               ),
                             ),
@@ -477,8 +530,8 @@ class _profileinnerpageState extends State<profileinnerpage>
                             ),
                           ),
                           Text("Post",
-                              style:
-                              TextStyle(fontSize: 10, color: bluetext))
+                              style: TextStyle(
+                                  fontSize: 10, color: bluetext))
                         ],
                       ),
                       InkWell(
@@ -505,8 +558,8 @@ class _profileinnerpageState extends State<profileinnerpage>
                                     fontWeight: FontWeight.w500,
                                     color: bluetext)),
                             Text("Followers",
-                                style:
-                                TextStyle(fontSize: 10, color: bluetext))
+                                style: TextStyle(
+                                    fontSize: 10, color: bluetext))
                           ],
                         ),
                       ),
@@ -535,8 +588,8 @@ class _profileinnerpageState extends State<profileinnerpage>
                                     color: bluetext)),
                             Text(
                               "Following",
-                              style:
-                              TextStyle(fontSize: 10, color: bluetext),
+                              style: TextStyle(
+                                  fontSize: 10, color: bluetext),
                             )
                           ],
                         ),
@@ -582,8 +635,10 @@ class _profileinnerpageState extends State<profileinnerpage>
               child: Align(
                 alignment: Alignment.topLeft,
                 child: Text(
-                  (profileinnerpageshow?['media']?[0]['bio'] ??
-                      'loading...'),
+                  (profileinnerpageshow?['media']?[0]['bio'] ?? '')
+                      .isEmpty
+                      ? ''
+                      : profileinnerpageshow['media'][0]['bio'],
                   style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
@@ -616,18 +671,25 @@ class _profileinnerpageState extends State<profileinnerpage>
                     ),
                   ),
                   SizedBox(width: 10),
-                  Container(
-                    height: 31,
-                    width: 150,
-                    decoration: BoxDecoration(
-                        color: conainer220,
-                        borderRadius:
-                        BorderRadius.all(Radius.circular(10))),
-                    child: Center(
-                        child: Text(
-                          "Message",
-                          style: TextStyle(fontSize: 10, color: bluetext),
-                        )),
+                  GestureDetector(
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ChatPage( userId: userId, userName: username,
+                        conversationId: conversationId,)),
+                    ),
+                    child: Container(
+                      height: 31,
+                      width: 150,
+                      decoration: BoxDecoration(
+                          color: conainer220,
+                          borderRadius:
+                          BorderRadius.all(Radius.circular(10))),
+                      child: Center(
+                          child: Text(
+                            "Message",
+                            style: TextStyle(fontSize: 10, color: bluetext),
+                          )),
+                    ),
                   ),
                   SizedBox(width: 10),
                 ],
@@ -636,15 +698,13 @@ class _profileinnerpageState extends State<profileinnerpage>
             SizedBox(height: 20),
             Container(
               height: 30,
-              decoration: BoxDecoration(
-                  color: white,
-                  boxShadow: [
-                    BoxShadow(
-                      color: white1,
-                      blurRadius: 1.0,
-                      offset: Offset(1, 0),
-                    ),
-                  ]),
+              decoration: BoxDecoration(color: white, boxShadow: [
+                BoxShadow(
+                  color: white1,
+                  blurRadius: 1.0,
+                  offset: Offset(1, 0),
+                ),
+              ]),
               child: TabBar(
                 controller: _tabController,
                 labelColor: bluetext,
@@ -690,8 +750,7 @@ class _profileinnerpageState extends State<profileinnerpage>
                           onTap: () {
                             List<dynamic> imageUrls =
                             profileinnerpageshow['media']
-                                .map((item) =>
-                            item['filePath'])
+                                .map((item) => item['filePath'])
                                 .toList();
                             int selectedIndex = index;
                             _showFullScreenImage(
@@ -709,16 +768,18 @@ class _profileinnerpageState extends State<profileinnerpage>
                                 child: Container(
                                   width: 112,
                                   height: 300,
-                                  child: profileinnerpageshow['media']
-                                  [index] !=
+                                  child: profileinnerpageshow[
+                                  'media'][index] !=
                                       null &&
-                                      profileinnerpageshow['media']
+                                      profileinnerpageshow[
+                                      'media']
                                       [index]
                                       ['filePath'] !=
                                           null
                                       ? Image.network(
-                                    profileinnerpageshow['media']
-                                    [index]['filePath'],
+                                    profileinnerpageshow[
+                                    'media'][index]
+                                    ['filePath'],
                                     fit: BoxFit.fill,
                                   )
                                       : Image.network(
@@ -776,8 +837,7 @@ class _profileinnerpageState extends State<profileinnerpage>
                           ? CircularProgressIndicator()
                           : Text(
                         "No images available",
-                        style:
-                        TextStyle(color: Colors.black),
+                        style: TextStyle(color: Colors.black),
                       ),
                     ),
                   ),
@@ -791,16 +851,6 @@ class _profileinnerpageState extends State<profileinnerpage>
     );
   }
 }
-
-
-
-
-
-
-
-
-
-
 
 class FullScreenImageDialog extends StatefulWidget {
   final List<dynamic> imageUrls;
@@ -950,8 +1000,10 @@ class _FullScreenImageDialogState extends State<FullScreenImageDialog> {
                                           fontSize: 15,
                                           fontWeight: FontWeight.w500),
                                     ),
+
                                   ],
                                 ),
+
                                 Expanded(child: SizedBox()),
                                 Padding(
                                   padding: const EdgeInsets.symmetric(
@@ -1037,24 +1089,6 @@ class _FullScreenImageDialogState extends State<FullScreenImageDialog> {
                                   ),
                                 ],
                               ),
-                              // Row(
-                              //   children: [
-                              //     Text("Likes",
-                              //         style: TextStyle(
-                              //             color: Colors.blue, fontSize: 10)),
-                              //     Text(
-                              //       widget.profileList['media'][index]
-                              //               ['likeCount']
-                              //           .toString(),
-                              //       style: TextStyle(
-                              //         color: Colors.blue,
-                              //         fontSize: 13,
-                              //         fontWeight: FontWeight.w700,
-                              //       ),
-                              //     ),
-                              //     SizedBox(width: 2),
-                              //   ],
-                              // ),
 
                               SizedBox(
                                 height: 10,
@@ -1093,7 +1127,7 @@ class _FullScreenImageDialogState extends State<FullScreenImageDialog> {
                                   ),
                                   SizedBox(width: 2),
                                   Text(
-                                      "${widget.profileList['media'][index]['likeCount'].toString()}",
+                                      "${widget.profileList['media'][index]['likeCount'] - 1}",
                                       style: TextStyle(
                                           color: bluetext,
                                           fontSize: 13,
@@ -1101,7 +1135,6 @@ class _FullScreenImageDialogState extends State<FullScreenImageDialog> {
                                   SizedBox(width: 2),
                                 ],
                               ),
-
 
                               InkWell(
                                 onTap: () {
@@ -1154,87 +1187,54 @@ class _FullScreenImageDialogState extends State<FullScreenImageDialog> {
                           ),
                         ),
                         SizedBox(height: 5),
-                        // Align(
-                        //   alignment: Alignment.topLeft,
-                        //   child: Padding(
-                        //     padding: const EdgeInsets.symmetric(horizontal: 15),
-                        //     child: Container(
-                        //       height: isExpanded ? null : 40,
-                        //       // Adjust height when expanded
-                        //       child: Text(
-                        //         widget.profileList['media'][index]
-                        //         ['description'],
-                        //         maxLines: isExpanded ? null : 2,
-                        //         style: TextStyle(
-                        //             fontSize: 12, fontWeight: FontWeight.w700),
-                        //       ),
-                        //     ),
-                        //   ),
-                        // ),
-                        // if (widget.profileList['media'][index]['description']
-                        //     .split('\n')
-                        //     .length >
-                        //     2) // Check for multiline
-                        //   GestureDetector(
-                        //     onTap: () {
-                        //       setState(() {
-                        //         isExpanded =
-                        //         !isExpanded; // Toggle the isExpanded state
-                        //       });
-                        //     },
-                        //     child: Padding(
-                        //       padding:
-                        //       const EdgeInsets.symmetric(horizontal: 10),
-                        //       child: Align(
-                        //         alignment: Alignment.bottomRight,
-                        //         child: Text(
-                        //           isExpanded ? 'See Less' : 'See More',
-                        //           style:
-                        //           TextStyle(color: bluetext, fontSize: 8),
-                        //         ),
-                        //       ),
-                        //     ),
-                        //   ),
-
 
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 10),
                           child: Align(
                             alignment: Alignment.topLeft,
                             child: Container(
-
-                              height: isExpanded ? null : 40, // Adjust height when expanded
+                              height: isExpanded
+                                  ? null
+                                  : 40, // Adjust height when expanded
                               child: Linkify(
                                 onOpen: _onOpen,
-                                text: widget.profileList['media'][index]['description'],
+                                text: widget.profileList['media'][index]
+                                ['description'],
                                 maxLines: isExpanded ? null : 2,
-                                overflow: isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
-                                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                                overflow: isExpanded
+                                    ? TextOverflow.visible
+                                    : TextOverflow.ellipsis,
+                                style: TextStyle(
+                                    fontSize: 12, fontWeight: FontWeight.w700),
                                 linkStyle: TextStyle(color: Colors.blue),
                               ),
                             ),
                           ),
                         ),
-                        if (widget.profileList['media'][index]['description'].split('\n').length > 2) // Check for multiline
+                        if (widget.profileList['media'][index]['description']
+                            .split('\n')
+                            .length >
+                            2) // Check for multiline
                           GestureDetector(
                             onTap: () {
                               setState(() {
-                                isExpanded = !isExpanded; // Toggle the isExpanded state
+                                isExpanded =
+                                !isExpanded; // Toggle the isExpanded state
                               });
                             },
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 10),
+                              padding:
+                              const EdgeInsets.symmetric(horizontal: 10),
                               child: Align(
                                 alignment: Alignment.bottomRight,
                                 child: Text(
                                   isExpanded ? 'See Less' : 'See More ',
-                                  style: TextStyle(color: Colors.blue, fontSize: 8),
+                                  style: TextStyle(
+                                      color: Colors.blue, fontSize: 8),
                                 ),
                               ),
                             ),
                           ),
-
-
                       ],
                     ),
                   ),
@@ -1254,7 +1254,6 @@ class _FullScreenImageDialogState extends State<FullScreenImageDialog> {
       throw 'Could not launch ${link.url}';
     }
   }
-
 }
 
 void _showFullScreenImage(BuildContext context, List<dynamic> imageUrls,
@@ -1276,4 +1275,28 @@ void _showFullScreenImage(BuildContext context, List<dynamic> imageUrls,
       );
     },
   );
+}
+
+class FullScreenImage extends StatelessWidget {
+  final String imageUrl;
+
+  FullScreenImage({required this.imageUrl});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: GestureDetector(
+        onTap: () {
+          Navigator.pop(context);
+        },
+        child: Center(
+          child: Hero(
+            tag: 'profileImage',
+            child: Image.network(imageUrl),
+          ),
+        ),
+      ),
+    );
+  }
 }

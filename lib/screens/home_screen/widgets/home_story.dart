@@ -1,14 +1,15 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:rubidya/resources/color.dart';
-import 'package:rubidya/services/home_service.dart';
-import 'package:story/story.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:dio/dio.dart';
-import 'package:video_trimmer/video_trimmer.dart';
-import '../../../navigation/bottom_navigation.dart';
-import '../../../services/upload_image.dart';
+import 'package:story/story.dart';
+
+import 'package:image_picker/image_picker.dart';
+import 'package:rubidya/services/home_service.dart';
+import 'package:rubidya/services/upload_image.dart';
 import 'package:video_player/video_player.dart';
+import 'package:flutter/services.dart';
+import 'package:video_trimmer/video_trimmer.dart';
+import 'package:rubidya/navigation/bottom_navigation.dart';
 
 class HomeStory extends StatefulWidget {
   const HomeStory({Key? key}) : super(key: key);
@@ -107,8 +108,7 @@ class _HomeStoryState extends State<HomeStory> {
           );
 
           Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(
-                builder: (context) => Bottomnav(initialPageIndex: 0)),
+            MaterialPageRoute(builder: (context) => Bottomnav(initialPageIndex: 0)),
                 (route) => false,
           );
           print(response['msg']);
@@ -158,30 +158,35 @@ class _HomeStoryState extends State<HomeStory> {
       storiesByUser[userId]!.add(story);
     });
 
-    // If there are no stories, display a user profile icon
+    // If there are no stories, display "Your Story" option
     if (storiesByUser.isEmpty) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          ClipOval(
-            child: Container(
-              color: Colors.grey,
-              height: 60,
-              width: 60,
-              child: Icon(
-                Icons.person,
-                size: 40,
-                color: Colors.white,
+      return GestureDetector(
+        onTap: uploadVideo,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+          child: Column(
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: Colors.grey,
+                    width: 1,
+                  ),
+                ),
+                height: 60,
+                width: 60,
+                child: Icon(
+                  Icons.add,
+                  size: 40,
+                  color: Colors.grey,
+                ),
               ),
-            ),
+              SizedBox(height: 8),
+              Text("Your Story", style: TextStyle(fontSize: 12)),
+            ],
           ),
-          SizedBox(height: 2),
-          Text(
-            "  No stories ",
-            style: TextStyle(fontSize: 10),
-          ),
-        ],
+        ),
       );
     }
 
@@ -262,8 +267,8 @@ class _HomeStoryState extends State<HomeStory> {
                               width: 1,
                             ),
                             color: userStories.first['seen']
-                                ? blueshade
-                                : bluetext,
+                                ? Colors.blue.shade200
+                                : Colors.blue,
                           ),
                         ),
                       ),
@@ -409,15 +414,16 @@ class _UserStoriesScreenState extends State<UserStoriesScreen> {
                         width: 32,
                         decoration: BoxDecoration(
                           image: DecorationImage(
-                            image: story['profilePic'] != null && story['profilePic']['filePath'] != null
+                            image: story['profilePic'] != null &&
+                                story['profilePic']['filePath'] != null
                                 ? NetworkImage(story['profilePic']['filePath'])
-                                : NetworkImage("https://play-lh.googleusercontent.com/4HZhLFCcIjgfbXoVj3mgZdQoKO2A_z-uX2gheF5yNCkb71wzGqwobr9muj8I05Nc8u8=w240-h480-rw"), // Use the specified URL
+                                : NetworkImage(
+                                "https://play-lh.googleusercontent.com/4HZhLFCcIjgfbXoVj3mgZdQoKO2A_z-uX2gheF5yNCkb71wzGqwobr9muj8I05Nc8u8=w240-h480-rw"),
                             fit: BoxFit.cover,
                           ),
                           shape: BoxShape.circle,
                         ),
                       ),
-
                       const SizedBox(
                         width: 8,
                       ),

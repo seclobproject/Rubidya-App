@@ -25,9 +25,6 @@ import 'dart:io' as io;
 import 'package:image_cropper/image_cropper.dart';
 import 'dart:io';
 
-
-
-
 class ProfileView extends StatefulWidget {
   const ProfileView({Key? key}) : super(key: key);
 
@@ -37,7 +34,6 @@ class ProfileView extends StatefulWidget {
 
 class _ProfileViewState extends State<ProfileView> {
   int _currentIndex = 0;
-
 
   late TabController _tabController;
 
@@ -91,7 +87,6 @@ class _ProfileViewState extends State<ProfileView> {
     });
   }
 
-
   Future<void> logout() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.remove('token');
@@ -99,8 +94,6 @@ class _ProfileViewState extends State<ProfileView> {
     Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (context) => login()), (route) => false);
   }
-
-
 
   Future<void> pickImages() async {
     if (isUploading) return; // Prevent picking images during upload
@@ -117,7 +110,6 @@ class _ProfileViewState extends State<ProfileView> {
       }
     }
   }
-
 
   bool isUploading = false;
 // Modify the uploadImage() function to upload the selected image
@@ -148,11 +140,11 @@ class _ProfileViewState extends State<ProfileView> {
       print("Exception during image upload: $e");
     } finally {
       setState(() {
-        isUploading = false; // Reset upload state regardless of success or failure
+        isUploading =
+        false; // Reset upload state regardless of success or failure
       });
     }
   }
-
 
   Future<io.File?> _cropImage(String imagePath) async {
     // Show loading indicator
@@ -191,7 +183,6 @@ class _ProfileViewState extends State<ProfileView> {
     return croppedFile != null ? io.File(croppedFile.path) : null;
   }
 
-
   Future<void> _refresh() async {
     await _profiledetailsapi();
     await _profileimgget();
@@ -200,8 +191,6 @@ class _ProfileViewState extends State<ProfileView> {
     });
     uploadImage();
   }
-
-
 
   Future _initLoad() async {
     await Future.wait(
@@ -227,7 +216,6 @@ class _ProfileViewState extends State<ProfileView> {
     _tabController.dispose();
   }
 
-
   @override
   Widget build(BuildContext context) {
     return RefreshIndicator(
@@ -247,29 +235,24 @@ class _ProfileViewState extends State<ProfileView> {
                 style: TextStyle(fontSize: 14),
               ),
               actions: <Widget>[
-
                 InkWell(
-                  onTap: (){
+                  onTap: () {
                     // Share.share("https://rubidya.com/register/$userid");
 
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) =>  referralpage()),
+                      MaterialPageRoute(builder: (context) => referralpage()),
                     );
-
-
 
                     // Navigator.push(
                     //   context,
                     //   MaterialPageRoute(builder: (context) =>  MyHomePages()),
                     // );
-
                   },
                   child: SvgPicture.asset(
                     "assets/svg/reffer.svg",
                   ),
                 ),
-
 
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -320,12 +303,16 @@ class _ProfileViewState extends State<ProfileView> {
                                 // ),
 
                                 Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 40),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 40),
                                   child: Align(
                                     alignment: Alignment.topLeft,
                                     child: InkWell(
-                                      onTap: (){
-                                        Navigator.of(context).push(MaterialPageRoute(builder: (context) => TermsAndConditions()));
+                                      onTap: () {
+                                        Navigator.of(context).push(
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    TermsAndConditions()));
                                       },
                                       child: Row(
                                         children: [
@@ -352,14 +339,17 @@ class _ProfileViewState extends State<ProfileView> {
                                   height: 25,
                                 ),
 
-
                                 Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 40),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 40),
                                   child: Align(
                                     alignment: Alignment.topLeft,
                                     child: InkWell(
-                                      onTap: (){
-                                        Navigator.of(context).push(MaterialPageRoute(builder: (context) => Saved_items()));
+                                      onTap: () {
+                                        Navigator.of(context).push(
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    Saved_items()));
                                       },
                                       child: Row(
                                         children: [
@@ -486,18 +476,19 @@ class _ProfileViewState extends State<ProfileView> {
                                     logout();
                                   },
                                   child: Padding(
-                                    padding:
-                                    const EdgeInsets.symmetric(horizontal: 40),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 40),
                                     child: Container(
                                       height: 40,
                                       width: 400,
                                       decoration: BoxDecoration(
-                                          borderRadius:
-                                          BorderRadius.all(Radius.circular(10)),
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(10)),
                                           color: bluetext),
                                       child: Center(
                                           child: Row(
-                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            mainAxisAlignment:
+                                            MainAxisAlignment.center,
                                             children: [
                                               SvgPicture.asset(
                                                 "assets/svg/logout.svg",
@@ -516,7 +507,9 @@ class _ProfileViewState extends State<ProfileView> {
                                   ),
                                 ),
 
-                                SizedBox(height: 40,),
+                                SizedBox(
+                                  height: 40,
+                                ),
                               ],
                             ),
                           );
@@ -540,11 +533,9 @@ class _ProfileViewState extends State<ProfileView> {
               ],
               //<Widget>[]
               backgroundColor: white,
-
             ),
             body: Column(
               children: [
-
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -564,10 +555,14 @@ class _ProfileViewState extends State<ProfileView> {
                                   width: 90,
                                   height: 90,
                                   child: profileimgshow != null &&
-                                      profileimgshow['profilePic'] != null &&
-                                      profileimgshow['profilePic']['filePath'] != null
+                                      profileimgshow['profilePic'] !=
+                                          null &&
+                                      profileimgshow['profilePic']
+                                      ['filePath'] !=
+                                          null
                                       ? Image.network(
-                                    profileimgshow['profilePic']['filePath'],
+                                    profileimgshow['profilePic']
+                                    ['filePath'],
                                     fit: BoxFit.cover,
                                   )
                                       : Center(
@@ -576,7 +571,8 @@ class _ProfileViewState extends State<ProfileView> {
                                       width: 90,
                                       decoration: BoxDecoration(
                                           color: grad2,
-                                          borderRadius: BorderRadius.all(Radius.circular(100))),
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(100))),
                                       child: Center(
                                           child: Text(
                                             "No Img",
@@ -589,17 +585,13 @@ class _ProfileViewState extends State<ProfileView> {
                             ),
                           ),
                         ),
-
                       ],
                     ),
-
-
                     Container(
                       width: 250.0,
                       height: 64.0,
                       decoration: BoxDecoration(
-                          borderRadius:
-                          BorderRadius.all(Radius.circular(10))),
+                          borderRadius: BorderRadius.all(Radius.circular(10))),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
@@ -609,7 +601,8 @@ class _ProfileViewState extends State<ProfileView> {
                                 height: 10,
                               ),
                               Text(
-                                postcount != null && postcount['postCount'] != null
+                                postcount != null &&
+                                    postcount['postCount'] != null
                                     ? postcount['postCount'].toString()
                                     : '0', // Default value if postcount or postCount is null
                                 style: TextStyle(
@@ -619,25 +612,24 @@ class _ProfileViewState extends State<ProfileView> {
                                 ),
                               ),
                               Text("Post",
-                                  style: TextStyle(
-                                      fontSize: 10, color: bluetext))
+                                  style:
+                                  TextStyle(fontSize: 10, color: bluetext))
                             ],
                           ),
                           InkWell(
                             onTap: () {
-
-                              Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          FollowersList()));
+                              Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) => FollowersList()));
                             },
                             child: Column(
                               children: [
                                 SizedBox(
                                   height: 10,
                                 ),
-                                Text((profiledetails?['user']?['followersCount'].toString() ??
-                                    'loading...'),
+                                Text(
+                                    (profiledetails?['user']?['followersCount']
+                                        .toString() ??
+                                        '0'),
                                     style: TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.w500,
@@ -650,26 +642,26 @@ class _ProfileViewState extends State<ProfileView> {
                           ),
                           InkWell(
                             onTap: () {
-                              Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          FollowingList()));
+                              Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) => FollowingList()));
                             },
                             child: Column(
                               children: [
                                 SizedBox(
                                   height: 10,
                                 ),
-                                Text((profiledetails?['user']?['followingCount'].toString() ??
-                                    'loading...'),
+                                Text(
+                                    (profiledetails?['user']?['followingCount']
+                                        .toString() ??
+                                        '0'),
                                     style: TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.w500,
                                         color: bluetext)),
                                 Text(
                                   "Following",
-                                  style: TextStyle(
-                                      fontSize: 10, color: bluetext),
+                                  style:
+                                  TextStyle(fontSize: 10, color: bluetext),
                                 )
                               ],
                             ),
@@ -679,10 +671,9 @@ class _ProfileViewState extends State<ProfileView> {
                     ),
                   ],
                 ),
-
-
-                SizedBox(height: 10,),
-
+                SizedBox(
+                  height: 10,
+                ),
                 Row(
                   children: [
                     Padding(
@@ -699,11 +690,11 @@ class _ProfileViewState extends State<ProfileView> {
                         ),
                       ),
                     ),
-                    SizedBox(width: 5,),
-
+                    SizedBox(
+                      width: 5,
+                    ),
                     Text(
-                      (profiledetails?['user']?['lastName'] ??
-                          'loading...'),
+                      (profiledetails?['user']?['lastName'] ?? 'loading...'),
                       style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
@@ -711,28 +702,23 @@ class _ProfileViewState extends State<ProfileView> {
                     ),
                   ],
                 ),
-
-
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Align(
                     alignment: Alignment.topLeft,
-                    child: Text(
-                        (profiledetails?['user']?['bio'] ?? ''),
+                    child: Text((profiledetails?['user']?['bio'] ?? ''),
                         style: TextStyle(
                             color: bluetext,
                             fontSize: 12,
                             fontWeight: FontWeight.w200),
-                        textAlign:
-                        TextAlign.center, // Center-align the text
+                        textAlign: TextAlign.center, // Center-align the text
                         overflow: TextOverflow.ellipsis,
-                        maxLines:3
-                    ),
+                        maxLines: 3),
                   ),
                 ),
-
-                SizedBox(height: 10,),
-
+                SizedBox(
+                  height: 10,
+                ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Row(
@@ -743,36 +729,27 @@ class _ProfileViewState extends State<ProfileView> {
                           Navigator.of(context).push(MaterialPageRoute(
                             builder: (context) => editprofile(
                               bio: profiledetails['user']['bio'] ?? "",
-                              firstname: profiledetails['user']
-                              ['firstName'] ??
-                                  "",
-                              lastName: profiledetails['user']
-                              ['lastName'] ??
-                                  "",
-                              countryCode: profiledetails['user']
-                              ['countryCode']
+                              firstname:
+                              profiledetails['user']['firstName'] ?? "",
+                              lastName:
+                              profiledetails['user']['lastName'] ?? "",
+                              countryCode: profiledetails['user']['countryCode']
                                   ?.toString() ??
                                   "",
-                              phone: profiledetails['user']['phone']
-                                  ?.toString() ??
+                              phone:
+                              profiledetails['user']['phone']?.toString() ??
                                   "",
-                              email:
-                              profiledetails['user']['email'] ?? "",
+                              email: profiledetails['user']['email'] ?? "",
                               // dateOfBirth: profiledetails['user']
                               //         ['updatedDOB'] ??
                               //     "",
-                              gender: profiledetails['user']
-                              ['gender'] ??
-                                  "",
-                              location: profiledetails['user']
-                              ['location'] ??
-                                  "",
-                              profession: profiledetails['user']
-                              ['profession'] ??
-                                  "",
-                              district: profiledetails['user']
-                              ['district'] ??
-                                  "",
+                              gender: profiledetails['user']['gender'] ?? "",
+                              location:
+                              profiledetails['user']['location'] ?? "",
+                              profession:
+                              profiledetails['user']['profession'] ?? "",
+                              district:
+                              profiledetails['user']['district'] ?? "",
                             ),
                           ));
                         },
@@ -781,13 +758,12 @@ class _ProfileViewState extends State<ProfileView> {
                           width: 110,
                           decoration: BoxDecoration(
                               color: conainer220,
-                              borderRadius: BorderRadius.all(
-                                  Radius.circular(10))),
+                              borderRadius:
+                              BorderRadius.all(Radius.circular(10))),
                           child: Center(
                               child: Text(
                                 "Edit profile",
-                                style: TextStyle(
-                                    fontSize: 10, color: bluetext),
+                                style: TextStyle(fontSize: 10, color: bluetext),
                               )),
                         ),
                       ),
@@ -795,10 +771,11 @@ class _ProfileViewState extends State<ProfileView> {
                         width: 10,
                       ),
                       InkWell(
-                        onTap: (){
+                        onTap: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => contactpage()),
+                            MaterialPageRoute(
+                                builder: (context) => contactpage()),
                           );
                         },
                         child: Container(
@@ -811,8 +788,7 @@ class _ProfileViewState extends State<ProfileView> {
                           child: Center(
                               child: Text(
                                 "Contact",
-                                style:
-                                TextStyle(fontSize: 10, color: bluetext),
+                                style: TextStyle(fontSize: 10, color: bluetext),
                               )),
                         ),
                       ),
@@ -820,9 +796,6 @@ class _ProfileViewState extends State<ProfileView> {
                       SizedBox(
                         width: 10,
                       ),
-
-
-
 
                       // profiledetails?['user']['isVerified'] == true
                       //     ? InkWell(
@@ -875,37 +848,27 @@ class _ProfileViewState extends State<ProfileView> {
                       // ),
 
                       InkWell(
-                        onTap: (){
-                          Navigator.of(context).push(
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      MyWallet()));
+                        onTap: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => MyWallet()));
                         },
                         child: Container(
                           height: 31,
                           width: 110,
                           decoration: BoxDecoration(
                               color: blueshade,
-                              borderRadius: BorderRadius.all(
-                                  Radius.circular(10))),
+                              borderRadius:
+                              BorderRadius.all(Radius.circular(10))),
                           child: Center(
                               child: Text(
                                 "Wallet",
-                                style: TextStyle(
-                                    color: white, fontSize: 12),
+                                style: TextStyle(color: white, fontSize: 12),
                               )),
                         ),
                       ),
-
-
-
                     ],
                   ),
                 ),
-
-
-
-
                 Expanded(
                   child: SingleChildScrollView(
                     child: Column(
@@ -920,18 +883,21 @@ class _ProfileViewState extends State<ProfileView> {
                             Tab(
                               child: Text(
                                 'Photo',
-                                style: TextStyle(fontSize: 12), // Adjust the font size as needed
+                                style: TextStyle(
+                                    fontSize:
+                                    12), // Adjust the font size as needed
                               ),
                             ),
                             Tab(
                               child: Text(
                                 'Video',
-                                style: TextStyle(fontSize: 12), // Adjust the font size as needed
+                                style: TextStyle(
+                                    fontSize:
+                                    12), // Adjust the font size as needed
                               ),
                             ),
                           ],
                         ),
-
                         SizedBox(
                           height: MediaQuery.of(context).size.height - 400,
                           child: TabBarView(
