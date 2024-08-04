@@ -672,11 +672,11 @@ class _profileinnerpageState extends State<profileinnerpage>
                   ),
                   SizedBox(width: 10),
                   GestureDetector(
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => ChatPage( userId: userId, userName: username,
-                        conversationId: conversationId,)),
-                    ),
+                    // onTap: () => Navigator.push(
+                    //   context,
+                    //   MaterialPageRoute(builder: (context) => ChatPage( userId: userId, userName: username,
+                    //     conversationId: conversationId,)),
+                    // ),
                     child: Container(
                       height: 31,
                       width: 150,

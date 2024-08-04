@@ -5,18 +5,20 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import '../../resources/color.dart';
 import '../../services/chat_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ChatPage extends StatefulWidget {
   final String userId;
-  final String userName;
-  final String? profilePic;
   final String conversationId;
+  final String userName;
+  final String profilePic;
+
+
 
   ChatPage(
-      {required this.userId,
-        required this.userName,
-        this.profilePic,
-        required this.conversationId});
+      {
+        required this.userId,
+      required this.conversationId,required this.userName,required this.profilePic,});
 
   @override
   _ChatPageState createState() => _ChatPageState();
@@ -28,15 +30,16 @@ class _ChatPageState extends State<ChatPage> {
   Timer? _timer;
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _messageController =
-  TextEditingController(); // Controller for text input
+      TextEditingController(); // Controller for text input
 
   @override
   void initState() {
     super.initState();
     fetchMessages(widget.conversationId);
-    _timer = Timer.periodic(Duration(seconds: 2), (timer) {
-      fetchMessages(widget.conversationId);
-    });
+    // _timer = Timer.periodic(Duration(seconds: 2), (timer) {
+    //   fetchMessages(widget.conversationId);
+    // });
+    fetchMessages(widget.conversationId);
   }
 
   @override
@@ -52,8 +55,8 @@ class _ChatPageState extends State<ChatPage> {
       await ChatService.getMessages(conversationId, page: 1, limit: 10);
       print("Fetched data: $data");
       setState(() {
-        messages =
-            List<Map<String, dynamic>>.from(data['messages']).reversed.toList();
+        messages = List<Map<String, dynamic>>.from(data['messages']);
+        messages = messages.reversed.toList();
         isLoading = false;
       });
       WidgetsBinding.instance!.addPostFrameCallback((_) {
@@ -70,9 +73,18 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   Future<void> sendMessage(String message) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? loginId = prefs.getString('userid');
+
+    print('$loginId');
+    if (loginId == null) {
+      print("No login ID found in SharedPreferences");
+      return;
+    }
+
     try {
       var response = await ChatService.sendMessage(
-          widget.userId, message, widget.conversationId);
+          loginId, message, widget.userId);
       print("Message sent successfully: $response");
 
       _messageController.clear();
@@ -82,6 +94,8 @@ class _ChatPageState extends State<ChatPage> {
       print("Error sending message: $e");
     }
   }
+
+
 
   Widget _buildMessage(Map<String, dynamic> message, bool isMe) {
     final alignment = isMe ? CrossAxisAlignment.start : CrossAxisAlignment.end;
@@ -168,13 +182,13 @@ class _ChatPageState extends State<ChatPage> {
                       width: 42,
                       child: widget.profilePic != null
                           ? Image.network(
-                        widget.profilePic!,
-                        fit: BoxFit.cover,
-                      )
+                              widget.profilePic!,
+                              fit: BoxFit.cover,
+                            )
                           : Image.network(
-                        'https://play-lh.googleusercontent.com/4HZhLFCcIjgfbXoVj3mgZdQoKO2A_z-uX2gheF5yNCkb71wzGqwobr9muj8I05Nc8u8=w600-h300-pc0xffffff-pd',
-                        fit: BoxFit.cover,
-                      ),
+                              'https://play-lh.googleusercontent.com/4HZhLFCcIjgfbXoVj3mgZdQoKO2A_z-uX2gheF5yNCkb71wzGqwobr9muj8I05Nc8u8=w600-h300-pc0xffffff-pd',
+                              fit: BoxFit.cover,
+                            ),
                     ),
                   ),
                   SizedBox(width: 20),
@@ -205,84 +219,82 @@ class _ChatPageState extends State<ChatPage> {
               SizedBox(height: 5)
             ],
           ),
-          actions: [
-
-            SizedBox(width: 20)],
+          actions: [SizedBox(width: 20)],
         ),
       ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : Column(
-        children: <Widget>[
-          Expanded(
-            child: ListView.builder(
-              controller: _scrollController,
-              padding: EdgeInsets.all(10),
-              itemCount: messages.length,
-              itemBuilder: (context, index) {
-                final isMe = messages[index]['senderId'] == widget.userId;
-                return _buildMessage(messages[index], isMe);
-              },
-            ),
-          ),
-          Padding(
-            padding:
-            const EdgeInsets.only(left: 10, right: 10, bottom: 10),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: Container(
-                height: 40,
-                color: Color(0x3AA3D4FF),
-                child: Row(
-                  children: <Widget>[
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 10),
-                        child: TextField(
-                          controller: _messageController,
-                          decoration: InputDecoration.collapsed(
-                            hintText: 'Message',
-                            hintStyle: TextStyle(
-                              color: Color(0xff8996BC),
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400,
+              children: <Widget>[
+                Expanded(
+                  child: ListView.builder(
+                    controller: _scrollController,
+                    padding: EdgeInsets.all(10),
+                    itemCount: messages.length,
+                    itemBuilder: (context, index) {
+                      final isMe = messages[index]['senderId'] == widget.userId;
+                      return _buildMessage(messages[index], isMe);
+                    },
+                  ),
+                ),
+                Padding(
+                  padding:
+                      const EdgeInsets.only(left: 10, right: 10, bottom: 10),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Container(
+                      height: 40,
+                      color: Color(0x3AA3D4FF),
+                      child: Row(
+                        children: <Widget>[
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.only(left: 10),
+                              child: TextField(
+                                controller: _messageController,
+                                decoration: InputDecoration.collapsed(
+                                  hintText: 'Message',
+                                  hintStyle: TextStyle(
+                                    color: Color(0xff8996BC),
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                ),
+                                textCapitalization:
+                                    TextCapitalization.sentences,
+                              ),
                             ),
                           ),
-                          textCapitalization:
-                          TextCapitalization.sentences,
-                        ),
+                          SvgPicture.asset(
+                            'assets/svg/Vector.svg',
+                            height: 20,
+                            width: 20,
+                          ),
+                          SizedBox(width: 10),
+                          GestureDetector(
+                            onTap: () {
+                              String message = _messageController.text.trim();
+                              if (message.isNotEmpty) {
+                                sendMessage(message);
+                              }
+                            },
+                            child: CircleAvatar(
+                              radius: 15,
+                              backgroundColor: bluetext,
+                              child: Icon(
+                                Icons.send,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 10),
+                        ],
                       ),
                     ),
-                    SvgPicture.asset(
-                      'assets/svg/Vector.svg',
-                      height: 20,
-                      width: 20,
-                    ),
-                    SizedBox(width: 10),
-                    GestureDetector(
-                      onTap: () {
-                        String message = _messageController.text.trim();
-                        if (message.isNotEmpty) {
-                          sendMessage(message);
-                        }
-                      },
-                      child: CircleAvatar(
-                        radius: 15,
-                        backgroundColor: bluetext,
-                        child: Icon(
-                          Icons.send,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 10),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
-          ),
-        ],
-      ),
     );
   }
 }

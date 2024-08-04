@@ -1,0 +1,1 @@
+enum ContentLoadingStatus { initial, loading, refreshing, completed, error }

@@ -103,6 +103,8 @@
         android:label="rubidya"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        android:enableOnBackInvokedCallback="true">
+
         <service
             android:name="be.tramckrijte.workmanager.WorkManagerTask"
             android:permission="android.permission.BIND_JOB_SERVICE"

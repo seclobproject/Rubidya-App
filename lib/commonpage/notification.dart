@@ -11,7 +11,8 @@ class NotificationPage extends StatefulWidget {
   State<NotificationPage> createState() => _NotificationPageState();
 }
 
-class _NotificationPageState extends State<NotificationPage> with SingleTickerProviderStateMixin {
+class _NotificationPageState extends State<NotificationPage>
+    with SingleTickerProviderStateMixin {
   List<dynamic> activityNotifications = [];
   List<dynamic> referralNotifications = [];
   bool isLoading = true;
@@ -44,7 +45,8 @@ class _NotificationPageState extends State<NotificationPage> with SingleTickerPr
   }
 
   void _activityScrollListener() {
-    if (_activityScrollController.position.pixels == _activityScrollController.position.maxScrollExtent &&
+    if (_activityScrollController.position.pixels ==
+        _activityScrollController.position.maxScrollExtent &&
         !_isFetchingMoreActivity &&
         !_isLastPageActivity) {
       _fetchActivityNotifications();
@@ -52,7 +54,8 @@ class _NotificationPageState extends State<NotificationPage> with SingleTickerPr
   }
 
   void _referralScrollListener() {
-    if (_referralScrollController.position.pixels == _referralScrollController.position.maxScrollExtent &&
+    if (_referralScrollController.position.pixels ==
+        _referralScrollController.position.maxScrollExtent &&
         !_isFetchingMoreReferral &&
         !_isLastPageReferral) {
       _fetchReferralNotifications();
@@ -75,11 +78,13 @@ class _NotificationPageState extends State<NotificationPage> with SingleTickerPr
     });
 
     try {
-      var response = await HomeService.getActivityNotification(page: _activityPage, limit: 10);
+      var response = await HomeService.getActivityNotification(
+          page: _activityPage, limit: 10);
       log.i('Activity API Request: page $_activityPage');
       log.i('Activity API Response: $response');
 
-      if (response['notifications'] != null && response['notifications'].isNotEmpty) {
+      if (response['notifications'] != null &&
+          response['notifications'].isNotEmpty) {
         setState(() {
           activityNotifications.addAll(response['notifications']);
           if (response['notifications'].length < 10) {
@@ -118,11 +123,13 @@ class _NotificationPageState extends State<NotificationPage> with SingleTickerPr
     });
 
     try {
-      var response = await HomeService.getReferalNotification(page: _referralPage, limit: 10);
+      var response = await HomeService.getReferalNotification(
+          page: _referralPage, limit: 10);
       log.i('Referral API Request: page $_referralPage');
       log.i('Referral API Response: $response');
 
-      if (response['notifications'] != null && response['notifications'].isNotEmpty) {
+      if (response['notifications'] != null &&
+          response['notifications'].isNotEmpty) {
         setState(() {
           referralNotifications.addAll(response['notifications']);
           if (response['notifications'].length < 10) {
@@ -146,8 +153,8 @@ class _NotificationPageState extends State<NotificationPage> with SingleTickerPr
   }
 
   String formatTime(String dateTime) {
-    DateTime time = DateTime.parse(dateTime);
-    return DateFormat.yMMMd().add_jm().format(time);
+    DateTime time = DateTime.parse(dateTime).toLocal(); // Convert to local time
+    return DateFormat.yMMMd().add_jm().format(time); // Format the time
   }
 
   @override
@@ -229,7 +236,8 @@ class NotificationListView extends StatelessWidget {
               ),
               title: Text(
                 notification['user'],
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+                style:
+                TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
               ),
               subtitle: Text(
                 notification['message'],

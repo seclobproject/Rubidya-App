@@ -6,8 +6,8 @@ class ChatService {
       {int page = 1, int limit = 10}) async {
     try {
       var dio = await DioHelper.getInstance();
-      var response = await dio
-          .get('$baseURL/api/message/get-all-conversation?$page=1&$limit=1');
+      var response = await dio.get(
+          '$baseURL/api/message/get-all-conversation?page=$page&limit=$limit');
       return response.data;
     } catch (e) {
 // Handle error appropriately, e.g., log the error or throw it further
@@ -42,7 +42,7 @@ class ChatService {
         data: {
           "senderId": senderId,
           "message": message,
-          "receiverId": userId,
+          "recieverId": userId,
         },
       );
       return response.data;

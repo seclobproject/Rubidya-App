@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:in_app_update/in_app_update.dart';
 import 'package:uni_links/uni_links.dart';
 import 'dart:async';
-
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 // import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:workmanager/workmanager.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -52,7 +52,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // await Firebase.initializeApp(); // Initialize Firebase
   Workmanager().initialize(callbackDispatcher, isInDebugMode: false); // Initialize WorkManager
-  runApp(MyApp());
+  // runApp(MyApp());
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatefulWidget {

@@ -1,30 +1,44 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../services/Chat_service.dart';
-import 'ChatPage.dart';
+import '../../services/Search_service.dart';
+import 'chatpage.dart';
 
 class MessagePage extends StatefulWidget {
   @override
   _MessageState createState() => _MessageState();
 }
-class _MessageState extends State<MessagePage> with
-    SingleTickerProviderStateMixin {
+
+class _MessageState extends State<MessagePage>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   List<dynamic> conversationData = [];
   bool isLoading = true;
+  late List<Map<String, dynamic>> searchlist = [];
+  late List<Map<String, dynamic>> originalSearchList = [];
+  late TextEditingController _searchController;
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _searchController = TextEditingController();
     fetchChatHistory();
+    _initLoad();
   }
+
   @override
   void dispose() {
     _tabController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
+
+  Future<void> _initLoad() async {
+    await _searchFollowList();
+  }
+
   Future<void> fetchChatHistory() async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -36,16 +50,47 @@ class _MessageState extends State<MessagePage> with
       var data = await ChatService.getChatHistory(page: 1, limit: 10);
       setState(() {
         conversationData = data['conversationData'];
+        print('.........');
+        print(conversationData = data['conversationData']);
+
         isLoading = false;
       });
     } catch (e) {
-// Handle error appropriately
       print(e);
       setState(() {
         isLoading = false;
       });
     }
   }
+
+
+
+  Future<void> _searchFollowList() async {
+    try {
+      var response = await SearchService.searchpage();
+      if (mounted) {
+        setState(() {
+          originalSearchList =
+          List<Map<String, dynamic>>.from(response['result']);
+          searchlist = List<Map<String, dynamic>>.from(originalSearchList);
+        });
+      }
+    } catch (e) {
+      print('Error fetching search data: $e');
+    }
+  }
+
+  void _onSearchTextChanged(String text) {
+    if (mounted) {
+      setState(() {
+        searchlist = originalSearchList
+            .where((result) =>
+            result['firstName'].toLowerCase().contains(text.toLowerCase()))
+            .toList();
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -56,7 +101,7 @@ class _MessageState extends State<MessagePage> with
         slivers: <Widget>[
           SliverAppBar(
             automaticallyImplyLeading: false,
-            collapsedHeight: 180,
+            collapsedHeight: 100,
             surfaceTintColor: Colors.white,
             backgroundColor: Colors.white,
             title: Row(
@@ -87,12 +132,17 @@ class _MessageState extends State<MessagePage> with
             flexibleSpace: FlexibleSpaceBar(
               background: Column(
                 children: [
+
+
+
                   SizedBox(height: screenHeight * 0.12),
                   Padding(
                     padding: EdgeInsets.symmetric(
                         horizontal: screenWidth * 0.05,
                         vertical: screenHeight * 0.02),
                     child: TextFormField(
+                      controller: _searchController,
+                      onChanged: _onSearchTextChanged,
                       decoration: InputDecoration(
                           fillColor: Color(0x3AA3D4FF),
                           filled: true,
@@ -124,74 +174,132 @@ class _MessageState extends State<MessagePage> with
               ),
             ),
           ),
-          isLoading
-              ? SliverFillRemaining(
-            child: Center(
-              child: CircularProgressIndicator(),
-            ),
-          )
-              : SliverList(
-            delegate: SliverChildBuilderDelegate(
-                  (BuildContext context, int index) {
-                var conversation = conversationData[index];
-                return InkWell(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ChatPage(
-                          userId: conversation['_id'],
-                          userName: conversation['interactedUser'],
-                          profilePic: conversation['profilePic'],
-                          conversationId: conversation['_id'],
+          if (isLoading)
+            SliverFillRemaining(
+              child: Center(
+                child: CircularProgressIndicator(),
+              ),
+            )
+          else if (searchlist.isNotEmpty && _searchController.text.isNotEmpty)
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                    (BuildContext context, int index) {
+                  var searchResult = searchlist[index];
+                  return InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ChatPage(
+                            conversationId: conversationData[index]['_id'],
+                            userId:  conversationData[index]['userId'],
+                            userName:  conversationData[index]['interactedUser'],
+                            profilePic:  conversationData[index]['profilePic'],
+
+
+
+
+                          ),
+                        ),
+                      );
+                    },
+                    child: ListTile(
+                      leading: ClipRRect(
+                        borderRadius: BorderRadius.circular(100),
+                        child: Container(
+                          height: 42,
+                          width: 42,
+                          child: searchResult['profilePic'] != null
+                              ? Image.network(
+                            searchResult['profilePic']['filePath'],
+                            fit: BoxFit.cover,
+                          )
+                              : Image.network(
+                            'https://play-lh.googleusercontent.com/4HZhLFCcIjgfbXoVj3mgZdQoKO2A_z-uX2gheF5yNCkb71wzGqwobr9muj8I05Nc8u8',
+                            width: 65,
+                            height: 65,
+                            fit: BoxFit.cover,
+                          ),
                         ),
                       ),
-                    );
-                  },
-                  child: ListTile(
-                    leading: ClipRRect(
-                      borderRadius: BorderRadius.circular(100),
-                      child: Container(
-                        height: 42,
-                        width: 42,
-                        child: conversation['profilePic'] != null
-                            ? Image.network(
-                          conversation['profilePic'],
-                          fit: BoxFit.cover,
-                        )
-                            : Image.asset(
-                          'assets/images/default_avatar.png',
-                          fit: BoxFit.cover,
-                        ),
+                      title: Text(
+                        searchResult['firstName'],
+                        style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16,
+                            color: Color(0xff1E3167)),
                       ),
                     ),
-                    title: Text(
-                      conversation['interactedUser'],
-                      style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 16,
-                          color: Color(0xff1E3167)),
+                  );
+                },
+                childCount: searchlist.length,
+              ),
+            )
+          else
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                    (BuildContext context, int index) {
+                  var conversation = conversationData[index];
+                  return InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ChatPage(
+                             conversationId: conversationData[index]['_id'],
+                            userId:  conversationData[index]['userId'],
+                            userName:  conversationData[index]['interactedUser'],
+                            profilePic:  conversationData[index]['profilePic'],
+                          ),
+                        ),
+                      );
+                    },
+                    child: ListTile(
+                      leading: ClipRRect(
+                        borderRadius: BorderRadius.circular(100),
+                        child: Container(
+                          height: 42,
+                          width: 42,
+                          child: conversation['profilePic'] != null
+                              ? Image.network(
+                            conversation['profilePic'],
+                            fit: BoxFit.cover,
+                          )
+                              : Image.network(
+                            'https://play-lh.googleusercontent.com/4HZhLFCcIjgfbXoVj3mgZdQoKO2A_z-uX2gheF5yNCkb71wzGqwobr9muj8I05Nc8u8',
+                            width: 65,
+                            height: 65,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                      title: Text(
+                        conversation['interactedUser'],
+                        style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16,
+                            color: Color(0xff1E3167)),
+                      ),
+                      subtitle: Text(
+                        conversationData[index]['_id'],
+                        style: TextStyle(
+                            fontWeight: FontWeight.w400,
+                            fontSize: 14,
+                            color: Color(0xff8996BC)),
+                      ),
+                      trailing: Text(
+                        'Time',
+                        style: TextStyle(
+                            color: Color(0xffAEAEAE),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w400),
+                      ),
                     ),
-                    subtitle: Text(
-                      'Last message...',
-                      style: TextStyle(
-                          fontWeight: FontWeight.w400,
-                          fontSize: 14,
-                          color: Color(0xff8996BC)),
-                    ),
-                    trailing: Text(
-                      'Time',
-                      style: TextStyle(
-                          color: Color(0xffAEAEAE),
-                          fontSize: 12,
-                          fontWeight: FontWeight.w400),
-                    ),
-                  ),
-                );
-              },
-              childCount: conversationData.length,
+                  );
+                },
+                childCount: conversationData.length,
+              ),
             ),
-          ),
         ],
       ),
     );
