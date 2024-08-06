@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../services/Chat_service.dart';
 import '../../services/Search_service.dart';
 import 'chatpage.dart';
+import 'package:intl/intl.dart';
 
 class MessagePage extends StatefulWidget {
   @override
@@ -51,7 +52,7 @@ class _MessageState extends State<MessagePage>
       setState(() {
         conversationData = data['conversationData'];
         print('.........');
-        print(conversationData = data['conversationData']);
+        print(conversationData);
 
         isLoading = false;
       });
@@ -62,8 +63,6 @@ class _MessageState extends State<MessagePage>
       });
     }
   }
-
-
 
   Future<void> _searchFollowList() async {
     try {
@@ -85,10 +84,19 @@ class _MessageState extends State<MessagePage>
       setState(() {
         searchlist = originalSearchList
             .where((result) =>
-            result['firstName'].toLowerCase().contains(text.toLowerCase()))
+        result['firstName']
+            ?.toLowerCase()
+            .contains(text.toLowerCase()) ??
+            false)
             .toList();
       });
     }
+  }
+
+  String formatDateTime(String dateTimeString) {
+    DateTime dateTime = DateTime.parse(dateTimeString).toUtc();
+    DateTime istDateTime = dateTime.add(Duration(hours: 5, minutes: 30));
+    return DateFormat('hh:mm a').format(istDateTime);
   }
 
   @override
@@ -132,10 +140,8 @@ class _MessageState extends State<MessagePage>
             flexibleSpace: FlexibleSpaceBar(
               background: Column(
                 children: [
-
-
-
                   SizedBox(height: screenHeight * 0.12),
+
                   Padding(
                     padding: EdgeInsets.symmetric(
                         horizontal: screenWidth * 0.05,
@@ -185,50 +191,50 @@ class _MessageState extends State<MessagePage>
               delegate: SliverChildBuilderDelegate(
                     (BuildContext context, int index) {
                   var searchResult = searchlist[index];
-                  return InkWell(
+                  return ListTile(
                     onTap: () {
+
+                      print( searchResult['_id'],);
+                      print(searchResult['userId']);
+
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => ChatPage(
-                            conversationId: conversationData[index]['_id'],
-                            userId:  conversationData[index]['userId'],
-                            userName:  conversationData[index]['interactedUser'],
-                            profilePic:  conversationData[index]['profilePic'],
-
-
-
-
+                            conversationId: searchResult['_id'],
+                            userId: searchResult['userId'] ?? '',
+                            userName: searchResult['firstName'] ?? '',
+                            profilePic: searchResult['profilePic'] != null
+                                ? searchResult['profilePic']['filePath'] ?? ''
+                                : '',
                           ),
                         ),
                       );
                     },
-                    child: ListTile(
-                      leading: ClipRRect(
-                        borderRadius: BorderRadius.circular(100),
-                        child: Container(
-                          height: 42,
-                          width: 42,
-                          child: searchResult['profilePic'] != null
-                              ? Image.network(
-                            searchResult['profilePic']['filePath'],
-                            fit: BoxFit.cover,
-                          )
-                              : Image.network(
-                            'https://play-lh.googleusercontent.com/4HZhLFCcIjgfbXoVj3mgZdQoKO2A_z-uX2gheF5yNCkb71wzGqwobr9muj8I05Nc8u8',
-                            width: 65,
-                            height: 65,
-                            fit: BoxFit.cover,
-                          ),
+                    leading: ClipRRect(
+                      borderRadius: BorderRadius.circular(100),
+                      child: Container(
+                        height: 42,
+                        width: 42,
+                        child: searchResult['profilePic'] != null
+                            ? Image.network(
+                          searchResult['profilePic']['filePath'] ?? '',
+                          fit: BoxFit.cover,
+                        )
+                            : Image.network(
+                          'https://play-lh.googleusercontent.com/4HZhLFCcIjgfbXoVj3mgZdQoKO2A_z-uX2gheF5yNCkb71wzGqwobr9muj8I05Nc8u8',
+                          width: 65,
+                          height: 65,
+                          fit: BoxFit.cover,
                         ),
                       ),
-                      title: Text(
-                        searchResult['firstName'],
-                        style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 16,
-                            color: Color(0xff1E3167)),
-                      ),
+                    ),
+                    title: Text(
+                      searchResult['firstName'] ?? '',
+                      style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                          color: Color(0xff1E3167)),
                     ),
                   );
                 },
@@ -242,14 +248,20 @@ class _MessageState extends State<MessagePage>
                   var conversation = conversationData[index];
                   return InkWell(
                     onTap: () {
+
+                      print(conversation['_id']);
+                      print(conversation['userId']);
+                      print(conversation['interactedUser']);
+
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => ChatPage(
-                             conversationId: conversationData[index]['_id'],
-                            userId:  conversationData[index]['userId'],
-                            userName:  conversationData[index]['interactedUser'],
-                            profilePic:  conversationData[index]['profilePic'],
+                            conversationId: conversation['_id'],
+                            userId: conversation['userId'] ?? '',
+                            userName: conversation['interactedUser'] ?? '',
+                            profilePic: conversation['profilePic'] ?? '',
+
                           ),
                         ),
                       );
@@ -262,7 +274,7 @@ class _MessageState extends State<MessagePage>
                           width: 42,
                           child: conversation['profilePic'] != null
                               ? Image.network(
-                            conversation['profilePic'],
+                            conversation['profilePic'] ?? '',
                             fit: BoxFit.cover,
                           )
                               : Image.network(
@@ -274,25 +286,25 @@ class _MessageState extends State<MessagePage>
                         ),
                       ),
                       title: Text(
-                        conversation['interactedUser'],
+                        conversation['interactedUser'] ?? '',
                         style: TextStyle(
                             fontWeight: FontWeight.w600,
                             fontSize: 16,
                             color: Color(0xff1E3167)),
                       ),
                       subtitle: Text(
-                        conversationData[index]['_id'],
+                        'Hello',
                         style: TextStyle(
                             fontWeight: FontWeight.w400,
                             fontSize: 14,
                             color: Color(0xff8996BC)),
                       ),
                       trailing: Text(
-                        'Time',
+                        formatDateTime(conversationData[index]['updatedAt']),
                         style: TextStyle(
-                            color: Color(0xffAEAEAE),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w400),
+                            fontWeight: FontWeight.w400,
+                            fontSize: 14,
+                            color: Color(0xff8996BC)),
                       ),
                     ),
                   );

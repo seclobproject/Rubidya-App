@@ -84,13 +84,17 @@ class _homepageState extends ConsumerState<homepage> {
     _initSocket();
   }
 
-  void _initSocket() {
-    String userId = "${profiledetails?['user']?['_id']?.toString()}";
+  Future<void> _initSocket() async {
+    // String userId = "${profiledetails?['user']?['_id']?.toString()}";
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? loginId = prefs.getString('userid');
 
     socket = IO.io('wss://rubidya.com', <String, dynamic>{
       'transports': ['websocket'],
-      'query': {'userId': userId},
+      'query': {'userId': loginId},
     });
+
+    print('.................................$loginId');
 
     socket.on('connect', (_) {
       log.i('Connected to Socket.IO server');
@@ -98,9 +102,15 @@ class _homepageState extends ConsumerState<homepage> {
 
     socket.on('activityNotification', (data) {
       log.i('Received activity notification: $data');
-      _showNotification(data['user'], data['message'], data['notificationType'],
+      _showNotification(data['user'],data['message'], data['notificationType'],
           data['time']);
     });
+
+    socket.on('newMessage', (data) {
+      log.i('Received message: $data');
+      // _showNotification(data['user'],data['message'], data['notificationType'], data['time']);
+    });
+
 
     socket.on('disconnect', (_) {
       log.e('Disconnected from Socket.IO server');

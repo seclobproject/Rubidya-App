@@ -35,10 +35,12 @@ class _loginState extends State<login> {
     setState(() {
       _isLoading = true;
     });
+
     var reqData = {
       'email': email,
       'password': password,
     };
+
     try {
       var response = await AuthService.Login(reqData);
 
@@ -49,36 +51,12 @@ class _loginState extends State<login> {
         print('User ID: ${response['_id']}');
         print('Token: ${response['access_token']}');
 
-        print('isOTPVerified: ${response['false']}');
-
-        // _saveAndRedirectToHome(response['access_token'], response['name']);
-        _saveAndRedirectToHome(response['access_token'], response['_id']);
-
-        //     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        //       content: Text('Login Success'),
-        //     ));
-        //     gotoHome();
-        //   } else {
-        //     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        //       content: Text('Login failed: ${response['msg']}'),
-        //     ));
-        //     // Uncomment the line below if you want to prevent the page refresh on login failure
-        //     // login();
-        //   }
-        // } catch (error) {
-        //   setState(() {
-        //     _isLoading = false;
-        //     _isLoader = false;
-        //   });
-
         if (response['isOTPVerified'] == false) {
-          // Navigate to firstotppassword page
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => firstotppassword()),
           );
         } else {
-          // Proceed with normal login flow
           _saveAndRedirectToHome(response['access_token'], response['_id']);
 
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -94,15 +72,15 @@ class _loginState extends State<login> {
     } catch (error) {
       setState(() {
         _isLoading = false;
-        _isLoader = false;
       });
 
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Incorrect Username and password   '),
+        content: Text('Error during login: $error'),
       ));
       log.e('Error during login: $error');
     }
   }
+
 
 
   void _saveAndRedirectToHome(usertoken, userId) async {

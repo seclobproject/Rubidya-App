@@ -72,6 +72,10 @@ dev_dependencies:
   workmanager: ^0.5.2
   flutter_riverpod: ^2.5.1
 
+  permission_handler: ^10.2.0
+
+
+
 
 
 

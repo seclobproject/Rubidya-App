@@ -24,7 +24,7 @@ class _Landing_PageState extends State<Landing_Page> {
   Future _profiledetailsapi() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     userid = prefs.getString('userid');
-    print(userid);
+    print('...............$userid');
     var response = await ProfileService.getProfile();
     log.i('profile details show.. $response');
     setState(() {
