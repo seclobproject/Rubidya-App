@@ -11,7 +11,6 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:rubidya/screens/home_screen/widgets/home_story.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../commonpage/notification.dart';
-import '../../provider/home_provider.dart';
 import '../../services/home_service.dart';
 import '../../services/profile_service.dart';
 import '../../support/logger.dart';
@@ -23,16 +22,15 @@ import 'package:share_plus/share_plus.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class homepage extends ConsumerStatefulWidget {
+class homepage extends StatefulWidget {
   const homepage({Key? key}) : super(key: key);
 
   @override
-  ConsumerState<homepage> createState() => _homepageState();
+  State<homepage> createState() => _homepageState();
 }
 
-class _homepageState extends ConsumerState<homepage> {
+class _homepageState extends State<homepage> {
   late SharedPreferences prefs;
   late IO.Socket socket;
   late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
@@ -53,7 +51,6 @@ class _homepageState extends ConsumerState<homepage> {
     _initLoad();
     _profileDetailsApi();
     _initNotifications();
-    ref.read(notificationsProvider).loadContents();
 
     _scrollController.addListener(_scrollListener);
   }
@@ -84,17 +81,13 @@ class _homepageState extends ConsumerState<homepage> {
     _initSocket();
   }
 
-  Future<void> _initSocket() async {
-    // String userId = "${profiledetails?['user']?['_id']?.toString()}";
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? loginId = prefs.getString('userid');
+  void _initSocket() {
+    String userId = "${profiledetails?['user']?['_id']?.toString()}";
 
     socket = IO.io('wss://rubidya.com', <String, dynamic>{
       'transports': ['websocket'],
-      'query': {'userId': loginId},
+      'query': {'userId': userId},
     });
-
-    print('.................................$loginId');
 
     socket.on('connect', (_) {
       log.i('Connected to Socket.IO server');
@@ -102,15 +95,9 @@ class _homepageState extends ConsumerState<homepage> {
 
     socket.on('activityNotification', (data) {
       log.i('Received activity notification: $data');
-      _showNotification(data['user'],data['message'], data['notificationType'],
+      _showNotification(data['user'], data['message'], data['notificationType'],
           data['time']);
     });
-
-    socket.on('newMessage', (data) {
-      log.i('Received message: $data');
-      // _showNotification(data['user'],data['message'], data['notificationType'], data['time']);
-    });
-
 
     socket.on('disconnect', (_) {
       log.e('Disconnected from Socket.IO server');
@@ -334,12 +321,6 @@ class _homepageState extends ConsumerState<homepage> {
 
   @override
   Widget build(BuildContext context) {
-
-    final postList = ref.watch(notificationsProvider).notifications??[];
-
-
-
-
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -353,8 +334,6 @@ class _homepageState extends ConsumerState<homepage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
-
               Padding(
                 padding: const EdgeInsets.only(right: 20),
                 child: Row(
@@ -384,7 +363,8 @@ class _homepageState extends ConsumerState<homepage> {
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => MessagePage()),
+                          MaterialPageRoute(
+                              builder: (context) => MessagePage()),
                         );
                       },
                       child: SvgPicture.asset(
@@ -410,7 +390,6 @@ class _homepageState extends ConsumerState<homepage> {
                 ),
               ),
               SizedBox(height: 10),
-
               Padding(
                 padding: const EdgeInsets.only(left: 20),
                 child: Container(
@@ -434,9 +413,9 @@ class _homepageState extends ConsumerState<homepage> {
                 ListView.builder(
                   physics: NeverScrollableScrollPhysics(),
                   shrinkWrap: true,
-                  itemCount: postList.length + 1,
+                  itemCount: homeList!['posts'].length + 1,
                   itemBuilder: (BuildContext context, int index) {
-                    if (index == postList.length) {
+                    if (index == homeList!['posts'].length) {
                       return isLoading
                           ? Center(child: CupertinoActivityIndicator())
                           : SizedBox.shrink();
@@ -445,7 +424,7 @@ class _homepageState extends ConsumerState<homepage> {
                       children: [
                         ProductCard(
                           createdTime: _calculateTimeDifference(
-                             postList[index]['createdAt']),
+                              homeList!['posts'][index]['createdAt']),
                           name: homeList!['posts'][index]['username'] ?? '',
                           description:
                           homeList!['posts'][index]['description'] ?? '',
@@ -614,7 +593,9 @@ class _ProductCardState extends State<ProductCard> {
 
   void sharePost(String postId) {
     final Uri deepLink = Uri.parse('rubidya.com/post/${widget.id}');
-    Share.share('Check out this post: $deepLink',);
+    Share.share(
+      'Check out this post: $deepLink',
+    );
   }
 
   @override
@@ -1085,9 +1066,13 @@ class MembersListing extends StatelessWidget {
                   style: TextStyle(fontSize: 11),
                 ),
               ),
+
+
               SizedBox(
                 height: 10,
               ),
+
+
               GestureDetector(
                 onTap: onFollowToggled,
                 child: Container(
@@ -1112,9 +1097,7 @@ class MembersListing extends StatelessWidget {
       ),
     );
   }
-
 }
-
 
 
 //

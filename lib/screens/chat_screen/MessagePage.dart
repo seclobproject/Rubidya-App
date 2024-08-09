@@ -1,43 +1,64 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../provider/chat_provider.dart';
 import '../../services/Chat_service.dart';
 import '../../services/Search_service.dart';
 import 'chatpage.dart';
 import 'package:intl/intl.dart';
 
-class MessagePage extends StatefulWidget {
+class MessagePage extends ConsumerStatefulWidget {
+  const MessagePage({super.key});
+
   @override
-  _MessageState createState() => _MessageState();
+  ConsumerState<MessagePage> createState() => _MessageState();
 }
 
-class _MessageState extends State<MessagePage>
+class _MessageState extends ConsumerState<MessagePage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   List<dynamic> conversationData = [];
   bool isLoading = true;
+  bool isLoadingMore = false;
+  int currentPage = 1;
+  bool hasMore = true;
   late List<Map<String, dynamic>> searchlist = [];
   late List<Map<String, dynamic>> originalSearchList = [];
   late TextEditingController _searchController;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(chatProvider).loadContents();
+    });
     _tabController = TabController(length: 2, vsync: this);
     _searchController = TextEditingController();
     fetchChatHistory();
     _initLoad();
+
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels ==
+          _scrollController.position.maxScrollExtent) {
+        if (hasMore && !isLoadingMore) {
+          loadMoreChatHistory();
+        }
+      }
+    });
   }
 
   @override
   void dispose() {
     _tabController.dispose();
     _searchController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
   Future<void> _initLoad() async {
-    await _searchFollowList();
+    await _searchFollowList('');
   }
 
   Future<void> fetchChatHistory() async {
@@ -48,13 +69,22 @@ class _MessageState extends State<MessagePage>
       if (userId == null || token == null) {
         throw Exception("User ID or token not found");
       }
-      var data = await ChatService.getChatHistory(page: 1, limit: 10);
-      setState(() {
-        conversationData = data['conversationData'];
-        print('.........');
-        print(conversationData);
 
+      var data = await ChatService.getChatHistory(page: currentPage, limit: 10);
+      List<dynamic> updatedConversationData = [];
+
+      for (var conversation in data['conversationData']) {
+        if (conversation['latestMessage'] == null) {
+          var latestMessageData = await fetchLatestMessage(conversation['_id']);
+          conversation['latestMessage'] = latestMessageData;
+        }
+        updatedConversationData.add(conversation);
+      }
+
+      setState(() {
+        conversationData.addAll(updatedConversationData);
         isLoading = false;
+        hasMore = updatedConversationData.length == 10;
       });
     } catch (e) {
       print(e);
@@ -64,14 +94,51 @@ class _MessageState extends State<MessagePage>
     }
   }
 
-  Future<void> _searchFollowList() async {
+  Future<void> loadMoreChatHistory() async {
+    if (isLoadingMore || !hasMore) return;
+
+    setState(() {
+      isLoadingMore = true;
+    });
+
+    currentPage++;
+
     try {
-      var response = await SearchService.searchpage();
+      var data = await ChatService.getChatHistory(page: currentPage, limit: 10);
+      List<dynamic> updatedConversationData = [];
+
+      for (var conversation in data['conversationData']) {
+        if (conversation['latestMessage'] == null) {
+          var latestMessageData = await fetchLatestMessage(conversation['_id']);
+          conversation['latestMessage'] = latestMessageData;
+        }
+        updatedConversationData.add(conversation);
+      }
+
+      setState(() {
+        conversationData.addAll(updatedConversationData);
+        hasMore = updatedConversationData.length == 10;
+      });
+    } catch (e) {
+      print(e);
+    } finally {
+      setState(() {
+        isLoadingMore = false;
+      });
+    }
+  }
+
+  Future<Map<String, dynamic>> fetchLatestMessage(String conversationId) async {
+    var messages = await ChatService.getMessages(conversationId, page: 1, limit: 1);
+    return messages['messages'].first;
+  }
+
+  Future<void> _searchFollowList(String query) async {
+    try {
+      var response = await SearchService.searchpage(search: query);
       if (mounted) {
         setState(() {
-          originalSearchList =
-          List<Map<String, dynamic>>.from(response['result']);
-          searchlist = List<Map<String, dynamic>>.from(originalSearchList);
+          searchlist = List<Map<String, dynamic>>.from(response['users']);
         });
       }
     } catch (e) {
@@ -80,23 +147,24 @@ class _MessageState extends State<MessagePage>
   }
 
   void _onSearchTextChanged(String text) {
-    if (mounted) {
-      setState(() {
-        searchlist = originalSearchList
-            .where((result) =>
-        result['firstName']
-            ?.toLowerCase()
-            .contains(text.toLowerCase()) ??
-            false)
-            .toList();
-      });
-    }
+    _searchFollowList(text);
   }
 
   String formatDateTime(String dateTimeString) {
     DateTime dateTime = DateTime.parse(dateTimeString).toUtc();
     DateTime istDateTime = dateTime.add(Duration(hours: 5, minutes: 30));
     return DateFormat('hh:mm a').format(istDateTime);
+  }
+
+  void _updateConversation(String conversationId, Map<String, dynamic> message) {
+    setState(() {
+      for (var conversation in conversationData) {
+        if (conversation['_id'] == conversationId) {
+          conversation['latestMessage'] = message;
+          break;
+        }
+      }
+    });
   }
 
   @override
@@ -106,6 +174,7 @@ class _MessageState extends State<MessagePage>
     return Scaffold(
       backgroundColor: Colors.white,
       body: CustomScrollView(
+        controller: _scrollController,
         slivers: <Widget>[
           SliverAppBar(
             automaticallyImplyLeading: false,
@@ -141,7 +210,6 @@ class _MessageState extends State<MessagePage>
               background: Column(
                 children: [
                   SizedBox(height: screenHeight * 0.12),
-
                   Padding(
                     padding: EdgeInsets.symmetric(
                         horizontal: screenWidth * 0.05,
@@ -193,23 +261,29 @@ class _MessageState extends State<MessagePage>
                   var searchResult = searchlist[index];
                   return ListTile(
                     onTap: () {
-
-                      print( searchResult['_id'],);
-                      print(searchResult['userId']);
-
+                      String? conversationId = ref
+                          .read(chatProvider)
+                          .getConversationId(searchResult['_id']);
+                      print(
+                          "=================================================$conversationId");
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => ChatPage(
-                            conversationId: searchResult['_id'],
-                            userId: searchResult['userId'] ?? '',
+                            conversationId: conversationId ?? '',
+                            userId: searchResult['_id'] ?? '',
                             userName: searchResult['firstName'] ?? '',
                             profilePic: searchResult['profilePic'] != null
                                 ? searchResult['profilePic']['filePath'] ?? ''
                                 : '',
                           ),
                         ),
-                      );
+                      ).then((latestMessage) {
+                        if (latestMessage != null) {
+                          _updateConversation(
+                              conversationId ?? '', latestMessage);
+                        }
+                      });
                     },
                     leading: ClipRRect(
                       borderRadius: BorderRadius.circular(100),
@@ -246,13 +320,10 @@ class _MessageState extends State<MessagePage>
               delegate: SliverChildBuilderDelegate(
                     (BuildContext context, int index) {
                   var conversation = conversationData[index];
+                  var latestMessage = conversation['latestMessage'] ?? {};
+
                   return InkWell(
                     onTap: () {
-
-                      print(conversation['_id']);
-                      print(conversation['userId']);
-                      print(conversation['interactedUser']);
-
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -261,17 +332,21 @@ class _MessageState extends State<MessagePage>
                             userId: conversation['userId'] ?? '',
                             userName: conversation['interactedUser'] ?? '',
                             profilePic: conversation['profilePic'] ?? '',
-
                           ),
                         ),
-                      );
+                      ).then((latestMessage) {
+                        if (latestMessage != null) {
+                          _updateConversation(
+                              conversation['_id'], latestMessage);
+                        }
+                      });
                     },
                     child: ListTile(
                       leading: ClipRRect(
                         borderRadius: BorderRadius.circular(100),
                         child: Container(
-                          height: 42,
-                          width: 42,
+                          height: 40,
+                          width: 40,
                           child: conversation['profilePic'] != null
                               ? Image.network(
                             conversation['profilePic'] ?? '',
@@ -288,28 +363,37 @@ class _MessageState extends State<MessagePage>
                       title: Text(
                         conversation['interactedUser'] ?? '',
                         style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 16,
+                          // fontWeight: FontWeight.w600,
+                            fontSize: 14,
                             color: Color(0xff1E3167)),
                       ),
                       subtitle: Text(
-                        'Hello',
+                        latestMessage['message'] ?? '',
                         style: TextStyle(
                             fontWeight: FontWeight.w400,
-                            fontSize: 14,
+                            fontSize: 12,
                             color: Color(0xff8996BC)),
                       ),
                       trailing: Text(
-                        formatDateTime(conversationData[index]['updatedAt']),
+                        formatDateTime(latestMessage['createdAt'] ?? ''),
                         style: TextStyle(
                             fontWeight: FontWeight.w400,
-                            fontSize: 14,
+                            fontSize: 12,
                             color: Color(0xff8996BC)),
                       ),
                     ),
                   );
                 },
                 childCount: conversationData.length,
+              ),
+            ),
+          if (isLoadingMore)
+            SliverToBoxAdapter(
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: CircularProgressIndicator(),
+                ),
               ),
             ),
         ],

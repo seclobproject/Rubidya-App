@@ -22,19 +22,24 @@ class _searchpageState extends State<searchpage> {
   late SharedPreferences prefs;
   late List<Map<String, dynamic>> searchlist = [];
   late TextEditingController _searchController;
-  late List<Map<String, dynamic>> originalSearchList = [];
-
+  late ScrollController _scrollController;
+  int _currentPage = 1;
+  bool _hasMoreData = true;
+  String _searchQuery = '';
 
   @override
   void initState() {
     _initLoad();
-    _searchController = TextEditingController(); // Initialize the TextEditingController
+    _searchController = TextEditingController();
+    _scrollController = ScrollController();
+    _scrollController.addListener(_onScroll);
     super.initState();
   }
 
   @override
   void dispose() {
-    _searchController.dispose(); // Dispose of the TextEditingController
+    _searchController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -44,17 +49,35 @@ class _searchpageState extends State<searchpage> {
   }
 
   Future<void> _searchFollowList() async {
-    try {
-      var response = await SearchService.searchpage();
-      if (mounted) {
+    if (!isLoading && _hasMoreData) {
+      setState(() {
+        isLoading = true;
+      });
+      try {
+        var response = await SearchService.searchpage(page: _currentPage, search: _searchQuery);
+        if (mounted) {
+          setState(() {
+            if (_currentPage == 1) {
+              searchlist = List<Map<String, dynamic>>.from(response['users']);
+            } else {
+              searchlist.addAll(List<Map<String, dynamic>>.from(response['users']));
+            }
+            // Ensure 'isFollowing' is not null by providing a default value
+            for (var user in searchlist) {
+              if (user['isFollowing'] == null) {
+                user['isFollowing'] = false;
+              }
+            }
+            _hasMoreData = response['users'].length > 0;
+            isLoading = false;
+          });
+        }
+      } catch (e) {
+        print('Error fetching search data: $e');
         setState(() {
-          originalSearchList = List<Map<String, dynamic>>.from(response['result']);
-          searchlist = List<Map<String, dynamic>>.from(originalSearchList);
+          isLoading = false;
         });
       }
-    } catch (e) {
-      // Handle error
-      print('Error fetching search data: $e');
     }
   }
 
@@ -84,26 +107,21 @@ class _searchpageState extends State<searchpage> {
     log.i('removed from follow. $response');
   }
 
-  // Function to handle text field changes
   void _onSearchTextChanged(String text) {
-    if (mounted) { // Check if the widget is still mounted
+    if (mounted) {
       setState(() {
-        searchlist = originalSearchList.where((result) =>
-            result['firstName'].toLowerCase().contains(text.toLowerCase())).toList();
+        _searchQuery = text;
+        _currentPage = 1;
+        _hasMoreData = true;
+        _searchFollowList();
       });
     }
   }
 
-
-
-  List<Map<String, dynamic>> _filterSearchResults(String query) {
-    if (query.isEmpty) {
-      // If the query is empty, return an empty list
-      return [];
-    } else {
-      // Filter the search results based on the query
-      return searchlist.where((result) =>
-          result['firstName'].toLowerCase().contains(query.toLowerCase())).toList();
+  void _onScroll() {
+    if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent && _hasMoreData) {
+      _currentPage++;
+      _searchFollowList();
     }
   }
 
@@ -112,12 +130,9 @@ class _searchpageState extends State<searchpage> {
     return Scaffold(
       appBar: AppBar(
         title: Text("search", style: TextStyle(fontSize: 14)),
-        actions: [],
       ),
       body: Column(
         children: [
-
-
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10.0),
             child: Container(
@@ -133,22 +148,20 @@ class _searchpageState extends State<searchpage> {
                 decoration: InputDecoration(
                   hintText: 'Search',
                   hintStyle: TextStyle(
-                    color: Colors.grey, // You can adjust the hint text color
-                    fontSize: 14, // You can adjust the font size of the hint text
+                    color: Colors.grey,
+                    fontSize: 14,
                   ),
-                  border: InputBorder.none, // Remove the border
+                  border: InputBorder.none,
                   contentPadding: EdgeInsets.symmetric(vertical: 4, horizontal: 10),
                   suffixIcon: Icon(Icons.search),
-                  // Center align the hint text
                 ),
-                textAlign: TextAlign.start, // Center align the text field
+                textAlign: TextAlign.start,
               ),
             ),
           ),
-          SizedBox(height: 20,),
-
+          SizedBox(height: 20),
           Visibility(
-            visible: searchlist.isEmpty && _searchController.text.isNotEmpty,
+            visible: searchlist.isEmpty && _searchController.text.isNotEmpty && !isLoading,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Text(
@@ -160,12 +173,16 @@ class _searchpageState extends State<searchpage> {
               ),
             ),
           ),
-
-
           Expanded(
             child: ListView.builder(
-              itemCount: _searchController.text.isEmpty ? 0 : searchlist.length,
+              controller: _scrollController,
+              itemCount: searchlist.length + 1,
               itemBuilder: (BuildContext context, int index) {
+                if (index == searchlist.length) {
+                  return isLoading
+                      ? Center(child: CircularProgressIndicator())
+                      : SizedBox.shrink();
+                }
                 return MembersListing(
                   name: searchlist[index]['firstName'],
                   id: searchlist[index]['_id'],
@@ -183,10 +200,6 @@ class _searchpageState extends State<searchpage> {
     );
   }
 }
-
-
-
-
 
 class MembersListing extends StatelessWidget {
   const MembersListing({
@@ -207,21 +220,19 @@ class MembersListing extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: (){
+      onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) =>  profileinnerpage(
-            id: id,
-          )),
+          MaterialPageRoute(builder: (context) => profileinnerpage(id: id)),
         );
       },
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 5,),
+        padding: const EdgeInsets.symmetric(horizontal: 5),
         child: Column(
           children: [
             Row(
               children: [
-                SizedBox(height: 10,),
+                SizedBox(height: 10),
                 ClipRRect(
                   borderRadius: BorderRadius.all(Radius.circular(100)),
                   child: img.isNotEmpty
@@ -238,13 +249,13 @@ class MembersListing extends StatelessWidget {
                     fit: BoxFit.cover,
                   ),
                 ),
-                SizedBox(width: 20,),
+                SizedBox(width: 20),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 5),
                   child: Text(
                     name,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 12,fontWeight: FontWeight.w600),
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
                   ),
                 ),
                 Expanded(child: SizedBox()),
@@ -273,7 +284,7 @@ class MembersListing extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: Divider(color: Colors.black,thickness: .1,),
+              child: Divider(color: Colors.black, thickness: .1),
             )
           ],
         ),

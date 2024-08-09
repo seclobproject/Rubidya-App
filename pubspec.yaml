@@ -71,8 +71,8 @@ dev_dependencies:
   socket_io_client: ^2.0.0
   workmanager: ^0.5.2
   flutter_riverpod: ^2.5.1
-
   permission_handler: ^10.2.0
+  web_socket_channel: ^3.0.1
 
 
 

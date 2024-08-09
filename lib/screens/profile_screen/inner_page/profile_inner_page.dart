@@ -5,11 +5,12 @@ import 'package:rubidya/screens/profile_screen/tab_profile/vedio_tab.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../../provider/chat_provider.dart';
 import '../../../resources/color.dart';
 import '../../../services/home_service.dart';
 import '../../../services/profile_service.dart';
 import '../../../support/logger.dart';
-
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../chat_screen/ChatPage.dart';
 
 import '../../home_screen/widgets/comment_home.dart';
@@ -19,7 +20,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'follower_inner_list.dart';
 import 'following_inner_list.dart';
 
-class profileinnerpage extends StatefulWidget {
+class profileinnerpage extends ConsumerStatefulWidget {
   profileinnerpage({
     super.key,
     required this.id,
@@ -28,10 +29,10 @@ class profileinnerpage extends StatefulWidget {
   String? id;
 
   @override
-  State<profileinnerpage> createState() => _profileinnerpageState();
+  ConsumerState<profileinnerpage> createState() => _profileinnerpageState();
 }
 
-class _profileinnerpageState extends State<profileinnerpage>
+class _profileinnerpageState extends ConsumerState<profileinnerpage>
     with TickerProviderStateMixin {
   late TabController _tabController;
   var userid;
@@ -109,6 +110,12 @@ class _profileinnerpageState extends State<profileinnerpage>
     _tabController = TabController(length: 2, vsync: this);
     _initLoad();
     super.initState();
+
+
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(chatProvider).loadContents();
+    });
   }
 
   Future<void> _loadMore() async {
@@ -257,17 +264,16 @@ class _profileinnerpageState extends State<profileinnerpage>
 
   @override
   Widget build(BuildContext context) {
-    String userId = '';
-    String conversationId = '';
-    String username = '';
-    String profilepicc = '';
-
-    if (profileinnerpageshow != null && profileinnerpageshow['media'] != null && profileinnerpageshow['media'].isNotEmpty) {
-      userId = profileinnerpageshow['media'][0]['id'] ?? '';
-      conversationId = profileinnerpageshow['media'][0]['id'] ?? '';
-      username = profileinnerpageshow['media'][0]['firstName'] ?? '';
-      profilepicc = profileinnerpageshow['media'][0]['pr'] ?? '';
-    }
+    // String userId = '';
+    // String conversationId = '';
+    // String username = '';
+    // String profilepicc = '';
+    //
+    // if (profileinnerpageshow != null && profileinnerpageshow['media'] != null && profileinnerpageshow['media'].isNotEmpty) {
+    //   userId = profileinnerpageshow['media'][0]['id'] ?? '';
+    //   username = profileinnerpageshow['media'][0]['firstName'] ?? '';
+    //   profilepicc = profileinnerpageshow['media'][0]['pr'] ?? '';
+    // }
 
     return Scaffold(
       appBar: AppBar(
@@ -671,27 +677,51 @@ class _profileinnerpageState extends State<profileinnerpage>
                     ),
                   ),
                   SizedBox(width: 10),
-                  GestureDetector(
-                    // onTap: () => Navigator.push(
-                    //   context,
-                    //   MaterialPageRoute(builder: (context) => ChatPage( userId: userId, userName: username,
-                    //     conversationId: conversationId,)),
-                    // ),
-                    child: Container(
-                      height: 31,
-                      width: 150,
-                      decoration: BoxDecoration(
-                          color: conainer220,
-                          borderRadius:
-                          BorderRadius.all(Radius.circular(10))),
-                      child: Center(
-                          child: Text(
-                            "Message",
-                            style: TextStyle(fontSize: 10, color: bluetext),
-                          )),
-                    ),
+
+
+
+
+                InkWell(
+                  onTap: () {
+                    print(
+                      profileinnerpageshow?['media']?[0]['_id'] ?? '',
+                    );
+
+                    String? conversationId = ref
+                        .read(chatProvider)
+                        .getConversationId(profileinnerpageshow?['media']?[0]['_id'] ?? '');
+
+                    print(
+                      conversationId,
+                    );
+
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ChatPage(
+                          conversationId: conversationId ?? '',
+                          userId: profileinnerpageshow?['media']?[0]['_id'] ?? '',
+                          userName: profileinnerpageshow?['media']?[0]['firstName'] ?? '',
+                          profilePic: profileinnerpageshow?['media']?[0]['profilePic'] ?? '',
+                        ),
+                      ),
+                    );
+                  },
+                  child: Container(
+                    height: 31,
+                    width: 150,
+                    decoration: BoxDecoration(
+                        color: conainer220,
+                        borderRadius: BorderRadius.all(Radius.circular(10))),
+                    child: Center(
+                        child: Text(
+                          "Message",
+                          style: TextStyle(fontSize: 10, color: bluetext),
+                        )),
                   ),
-                  SizedBox(width: 10),
+                ),
+
+                SizedBox(width: 10),
                 ],
               ),
             ),
