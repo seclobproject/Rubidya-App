@@ -40,7 +40,7 @@ class _ChatPageState extends State<ChatPage> {
   @override
   void initState() {
     super.initState();
-    print("Initializing chat with conversationId: ${widget.conversationId}");
+    log("Initializing chat with conversationId: ${widget.conversationId}");
     fetchMessages(widget.conversationId);
     _initSocket();
   }
@@ -54,34 +54,28 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   Future<void> fetchChatHistory() async {
-    try {
-      print("Fetching chat history");
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      String? userId = prefs.getString('userid');
-      String? token = prefs.getString('token');
+    log("Fetching chat history");
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? userId = prefs.getString('userid');
+    String? token = prefs.getString('token');
 
-      if (userId == null || token == null) {
-        throw Exception("User ID or token not found");
-      }
-
-      var data = await ChatService.getChatHistory(page: 1, limit: 10);
-      print("Fetched chat history data: $data");
-
-      setState(() {
-        conversationData = data['conversationData'];
-        isLoading = false;
-      });
-    } catch (e) {
-      print("Error fetching chat history: $e");
-      setState(() {
-        isLoading = false;
-      });
+    if (userId == null || token == null) {
+      log("User ID or token not found in SharedPreferences");
+      throw Exception("User ID or token not found");
     }
+
+    var data = await ChatService.getChatHistory(page: 1, limit: 10);
+    log("Fetched chat history data: $data");
+
+    setState(() {
+      conversationData = data['conversationData'];
+      isLoading = false;
+    });
   }
 
   Future<void> fetchMessages(String conversationId) async {
     if (conversationId.isEmpty) {
-      print("Error: conversationId is empty");
+      log("Error: conversationId is empty");
       setState(() {
         isLoading = false;
       });
@@ -90,7 +84,7 @@ class _ChatPageState extends State<ChatPage> {
 
     try {
       var data = await ChatService.getMessages(conversationId, page: 1, limit: 10);
-      print("Fetched messages data: $data");
+      log("Fetched messages data: $data");
 
       if (data['messages'] != null) {
         setState(() {
@@ -105,13 +99,13 @@ class _ChatPageState extends State<ChatPage> {
           }
         });
       } else {
-        print("No messages found");
+        log("No messages found");
         setState(() {
           isLoading = false;
         });
       }
     } catch (e) {
-      print("Error fetching messages: $e");
+      log("Error fetching messages: $e");
       setState(() {
         isLoading = false;
       });
@@ -122,13 +116,12 @@ class _ChatPageState extends State<ChatPage> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? loginId = prefs.getString('userid');
 
-    print('Current user loginId: $loginId');
+    log('Current user loginId: $loginId');
     if (loginId == null) {
-      print("No login ID found in SharedPreferences");
+      log("No login ID found in SharedPreferences");
       return;
     }
 
-    // Add the message locally
     final localMessage = {
       "senderId": loginId,
       "message": message,
@@ -137,8 +130,7 @@ class _ChatPageState extends State<ChatPage> {
 
     setState(() {
       messages.add(localMessage);
-      // Ensure the list view scrolls to the bottom
-      WidgetsBinding.instance.addPostFrameCallback((_) {
+      WidgetsBinding.instance!.addPostFrameCallback((_) {
         if (_scrollController.hasClients) {
           _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
         }
@@ -149,18 +141,12 @@ class _ChatPageState extends State<ChatPage> {
 
     try {
       var response = await ChatService.sendMessage(loginId, message, widget.userId);
-      print("Message sent successfully: $response");
-
-      // Optionally, update the local message with additional details from the server response
+      log("Message sent successfully: $response");
     } catch (e) {
-      print("Error sending message: $e");
-
-      // Remove the message from the list if there was an error
+      log("Error sending message: $e");
       setState(() {
         messages.remove(localMessage);
       });
-
-      // Show an error message to the user
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text("Failed to send message: $e"),
@@ -178,11 +164,10 @@ class _ChatPageState extends State<ChatPage> {
       'query': {'userId': loginId},
     });
 
-    print('Socket connection initialized with loginId: $loginId');
+    log('Socket connection initialized with loginId: $loginId');
 
     socket.on('connect', (_) {
       log('Connected to Socket.IO server');
-      print('Socket ID: ${socket.id}');
     });
 
     socket.on('newMessage', (data) {
@@ -202,7 +187,12 @@ class _ChatPageState extends State<ChatPage> {
     socket.on('disconnect', (_) {
       log('Disconnected from Socket.IO server');
     });
+
+    socket.on('error', (data) {
+      log('Socket error: $data');
+    });
   }
+
 
   Widget _buildMessage(Map<String, dynamic> message, bool isMe) {
     final alignment = isMe ? CrossAxisAlignment.start : CrossAxisAlignment.end;
